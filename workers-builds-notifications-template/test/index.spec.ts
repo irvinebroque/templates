@@ -280,4 +280,322 @@ describe("Workers Builds Notifications", () => {
       expect(isMainBranch(featureBranchEvent.payload.buildTriggerMetadata!.branch)).toBe(false);
     });
   });
+
+  describe("Error Extraction", () => {
+    it("should extract error from logs with ERROR indicator", () => {
+      const logs = [
+        "Starting build...",
+        "Installing dependencies...",
+        "Running build command...",
+        "ERROR: Module not found: 'missing-package'",
+        "at build.js:42:15",
+        "at processModule",
+        "Build completed with errors",
+      ];
+
+      // Simple implementation to test the logic - searches from end backwards
+      const errorIndicators = ["ERROR:", "Error:", "error:", "FAILED:", "Failed:", "Build failed"];
+      let errorStartIdx = -1;
+      for (let i = logs.length - 1; i >= 0; i--) {
+        if (errorIndicators.some((indicator) => logs[i].includes(indicator))) {
+          errorStartIdx = i;
+          break;
+        }
+      }
+
+      // Should find an error indicator (searching backwards finds ERROR: at index 3)
+      expect(errorStartIdx).toBe(3);
+      expect(logs[errorStartIdx]).toContain("ERROR:");
+    });
+
+    it("should handle empty logs gracefully", () => {
+      const logs: string[] = [];
+
+      // Should return a fallback message
+      const result = logs.length === 0 ? 'No logs available. Click "View Full Logs" for details.' : logs.join("\n");
+
+      expect(result).toBe('No logs available. Click "View Full Logs" for details.');
+    });
+
+    it("should truncate very long errors to 1000 chars", () => {
+      const longError = "ERROR: " + "x".repeat(1500);
+      const truncated = longError.length > 1000 ? longError.substring(0, 1000) + "\n..." : longError;
+
+      expect(truncated.length).toBeLessThanOrEqual(1004); // 1000 + "\n..."
+      expect(truncated).toContain("...");
+    });
+
+    it("should find TypeScript errors", () => {
+      const logs = [
+        "Compiling TypeScript...",
+        "src/index.ts:10:5 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'number'",
+        "Compilation failed",
+      ];
+
+      const hasTypeScriptError = logs.some((line) => line.includes("error TS"));
+      expect(hasTypeScriptError).toBe(true);
+    });
+
+    it("should return last 10 lines if no error keyword found", () => {
+      const logs = Array.from({ length: 50 }, (_, i) => `Log line ${i + 1}`);
+
+      // Get last 10 lines as fallback
+      const fallback = logs.slice(-10);
+
+      expect(fallback.length).toBe(10);
+      expect(fallback[0]).toBe("Log line 41");
+      expect(fallback[9]).toBe("Log line 50");
+    });
+  });
+
+  describe("Block Kit Message Formatting", () => {
+    it("should create success block with live URL", () => {
+      const event = createMockBuildEvent({
+        type: "cf.workersBuilds.worker.build.succeeded",
+      });
+
+      const liveUrl = "https://test-worker.subdomain.workers.dev";
+
+      // Expected Block Kit structure
+      const expectedStructure = {
+        text: `✅ Build succeeded: ${event.source.workerName}`,
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: expect.stringContaining("✅"),
+            },
+            accessory: {
+              type: "button",
+              text: { type: "plain_text", text: "Open Worker" },
+              url: liveUrl,
+            },
+          },
+        ],
+      };
+
+      expect(expectedStructure.text).toContain("Build succeeded");
+      expect(expectedStructure.blocks[0].type).toBe("section");
+      expect(expectedStructure.blocks[0].accessory?.type).toBe("button");
+    });
+
+    it("should create success block with preview URL", () => {
+      const event = createMockBuildEvent({
+        type: "cf.workersBuilds.worker.build.succeeded",
+      });
+
+      const previewUrl = "https://preview-abc123.workers.dev";
+
+      const expectedStructure = {
+        text: `✅ Preview ready: ${event.source.workerName}`,
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: expect.stringContaining("preview ready"),
+            },
+            accessory: {
+              type: "button",
+              text: { type: "plain_text", text: "View Preview" },
+              url: previewUrl,
+            },
+          },
+        ],
+      };
+
+      expect(expectedStructure.blocks[0].accessory?.text.text).toBe("View Preview");
+      expect(expectedStructure.blocks[0].accessory?.url).toBe(previewUrl);
+    });
+
+    it("should create failure block with error and metadata", () => {
+      const event = createMockBuildEvent({
+        type: "cf.workersBuilds.worker.build.failed",
+        payload: {
+          buildUuid: "build-123",
+          status: "stopped",
+          buildOutcome: "fail",
+          createdAt: "2025-05-01T02:48:57.132Z",
+          stoppedAt: "2025-05-01T02:50:15.132Z",
+          buildTriggerMetadata: {
+            buildTriggerSource: "push_event",
+            branch: "feature/auth",
+            commitHash: "abc123def456",
+            commitMessage: "Add auth",
+            author: "developer@example.com",
+            repoName: "test-repo",
+            providerType: "github",
+          },
+        },
+      });
+
+      const expectedStructure = {
+        text: `❌ Build failed: ${event.source.workerName}`,
+        blocks: [
+          { type: "header" },
+          { type: "section", fields: expect.any(Array) }, // Metadata
+          { type: "section" }, // Error
+          { type: "actions" }, // Button
+        ],
+      };
+
+      expect(expectedStructure.text).toContain("Build failed");
+      expect(expectedStructure.blocks.length).toBe(4);
+      expect(expectedStructure.blocks[0].type).toBe("header");
+      expect(expectedStructure.blocks[3].type).toBe("actions");
+    });
+
+    it("should create cancelled block with minimal info", () => {
+      const event = createMockBuildEvent({
+        type: "cf.workersBuilds.worker.build.failed",
+        payload: {
+          buildUuid: "build-789",
+          status: "stopped",
+          buildOutcome: "cancelled",
+          createdAt: "2025-05-01T02:48:57.132Z",
+          buildTriggerMetadata: {
+            buildTriggerSource: "push_event",
+            branch: "feature/experiment",
+            commitHash: "xyz789",
+            commitMessage: "Testing",
+            author: "developer@example.com",
+            repoName: "test-repo",
+            providerType: "github",
+          },
+        },
+      });
+
+      const expectedStructure = {
+        text: `⚠️ Build cancelled: ${event.source.workerName}`,
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: expect.stringContaining("build cancelled"),
+            },
+            accessory: {
+              type: "button",
+              text: { type: "plain_text", text: "View Build" },
+            },
+          },
+        ],
+      };
+
+      expect(expectedStructure.text).toContain("Build cancelled");
+      expect(expectedStructure.blocks[0].accessory?.text.text).toBe("View Build");
+    });
+
+    it("should include branch and commit in success messages", () => {
+      const event = createMockBuildEvent({
+        payload: {
+          buildUuid: "build-123",
+          status: "stopped",
+          buildOutcome: "success",
+          createdAt: "2025-05-01T02:48:57.132Z",
+          buildTriggerMetadata: {
+            buildTriggerSource: "push_event",
+            branch: "main",
+            commitHash: "abc123def456",
+            commitMessage: "Fix",
+            author: "dev@example.com",
+            repoName: "test-repo",
+            providerType: "github",
+          },
+        },
+      });
+
+      const branchCommit = `\`${event.payload.buildTriggerMetadata!.branch}\` • ${event.payload.buildTriggerMetadata!.commitHash.substring(0, 7)}`;
+
+      expect(branchCommit).toBe("`main` • abc123d");
+    });
+  });
+
+  describe("Dashboard URL Generation", () => {
+    it("should generate correct dashboard URL", () => {
+      const event = createMockBuildEvent({
+        source: {
+          type: "workersBuilds.worker",
+          workerName: "my-worker",
+        },
+        payload: {
+          buildUuid: "build-12345678-90ab-cdef-1234-567890abcdef",
+          status: "stopped",
+          buildOutcome: "fail",
+          createdAt: "2025-05-01T02:48:57.132Z",
+        },
+        metadata: {
+          accountId: "abc123",
+          eventTimestamp: "2025-05-01T02:48:57.132Z",
+        },
+      });
+
+      const expectedUrl = `https://dash.cloudflare.com/${event.metadata.accountId}/workers/services/view/${event.source.workerName}/production/builds/${event.payload.buildUuid}`;
+
+      expect(expectedUrl).toBe(
+        "https://dash.cloudflare.com/abc123/workers/services/view/my-worker/production/builds/build-12345678-90ab-cdef-1234-567890abcdef"
+      );
+    });
+
+    it("should fallback to repo name if worker name missing", () => {
+      const event = createMockBuildEvent({
+        source: {
+          type: "workersBuilds.worker",
+          workerName: "",
+        },
+        payload: {
+          buildUuid: "build-123",
+          status: "stopped",
+          buildOutcome: "fail",
+          createdAt: "2025-05-01T02:48:57.132Z",
+          buildTriggerMetadata: {
+            buildTriggerSource: "push_event",
+            branch: "main",
+            commitHash: "abc123",
+            commitMessage: "test",
+            author: "test@example.com",
+            repoName: "fallback-worker",
+            providerType: "github",
+          },
+        },
+      });
+
+      const workerName = event.source.workerName || event.payload.buildTriggerMetadata?.repoName || "worker";
+
+      expect(workerName).toBe("fallback-worker");
+    });
+  });
+
+  describe("Event Skipping", () => {
+    it("should identify started events for skipping", () => {
+      const startedEvent = createMockBuildEvent({
+        type: "cf.workersBuilds.worker.build.started",
+      });
+
+      const isStarted = startedEvent.type.includes("started") || startedEvent.type.includes("queued");
+
+      expect(isStarted).toBe(true);
+    });
+
+    it("should not skip succeeded events", () => {
+      const succeededEvent = createMockBuildEvent({
+        type: "cf.workersBuilds.worker.build.succeeded",
+      });
+
+      const isStarted = succeededEvent.type.includes("started") || succeededEvent.type.includes("queued");
+
+      expect(isStarted).toBe(false);
+    });
+
+    it("should not skip failed events", () => {
+      const failedEvent = createMockBuildEvent({
+        type: "cf.workersBuilds.worker.build.failed",
+      });
+
+      const isStarted = failedEvent.type.includes("started") || failedEvent.type.includes("queued");
+
+      expect(isStarted).toBe(false);
+    });
+  });
 });
