@@ -2,7 +2,20 @@ import { test, expect } from "./fixtures";
 
 test.describe("React Router Postgres SSR Template", () => {
 	test("should work as expected", async ({ page, templateUrl }) => {
-		await page.goto(templateUrl);
+		let resumeHydration!: () => void;
+		const hydrationReady = new Promise<void>((resolve) => {
+			resumeHydration = resolve;
+		});
+		// Hold scripts so the server-rendered control is tested before hydration.
+		await page.route("**/*", async (route) => {
+			if (route.request().resourceType() === "script") {
+				await hydrationReady;
+			}
+			await route.continue();
+		});
+		await page.goto(templateUrl, { waitUntil: "commit" });
+		await expect(page.getByRole("combobox")).toBeDisabled();
+		resumeHydration();
 		await expect(
 			page.getByRole("heading", { name: "My Library" }),
 		).toBeVisible();

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import BookCard from "./BookCard";
 
@@ -5,6 +6,11 @@ function BooksList({ books = [], onSelectBook }) {
 	const navigate = useNavigate();
 	const [searchParams, setSearchParams] = useSearchParams();
 	const currentSort = searchParams.get("sort") || "";
+	const [isHydrated, setIsHydrated] = useState(false);
+
+	useEffect(() => {
+		setIsHydrated(true);
+	}, []);
 
 	const handleBookSelect = (bookId) => {
 		onSelectBook ? onSelectBook(bookId) : navigate(`/book/${bookId}`);
@@ -30,6 +36,7 @@ function BooksList({ books = [], onSelectBook }) {
 					className="py-2 px-4 border border-gray-300 rounded-md bg-white"
 					value={currentSort}
 					onChange={handleSortChange}
+					disabled={!isHydrated}
 				>
 					<option value="">Sort by...</option>
 					<option value="title_asc">Title (A-Z)</option>
