@@ -1,127 +1,127 @@
 {
   "templates": {
     "agent-visibility-template": {
-      "package_json_hash": "48b00005982dd50d132f3c0733c0f011a2ccea70"
+      "package_json_hash": "55d423450e51a6f765a163fcb73284af74ae6f25"
     },
     "astro-blog-starter-template": {
-      "package_json_hash": "edb0173b8dccb237c920548c501df73cfb95c60f"
+      "package_json_hash": "c81d6ce47ddf2198aeeb9a8c3daef643e4a6d980"
     },
     "chanfana-openapi-template": {
-      "package_json_hash": "87cc4c1859fc3a7104b7b2a33d808e5c49adc27f"
+      "package_json_hash": "99f5ee5377365e762461f959f86bcd74e5ad948a"
     },
     "d1-template": {
-      "package_json_hash": "75b9e3dd51c8bca4360d2d82892a1166f14bf558"
+      "package_json_hash": "25dc294f651aeadb4606139f9c95e81021fa44b8"
     },
     "durable-chat-template": {
-      "package_json_hash": "ff44124df144855736af69ebdbce9e2db9bc59ad"
+      "package_json_hash": "21e1423427b40e2ba472bff700dd280fde2a247d"
     },
     "llm-chat-app-template": {
-      "package_json_hash": "51b0a8ba872033747092401e69e4a926bf061d37"
+      "package_json_hash": "ef49c1e3ea41d185929a395b1bd75f32c4f2f89d"
     },
     "multiplayer-globe-template": {
-      "package_json_hash": "c482c529a3f9aca2dd8086507f32d9a43bfaee5a"
+      "package_json_hash": "d45637e934b341860607b8b1685cc4dbb901849e"
     },
     "next-starter-template": {
-      "package_json_hash": "39ec20e7e9f83e65f317847037110852890059b8"
+      "package_json_hash": "1baa6cd885598d31a722c9580de566f897e84dff"
     },
     "openauth-template": {
-      "package_json_hash": "ab7df6cd26543619ea2aec8a99d70a1b3e080547"
+      "package_json_hash": "a5c2750954ad3a289e66919b00350354f236016e"
     },
     "r2-explorer-template": {
-      "package_json_hash": "cdbf1da69b728c2f1a6d0af5a4839710d69e45e1"
+      "package_json_hash": "5cd30dda2bb6b1c3fe4e20b0cffc739279780b51"
     },
     "react-postgres-fullstack-template": {
-      "package_json_hash": "d4933b47be5f771e85d132bffe0b78bcd96bf149"
+      "package_json_hash": "cb8870bc5f5fb9d4d73f887c4755baeedcaffc62"
     },
     "react-router-hono-fullstack-template": {
-      "package_json_hash": "5a097372505b56494057584f00c627c8804911c4"
+      "package_json_hash": "f08b7376431a81f8c534090f72638e50d113f70b"
     },
     "react-router-starter-template": {
-      "package_json_hash": "8eed91a85afadfa09f49b3f6073ec109d231721f"
+      "package_json_hash": "138cbf6f23c22151703f2d9c4e4e3bb25fe3cd3f"
     },
     "remix-starter-template": {
       "package_json_hash": "62aa56ef2eeb0957c6aad6dcf9ef5df1aa7a1721"
     },
     "saas-admin-template": {
-      "package_json_hash": "75c21640813afc0d543021cde5190d2d6d12f79d"
+      "package_json_hash": "2f2e99f06a8b6f044f808cfd74943f398c9994e1"
     },
     "text-to-image-template": {
-      "package_json_hash": "dc0824190ca7f436f9261b1b073c7b5f3cf45b79"
+      "package_json_hash": "117468b7dae38ea018e1807f36b8483873bd533c"
     },
     "to-do-list-kv-template": {
       "package_json_hash": "a8ff3dfe801469065841bbd5c84402a1ed329442"
     },
     "vite-react-template": {
-      "package_json_hash": "a829f9c7804d03168e00e49c2eee96dd0a9ba040"
+      "package_json_hash": "f1c6cc0f34e3cdfd31992e5915b1567afd5e7918"
     },
     "worker-publisher-template": {
-      "package_json_hash": "5040a6c3bec81cf5ef47e90aa04b63b592b63b3b"
+      "package_json_hash": "81c33eacae007507db1788be7a4ceb1e127291d8"
     },
     "containers-template": {
-      "package_json_hash": "8c72978ae6ddeb36e098ea492ca45e4a333015b4"
+      "package_json_hash": "dad04260491771d329badc438529f8ba04fe532b"
     },
     "d1-starter-sessions-api-template": {
-      "package_json_hash": "d487d7fe17913817de9d0a9d30c5ae668e54b3c2"
+      "package_json_hash": "b80cc550ba838fcb9ba1bf9634cd7fb2c41e3322"
     },
     "hello-world-do-template": {
-      "package_json_hash": "8820abddf529b5678887380a4389c33e1fa6a4c6"
+      "package_json_hash": "9eb29ec12e4f4ecdf2064a1dfad70ed7137524f3"
     },
     "mysql-hyperdrive-template": {
-      "package_json_hash": "fd9c4013440f0f0ba155f450a359cd113aff8b06"
+      "package_json_hash": "a871bd2804e35bafb2a9ae80049de69b30100df8"
     },
     "nlweb-template": {
-      "package_json_hash": "c32a7d7d42562c848cd9ce367f01995be9be0ae6"
+      "package_json_hash": "c89d043b7d3a91a2dfa4eeb38b9a77a60c503560"
     },
     "nodejs-http-server-template": {
-      "package_json_hash": "ef65f4ca8625a0f5963a9c4b9c3d68b211e0fed6"
+      "package_json_hash": "f1731450865fce496912c50c5147d9d1b407b238"
     },
     "postgres-hyperdrive-template": {
-      "package_json_hash": "87d72d6ac0e4b5b1cfd192c3e89ba030d2da152f"
+      "package_json_hash": "c1af361dd0bd3b14dbe8ea36da19a170246d2430"
     },
     "react-router-postgres-ssr-template": {
-      "package_json_hash": "3123c76be943e1b06cb36cbadab46418d72cce8a"
+      "package_json_hash": "ba69b8489190f1004f367b82ba1a619f4c6bcecb"
     },
     "x402-proxy-template": {
-      "package_json_hash": "11161d5c57ee0195e3483764275124f1119fe5de"
+      "package_json_hash": "ff0d8936a7520736a65935caaf7bfc6c54fb9178"
     },
     "workflows-starter-template": {
-      "package_json_hash": "505c10be3bad594d9e29438e97481a8ace47ac12"
+      "package_json_hash": "8497468b9aeb8eb4e4719dcf8c8428f6705655b5"
     },
     "workers-for-platforms-template": {
-      "package_json_hash": "7c68988f0fef11becdead1483c9d9c777310e4e1"
+      "package_json_hash": "20f5e66bc7d9e50417a70b4f49477475c6c909e5"
     },
     "microfrontend-template": {
-      "package_json_hash": "d234df47cfbd98c89c93484564f6325782c58104"
+      "package_json_hash": "16796eaf748798624ecb07e51dff3db13007e587"
     },
     "workers-builds-notifications-template": {
-      "package_json_hash": "0f72009c73ed66618efe13618be701dff0e576d2"
+      "package_json_hash": "4b0ba2e3e4e1e4f960212531d8c39cb391eeabfd"
     },
     "ai-brand-visibility-template": {
-      "package_json_hash": "5f4b49cd51cc6febd50b9ade97e4896fb6c0a08b"
+      "package_json_hash": "a479578d822496e44d786bb5793638369bf2be0c"
     },
     "commerce-llms-txt-template": {
-      "package_json_hash": "40e7419c3f9f279460d725000864d31b79d8d5fd"
+      "package_json_hash": "b35e2592ca64a6f650609ab8c71b92de69ac790e"
     },
     "agent-commerce-analytics-template": {
-      "package_json_hash": "ccbd5a2f007d52acfd982de49487cd555660b00a"
+      "package_json_hash": "f6b2dc4cd6115b8f0866fe5a62987dc119c3c3e8"
     },
     "react-starter-template": {
-      "package_json_hash": "77b9635482394986236aae4e0c60e768c5871536"
+      "package_json_hash": "97066d8bb4cc4b66c91334ebb57f5c2d1c3302a3"
     },
     "internal-sites-template": {
-      "package_json_hash": "3ee2335c113e16b4870380281e638a9525bc5eac"
+      "package_json_hash": "9f0acd6f08bb9bc7a1ecfc3807ff28cbfbe52e23"
     },
     "voice-agent-template": {
-      "package_json_hash": "d8e6848326b6956c4090dd11960f1deb8f612d3c"
+      "package_json_hash": "f629e16a5a6022fdc9661c9d76e1f87540753325"
     },
     "email-routing-template": {
-      "package_json_hash": "eba881cb5b2cde82c90e6140115723b8d51cab7a"
+      "package_json_hash": "eaefd496d076ecfd63284c82fabcd7df1f9aa01a"
     },
     "email-sending-template": {
-      "package_json_hash": "aa6cd437e3f98f10d6d28b44a8da1143754f2d7b"
+      "package_json_hash": "3088805de0ce4f3aaf8dc29e6cc35335a2b436cf"
     },
     "grpc-container-template": {
-      "package_json_hash": "16410959f9031fcfdc8c0e9ce5f8c3604fd7348b"
+      "package_json_hash": "77e6c276a33382aff60f5dea66e0e530d6652100"
     }
   }
 }
