@@ -101,7 +101,9 @@ export class CustomerService {
 	}) {
 		const { name, email, notes, subscription } = customerData;
 
-		const customerResponse = await this.DB.prepare(CUSTOMER_QUERIES.INSERT_CUSTOMER)
+		const customerResponse = await this.DB.prepare(
+			CUSTOMER_QUERIES.INSERT_CUSTOMER,
+		)
 			.bind(name, email, notes || null)
 			.run();
 

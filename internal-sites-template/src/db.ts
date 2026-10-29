@@ -48,7 +48,9 @@ export async function Initialize(db: D1Database): Promise<void> {
 /** Check whether the sites table already exists. */
 export async function HasSitesTable(db: D1Database): Promise<boolean> {
 	const row = await db
-		.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'sites'")
+		.prepare(
+			"SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'sites'",
+		)
 		.first();
 	return Boolean(row);
 }
@@ -56,12 +58,17 @@ export async function HasSitesTable(db: D1Database): Promise<boolean> {
 // ── Queries ──────────────────────────────────────────────────────────────────
 
 /** Fetch all rows from a known table (admin view). */
-export async function FetchTable(db: D1Database, table: string): Promise<ResourceRecord[]> {
+export async function FetchTable(
+	db: D1Database,
+	table: string,
+): Promise<ResourceRecord[]> {
 	if (!["sites", "deployments", "site_acl"].includes(table)) {
 		throw new Error(`Unsupported table: ${table}`);
 	}
 
-	const result = await db.prepare(`SELECT * FROM ${table}`).all<ResourceRecord>();
+	const result = await db
+		.prepare(`SELECT * FROM ${table}`)
+		.all<ResourceRecord>();
 	return result.results || [];
 }
 
@@ -88,8 +95,14 @@ export async function CreateSite(db: D1Database, site: Site): Promise<void> {
 		.run();
 }
 
-export async function GetSiteBySlug(db: D1Database, slug: string): Promise<Site | null> {
-	return await db.prepare("SELECT * FROM sites WHERE slug = ?").bind(slug).first<Site>();
+export async function GetSiteBySlug(
+	db: D1Database,
+	slug: string,
+): Promise<Site | null> {
+	return await db
+		.prepare("SELECT * FROM sites WHERE slug = ?")
+		.bind(slug)
+		.first<Site>();
 }
 
 export async function UpdateSite(
@@ -98,7 +111,9 @@ export async function UpdateSite(
 	updates: Pick<Partial<Site>, "latest_deployment_id" | "updated_at">,
 ): Promise<void> {
 	await db
-		.prepare("UPDATE sites SET latest_deployment_id = ?, updated_at = ? WHERE id = ?")
+		.prepare(
+			"UPDATE sites SET latest_deployment_id = ?, updated_at = ? WHERE id = ?",
+		)
 		.bind(
 			updates.latest_deployment_id || null,
 			updates.updated_at || new Date().toISOString(),
@@ -107,7 +122,10 @@ export async function UpdateSite(
 		.run();
 }
 
-export async function DeleteSite(db: D1Database, siteId: string): Promise<void> {
+export async function DeleteSite(
+	db: D1Database,
+	siteId: string,
+): Promise<void> {
 	await db.prepare("DELETE FROM sites WHERE id = ?").bind(siteId).run();
 }
 
@@ -124,7 +142,9 @@ export interface DeploymentWithSite {
 }
 
 /** Fetch all deployments joined with their parent site, newest first. */
-export async function FetchDeploymentsWithSites(db: D1Database): Promise<DeploymentWithSite[]> {
+export async function FetchDeploymentsWithSites(
+	db: D1Database,
+): Promise<DeploymentWithSite[]> {
 	const result = await db
 		.prepare(
 			`SELECT d.id, s.name as site_name, s.slug as site_slug,
@@ -139,7 +159,10 @@ export async function FetchDeploymentsWithSites(db: D1Database): Promise<Deploym
 
 // ── Deployments ──────────────────────────────────────────────────────────────
 
-export async function CreateDeployment(db: D1Database, deployment: Deployment): Promise<void> {
+export async function CreateDeployment(
+	db: D1Database,
+	deployment: Deployment,
+): Promise<void> {
 	await db
 		.prepare(
 			`INSERT INTO deployments (

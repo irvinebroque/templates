@@ -11,12 +11,17 @@ export default {
 		// A. Create the Session.
 		// When we create a D1 Session, we can continue where we left off from a previous
 		// Session if we have that Session's last bookmark or use a constraint.
-		const bookmark = request.headers.get("x-d1-bookmark") ?? "first-unconstrained";
+		const bookmark =
+			request.headers.get("x-d1-bookmark") ?? "first-unconstrained";
 		const session = env.DB01.withSession(bookmark);
 
 		try {
 			// Use this Session for all our Workers' routes.
-			const response = await withTablesInitialized(request, session, handleRequest);
+			const response = await withTablesInitialized(
+				request,
+				session,
+				handleRequest,
+			);
 
 			// B. Return the bookmark so we can continue the Session in another request.
 			response.headers.set("x-d1-bookmark", session.getBookmark() ?? "");
@@ -30,7 +35,10 @@ export default {
 				url,
 				bookmark,
 			});
-			return Response.json({ error: String(e), errorDetails: e }, { status: 500 });
+			return Response.json(
+				{ error: String(e), errorDetails: e },
+				{ status: 500 },
+			);
 		}
 	},
 } satisfies ExportedHandler<Env>;
@@ -80,7 +88,11 @@ async function handleRequest(request: Request, session: D1DatabaseSession) {
 	return new Response("Not found", { status: 404 });
 }
 
-function buildResponse(session: D1DatabaseSession, res: D1Result, tsStart: number) {
+function buildResponse(
+	session: D1DatabaseSession,
+	res: D1Result,
+	tsStart: number,
+) {
 	return {
 		d1Latency: Date.now() - tsStart,
 

@@ -143,7 +143,9 @@ function findProtectedRouteConfig(
 ): ProtectedRouteConfig | null {
 	// Check built-in protected routes first, then configured patterns
 	const allRoutes = [...BUILTIN_PROTECTED_PATHS, ...patterns];
-	return allRoutes.find((config) => pathMatchesPattern(path, config.pattern)) ?? null;
+	return (
+		allRoutes.find((config) => pathMatchesPattern(path, config.pattern)) ?? null
+	);
 }
 
 /**
@@ -180,7 +182,8 @@ app.use("*", async (c, next) => {
 		if (!c.env.JWT_SECRET) {
 			return c.json(
 				{
-					error: "Server misconfigured: JWT_SECRET not set. See README for setup instructions.",
+					error:
+						"Server misconfigured: JWT_SECRET not set. See README for setup instructions.",
 				},
 				500,
 			);
@@ -293,7 +296,9 @@ app.get("/__x402/health", (c) => {
  */
 app.get("/__x402/config", (c) => {
 	const patterns = (c.env.PROTECTED_PATTERNS || []) as ProtectedRouteConfig[];
-	const botFilteringEnabled = patterns.some((p) => p.bot_score_threshold !== undefined);
+	const botFilteringEnabled = patterns.some(
+		(p) => p.bot_score_threshold !== undefined,
+	);
 
 	return c.json({
 		network: c.env.NETWORK,

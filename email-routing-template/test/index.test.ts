@@ -37,7 +37,9 @@ function createEnv(overrides: Partial<TestEnv> = {}): Env {
 function htmlAssets(html: string): Fetcher {
 	return {
 		fetch: vi.fn(() =>
-			Promise.resolve(new Response(html, { headers: { "Content-Type": "text/html" } })),
+			Promise.resolve(
+				new Response(html, { headers: { "Content-Type": "text/html" } }),
+			),
 		),
 	} as unknown as Fetcher;
 }
@@ -100,7 +102,9 @@ describe("Email Routing Worker", () => {
 	});
 
 	it("rejects email from an unknown sender", async () => {
-		const { message, forward, setReject } = createMessage("unknown@example.com");
+		const { message, forward, setReject } = createMessage(
+			"unknown@example.com",
+		);
 
 		await handleEmail(message, createEnv());
 
@@ -130,6 +134,8 @@ describe("Email Routing Worker", () => {
 		const { message, forward } = createMessage();
 		forward.mockRejectedValue(new Error("forward failed"));
 
-		await expect(handleEmail(message, createEnv())).rejects.toThrow("forward failed");
+		await expect(handleEmail(message, createEnv())).rejects.toThrow(
+			"forward failed",
+		);
 	});
 });

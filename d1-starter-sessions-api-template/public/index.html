@@ -11,7 +11,11 @@
 		<meta name="color-scheme" content="light dark" />
 		<script type="module">
 			import { h, render } from "https://esm.sh/preact@10.25.4";
-			import { useState, useEffect, useRef } from "https://esm.sh/preact@10.25.4/hooks";
+			import {
+				useState,
+				useEffect,
+				useRef,
+			} from "https://esm.sh/preact@10.25.4/hooks";
 			import htm from "https://esm.sh/htm@3.1.1";
 
 			// Initialize htm with Preact
@@ -45,7 +49,12 @@
 				border: "2px solid #D93526", // pico-color-red-500
 			};
 
-			const Latencies = ({ d1Latency, browserLatency, servedByRegion, servedByPrimary }) => {
+			const Latencies = ({
+				d1Latency,
+				browserLatency,
+				servedByRegion,
+				servedByPrimary,
+			}) => {
 				console.log({
 					d1Latency,
 					browserLatency,
@@ -94,9 +103,13 @@
 				const [result, setResult] = useState(null);
 
 				const listOrders = () => {
-					const bookmark = result ? result.sessionBookmark : "first-unconstrained";
+					const bookmark = result
+						? result.sessionBookmark
+						: "first-unconstrained";
 					fetchWorker("GET", "/api/orders", null, bookmark).then((json) => {
-						if ((mutRef.bookmark ?? "").localeCompare(json.sessionBookmark) > 0) {
+						if (
+							(mutRef.bookmark ?? "").localeCompare(json.sessionBookmark) > 0
+						) {
 							// Skip any update since it's an older bookmark than the current one.
 							return;
 						}
@@ -111,13 +124,17 @@
 						"POST",
 						"/api/orders",
 						{
-							customerId: containerRef.current.querySelector("input[name='customerId']").value,
+							customerId: containerRef.current.querySelector(
+								"input[name='customerId']",
+							).value,
 							orderId: crypto.randomUUID(),
 							quantity: Math.ceil(Math.random() * 100),
 						},
 						bookmark,
 					).then((json) => {
-						if ((mutRef.bookmark ?? "").localeCompare(json.sessionBookmark) > 0) {
+						if (
+							(mutRef.bookmark ?? "").localeCompare(json.sessionBookmark) > 0
+						) {
 							// Skip any update since it's an older bookmark than the current one.
 							return;
 						}
@@ -134,7 +151,12 @@
 				};
 
 				useEffect(async () => {
-					const json = await fetchWorker("GET", "/api/orders", null, "first-primary");
+					const json = await fetchWorker(
+						"GET",
+						"/api/orders",
+						null,
+						"first-primary",
+					);
 					setPrimaryRegion(json.servedByRegion);
 					if ((mutRef.bookmark ?? "").localeCompare(json.sessionBookmark) > 0) {
 						// Skip any update since it's an older bookmark than the current one.
@@ -152,20 +174,37 @@
 							<h4>Actions</h4>
 							<div class="grid">
 								<input name="customerId" value="customer-id-1" type="text" />
-								<input type="button" onClick=${(e) => createOrder()} value="Create order & List" />
-								<input type="button" onClick=${(e) => listOrders()} value="List orders" />
-								<input type="button" onClick=${(e) => resetTables()} value="Reset" />
+								<input
+									type="button"
+									onClick=${(e) => createOrder()}
+									value="Create order & List"
+								/>
+								<input
+									type="button"
+									onClick=${(e) => listOrders()}
+									value="List orders"
+								/>
+								<input
+									type="button"
+									onClick=${(e) => resetTables()}
+									value="Reset"
+								/>
 							</div>
 							<ul style="font-size: 0.8em">
 								<li>
-									<strong>Create order & List:</strong> 1 write query to the primary followed by 1
-									read query to a replica.
+									<strong>Create order & List:</strong> 1 write query to the
+									primary followed by 1 read query to a replica.
 								</li>
-								<li><strong>List orders:</strong> 1 read query to a replica.</li>
+								<li>
+									<strong>List orders:</strong> 1 read query to a replica.
+								</li>
 								<li><strong>Reset:</strong> 1 write query to the primary.</li>
 								${
 									primaryRegion
-										? html`<li><strong>Primary database region:</strong> ${primaryRegion}</li>`
+										? html`<li>
+												<strong>Primary database region:</strong>
+												${primaryRegion}
+											</li>`
 										: null
 								}
 							</ul>
@@ -189,7 +228,8 @@
 											!Array.isArray(result?.results)
 												? html`<tr>
 														<td colspan="3">
-															Use the buttons above to load existing orders or create new ones.
+															Use the buttons above to load existing orders or
+															create new ones.
 														</td>
 													</tr>`
 												: result.results.length > 0

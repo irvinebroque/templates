@@ -69,7 +69,9 @@ export class CustomerSubscriptionService {
 		const response = await this.DB.prepare(query).bind(id).all();
 
 		if (response.success) {
-			const [customerSubscription] = processCustomerSubscriptionResults(response.results);
+			const [customerSubscription] = processCustomerSubscriptionResults(
+				response.results,
+			);
 			return customerSubscription;
 		}
 		return null;
@@ -120,7 +122,9 @@ export class CustomerSubscriptionService {
 	}
 
 	async updateStatus(id, status) {
-		const response = await this.DB.prepare(CUSTOMER_SUBSCRIPTION_QUERIES.UPDATE_STATUS)
+		const response = await this.DB.prepare(
+			CUSTOMER_SUBSCRIPTION_QUERIES.UPDATE_STATUS,
+		)
 			.bind(status, id)
 			.run();
 

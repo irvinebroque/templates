@@ -16,7 +16,10 @@ export async function selectDataSource(c, dbLogic, mockLogic) {
 		return await dbLogic(c);
 	} catch (e) {
 		console.error("API Error:", e);
-		return Response.json({ error: e instanceof Error ? e.message : e }, { status: 500 });
+		return Response.json(
+			{ error: e instanceof Error ? e.message : e },
+			{ status: 500 },
+		);
 	}
 }
 
@@ -46,7 +49,10 @@ export const bookRelatedMockUtils = {
 		).slice(0, 3);
 
 		// Generate mock recent books
-		const recentBooks = c.env.MOCK_DATA.filter((b) => b.id !== bookIdNum).slice(0, 2);
+		const recentBooks = c.env.MOCK_DATA.filter((b) => b.id !== bookIdNum).slice(
+			0,
+			2,
+		);
 
 		// Generate mock genre counts
 		const genres = {};

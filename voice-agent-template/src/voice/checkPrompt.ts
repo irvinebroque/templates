@@ -94,7 +94,9 @@ export async function checkPrompt(
 ): Promise<GuardrailResult> {
 	callerSignal?.throwIfAborted();
 	const timeoutSignal = AbortSignal.timeout(TIMEOUT_MS);
-	const signal = callerSignal ? AbortSignal.any([callerSignal, timeoutSignal]) : timeoutSignal;
+	const signal = callerSignal
+		? AbortSignal.any([callerSignal, timeoutSignal])
+		: timeoutSignal;
 
 	try {
 		const rawResponse = await ai.run(
@@ -107,7 +109,9 @@ export async function checkPrompt(
 			{ returnRawResponse: true, signal },
 		);
 		if (!rawResponse.ok) {
-			throw new Error(`LlamaGuard request failed with HTTP ${rawResponse.status}`);
+			throw new Error(
+				`LlamaGuard request failed with HTTP ${rawResponse.status}`,
+			);
 		}
 
 		const raw = decodeLlamaGuardBody(await rawResponse.text());

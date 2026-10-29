@@ -80,13 +80,18 @@ export const MAX_BATCH_EVENTS = 500;
 
 function eventKey(timestamp: string): string {
 	// Reversed-time prefix so `list()` returns most recent first.
-	const reversed = (9999999999999 - new Date(timestamp).getTime()).toString().padStart(13, "0");
+	const reversed = (9999999999999 - new Date(timestamp).getTime())
+		.toString()
+		.padStart(13, "0");
 	const random = Math.random().toString(36).slice(2, 10);
 	return `${EVENT_KEY_PREFIX}${reversed}:${random}`;
 }
 
 function retentionSeconds(env: { EVENT_RETENTION_DAYS?: string }): number {
-	const days = parseInt(env.EVENT_RETENTION_DAYS || String(DEFAULT_RETENTION_DAYS), 10);
+	const days = parseInt(
+		env.EVENT_RETENTION_DAYS || String(DEFAULT_RETENTION_DAYS),
+		10,
+	);
 	return Math.max(1, days) * 24 * 60 * 60;
 }
 
@@ -129,7 +134,9 @@ export async function loadEvents(store: KVNamespace): Promise<AgentEvent[]> {
 	});
 	if (list.keys.length === 0) return [];
 
-	const values = await Promise.all(list.keys.map((k) => store.get(k.name, "json")));
+	const values = await Promise.all(
+		list.keys.map((k) => store.get(k.name, "json")),
+	);
 
 	const events: AgentEvent[] = [];
 	for (const value of values) {
@@ -434,12 +441,17 @@ export async function seedDemoDataIfNeeded(
 // Request → event classification
 // ---------------------------------------------------------------------------
 
-export function classifyAction(path: string, intent?: string | null): AgentAction {
+export function classifyAction(
+	path: string,
+	intent?: string | null,
+): AgentAction {
 	if (path === "/llms.txt") return "llms_txt_concise";
 	if (path === "/llms-full.txt") return "llms_txt_full";
-	if (path.startsWith("/api/products/") && path.split("/").length > 3) return "product_detail";
+	if (path.startsWith("/api/products/") && path.split("/").length > 3)
+		return "product_detail";
 	if (path === "/api/products") return "catalog_browse";
-	if (path.startsWith("/api/checkout") || intent === "pay") return "checkout_attempt";
+	if (path.startsWith("/api/checkout") || intent === "pay")
+		return "checkout_attempt";
 	if (path === "/") return "homepage";
 	return "unknown";
 }
@@ -469,7 +481,10 @@ function agentDisplayName(e: AgentEvent): string {
 // Summary computation
 // ---------------------------------------------------------------------------
 
-export function computeSummary(events: AgentEvent[], merchantName: string): AgentAnalyticsSummary {
+export function computeSummary(
+	events: AgentEvent[],
+	merchantName: string,
+): AgentAnalyticsSummary {
 	const now = new Date();
 	const nowIso = now.toISOString();
 
@@ -487,7 +502,10 @@ export function computeSummary(events: AgentEvent[], merchantName: string): Agen
 		agentMap.get(key)!.push(e);
 	}
 	for (const bucket of agentMap.values()) {
-		bucket.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+		bucket.sort(
+			(a, b) =>
+				new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+		);
 	}
 
 	const agentBreakdown: AgentProfile[] = [];
@@ -508,8 +526,11 @@ export function computeSummary(events: AgentEvent[], merchantName: string): Agen
 			network: firstEvent.agentNetwork,
 			verified: firstEvent.verified,
 			totalRequests: agentEvents.length,
-			productsViewed: agentEvents.filter((e) => e.action === "product_detail").length,
-			checkoutAttempts: agentEvents.filter((e) => e.action === "checkout_attempt").length,
+			productsViewed: agentEvents.filter((e) => e.action === "product_detail")
+				.length,
+			checkoutAttempts: agentEvents.filter(
+				(e) => e.action === "checkout_attempt",
+			).length,
 			successfulCheckouts: successfulCheckouts.length,
 			estimatedRevenue: revenue,
 			lastSeen: lastEvent.timestamp,
@@ -558,11 +579,14 @@ export function computeSummary(events: AgentEvent[], merchantName: string): Agen
 
 	const topProducts: ProductAnalytics[] = [];
 	for (const [slug, data] of productMap) {
-		const viewedNotPurchased = [...data.viewers].filter((n) => !data.purchasers.has(n));
+		const viewedNotPurchased = [...data.viewers].filter(
+			(n) => !data.purchasers.has(n),
+		);
 		// Conversion = unique-agents-who-bought / unique-agents-who-interacted.
 		// Using the raw checkout count as the numerator would let a single agent
 		// pushing multiple orders drive the rate above 100%.
-		const conversionRate = data.views.size > 0 ? data.purchasers.size / data.views.size : 0;
+		const conversionRate =
+			data.views.size > 0 ? data.purchasers.size / data.views.size : 0;
 		topProducts.push({
 			slug,
 			name: getProductName(slug),
@@ -578,10 +602,18 @@ export function computeSummary(events: AgentEvent[], merchantName: string): Agen
 	}
 	topProducts.sort((a, b) => b.detailViews - a.detailViews);
 
-	const discoveryReads = events.filter((e) => e.action === "llms_txt_concise").length;
-	const fullDetailReads = events.filter((e) => e.action === "llms_txt_full").length;
-	const productDetailReads = events.filter((e) => e.action === "product_detail").length;
-	const checkoutAttempts = events.filter((e) => e.action === "checkout_attempt").length;
+	const discoveryReads = events.filter(
+		(e) => e.action === "llms_txt_concise",
+	).length;
+	const fullDetailReads = events.filter(
+		(e) => e.action === "llms_txt_full",
+	).length;
+	const productDetailReads = events.filter(
+		(e) => e.action === "product_detail",
+	).length;
+	const checkoutAttempts = events.filter(
+		(e) => e.action === "checkout_attempt",
+	).length;
 	const successfulCheckouts = events.filter(
 		(e) => e.action === "checkout_attempt" && e.statusCode === 200,
 	).length;
@@ -596,14 +628,20 @@ export function computeSummary(events: AgentEvent[], merchantName: string): Agen
 		checkoutAttempts,
 		successfulCheckouts,
 		blockedCheckouts,
-		discoveryToFullRate: discoveryReads > 0 ? fullDetailReads / discoveryReads : 0,
-		discoveryToProductRate: discoveryReads > 0 ? productDetailReads / discoveryReads : 0,
-		productToCheckoutRate: productDetailReads > 0 ? checkoutAttempts / productDetailReads : 0,
-		checkoutSuccessRate: checkoutAttempts > 0 ? successfulCheckouts / checkoutAttempts : 0,
+		discoveryToFullRate:
+			discoveryReads > 0 ? fullDetailReads / discoveryReads : 0,
+		discoveryToProductRate:
+			discoveryReads > 0 ? productDetailReads / discoveryReads : 0,
+		productToCheckoutRate:
+			productDetailReads > 0 ? checkoutAttempts / productDetailReads : 0,
+		checkoutSuccessRate:
+			checkoutAttempts > 0 ? successfulCheckouts / checkoutAttempts : 0,
 	};
 
 	const agentsReadingConcise = new Set(
-		events.filter((e) => e.action === "llms_txt_concise").map((e) => agentKey(e)),
+		events
+			.filter((e) => e.action === "llms_txt_concise")
+			.map((e) => agentKey(e)),
 	);
 	const agentsReadingFull = new Set(
 		events.filter((e) => e.action === "llms_txt_full").map((e) => agentKey(e)),
@@ -612,17 +650,22 @@ export function computeSummary(events: AgentEvent[], merchantName: string): Agen
 		events
 			.filter((e) => e.action === "product_detail")
 			.map((e) => agentKey(e))
-			.filter((id) => !agentsReadingConcise.has(id) && !agentsReadingFull.has(id)),
+			.filter(
+				(id) => !agentsReadingConcise.has(id) && !agentsReadingFull.has(id),
+			),
 	);
 
 	const totalUniqueAgents = agentMap.size;
 	const contentQuality: ContentQualityMetrics = {
 		conciseOnlyRate:
 			totalUniqueAgents > 0
-				? Math.max(0, agentsReadingConcise.size - agentsReadingFull.size) / totalUniqueAgents
+				? Math.max(0, agentsReadingConcise.size - agentsReadingFull.size) /
+					totalUniqueAgents
 				: 0,
-		neededFullRate: totalUniqueAgents > 0 ? agentsReadingFull.size / totalUniqueAgents : 0,
-		directProductRate: totalUniqueAgents > 0 ? agentsDirectProduct.size / totalUniqueAgents : 0,
+		neededFullRate:
+			totalUniqueAgents > 0 ? agentsReadingFull.size / totalUniqueAgents : 0,
+		directProductRate:
+			totalUniqueAgents > 0 ? agentsDirectProduct.size / totalUniqueAgents : 0,
 	};
 
 	const queryMap = new Map<string, number>();
@@ -655,7 +698,8 @@ export function computeSummary(events: AgentEvent[], merchantName: string): Agen
 	);
 
 	const orderingAgents = new Set(allSuccessful.map((e) => agentKey(e)));
-	const avgOrderValue = orderingAgents.size > 0 ? totalRevenue / orderingAgents.size : 0;
+	const avgOrderValue =
+		orderingAgents.size > 0 ? totalRevenue / orderingAgents.size : 0;
 
 	const networkMap = new Map<
 		string,
@@ -718,7 +762,9 @@ export function computeSummary(events: AgentEvent[], merchantName: string): Agen
 		revenue,
 	);
 
-	const trustBreakdown = computeTrustBreakdown(events, (e) => getProductPrice(e.productSlug ?? ""));
+	const trustBreakdown = computeTrustBreakdown(events, (e) =>
+		getProductPrice(e.productSlug ?? ""),
+	);
 
 	return {
 		period: nowIso,
@@ -739,17 +785,23 @@ export function computeSummary(events: AgentEvent[], merchantName: string): Agen
 	};
 }
 
-function computeJourneys(agentMap: Map<string, AgentEvent[]>, now: Date): AgentJourney[] {
+function computeJourneys(
+	agentMap: Map<string, AgentEvent[]>,
+	now: Date,
+): AgentJourney[] {
 	const journeys: AgentJourney[] = [];
 
 	for (const [, agentEvents] of agentMap) {
 		const sorted = [...agentEvents].sort(
-			(a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+			(a, b) =>
+				new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
 		);
 		const first = sorted[0];
 
 		const steps: JourneyStep[] = sorted.map((e) => {
-			const minutesAgo = Math.round((now.getTime() - new Date(e.timestamp).getTime()) / 60000);
+			const minutesAgo = Math.round(
+				(now.getTime() - new Date(e.timestamp).getTime()) / 60000,
+			);
 			return {
 				timestamp: e.timestamp,
 				minutesAgo,
@@ -765,7 +817,8 @@ function computeJourneys(agentMap: Map<string, AgentEvent[]>, now: Date): AgentJ
 		let isReturnVisitor = false;
 		for (let i = 1; i < sorted.length; i++) {
 			const gap =
-				new Date(sorted[i].timestamp).getTime() - new Date(sorted[i - 1].timestamp).getTime();
+				new Date(sorted[i].timestamp).getTime() -
+				new Date(sorted[i - 1].timestamp).getTime();
 			if (gap > 30 * 60 * 1000) {
 				isReturnVisitor = true;
 				break;
@@ -806,7 +859,9 @@ function computeJourneys(agentMap: Map<string, AgentEvent[]>, now: Date): AgentJ
 function describeAction(e: AgentEvent): string {
 	switch (e.action) {
 		case "llms_txt_concise":
-			return e.searchQuery ? `Searched "${e.searchQuery}" via /llms.txt` : "Read /llms.txt";
+			return e.searchQuery
+				? `Searched "${e.searchQuery}" via /llms.txt`
+				: "Read /llms.txt";
 		case "llms_txt_full":
 			return "Read /llms-full.txt";
 		case "product_detail":
@@ -829,7 +884,9 @@ function buildJourneySummary(sorted: AgentEvent[]): string {
 	const hasDiscovery = sorted.some(
 		(e) => e.action === "llms_txt_concise" || e.action === "llms_txt_full",
 	);
-	const productViews = sorted.filter((e) => e.action === "product_detail").length;
+	const productViews = sorted.filter(
+		(e) => e.action === "product_detail",
+	).length;
 	const successfulCheckouts = sorted.filter(
 		(e) => e.action === "checkout_attempt" && e.statusCode === 200,
 	).length;
@@ -844,7 +901,8 @@ function buildJourneySummary(sorted: AgentEvent[]): string {
 
 	for (let i = 1; i < sorted.length; i++) {
 		const gap =
-			new Date(sorted[i].timestamp).getTime() - new Date(sorted[i - 1].timestamp).getTime();
+			new Date(sorted[i].timestamp).getTime() -
+			new Date(sorted[i - 1].timestamp).getTime();
 		if (gap > 30 * 60 * 1000) {
 			phases.push("Return");
 			break;
@@ -866,17 +924,26 @@ function computeSecurity(
 		else unverifiedAgents++;
 	}
 
-	const checkoutEvents = allEvents.filter((e) => e.action === "checkout_attempt");
-	const blockedCheckouts = checkoutEvents.filter((e) => e.statusCode === 403).length;
+	const checkoutEvents = allEvents.filter(
+		(e) => e.action === "checkout_attempt",
+	);
+	const blockedCheckouts = checkoutEvents.filter(
+		(e) => e.statusCode === 403,
+	).length;
 	const totalCheckoutAttempts = checkoutEvents.length;
 
 	const unverifiedHighValue: SecurityEvent[] = allEvents
 		.filter(
-			(e) => !e.verified && (e.action === "checkout_attempt" || e.action === "product_detail"),
+			(e) =>
+				!e.verified &&
+				(e.action === "checkout_attempt" || e.action === "product_detail"),
 		)
 		.map((e) => ({
 			agentName: e.agentName ?? "unknown",
-			action: e.action === "checkout_attempt" ? "Checkout attempt" : "Product detail view",
+			action:
+				e.action === "checkout_attempt"
+					? "Checkout attempt"
+					: "Product detail view",
 			path: e.path,
 			statusCode: e.statusCode,
 			timestamp: e.timestamp,
@@ -891,12 +958,15 @@ function computeSecurity(
 				: 0,
 		blockedCheckouts,
 		totalCheckoutAttempts,
-		checkoutBlockRate: totalCheckoutAttempts > 0 ? blockedCheckouts / totalCheckoutAttempts : 0,
+		checkoutBlockRate:
+			totalCheckoutAttempts > 0 ? blockedCheckouts / totalCheckoutAttempts : 0,
 		unverifiedHighValueAttempts: unverifiedHighValue,
 	};
 }
 
-function computeDemandSignals(agentMap: Map<string, AgentEvent[]>): DemandSignals {
+function computeDemandSignals(
+	agentMap: Map<string, AgentEvent[]>,
+): DemandSignals {
 	const convertedQueries: QueryOutcome[] = [];
 	const browseOnlyQueries: QueryOutcome[] = [];
 	const bouncedQueries: QueryOutcome[] = [];
@@ -913,7 +983,9 @@ function computeDemandSignals(agentMap: Map<string, AgentEvent[]>): DemandSignal
 		const hasBlockedCheckout = agentEvents.some(
 			(e) => e.action === "checkout_attempt" && e.statusCode === 403,
 		);
-		const hasProductView = agentEvents.some((e) => e.action === "product_detail");
+		const hasProductView = agentEvents.some(
+			(e) => e.action === "product_detail",
+		);
 		const productsViewed = agentEvents
 			.filter((e) => e.action === "product_detail" && e.productSlug)
 			.map((e) => getProductName(e.productSlug!));
@@ -923,7 +995,8 @@ function computeDemandSignals(agentMap: Map<string, AgentEvent[]>): DemandSignal
 
 		for (const qEvent of queries) {
 			const query = qEvent.searchQuery!;
-			const isLikelyUnmatched = !hasProductView && !hasCheckout && !hasBlockedCheckout;
+			const isLikelyUnmatched =
+				!hasProductView && !hasCheckout && !hasBlockedCheckout;
 
 			if (hasCheckout) {
 				convertedQueries.push({
@@ -974,7 +1047,9 @@ function generateInsights(
 ): Insight[] {
 	const insights: Insight[] = [];
 
-	const topAgent = [...agents].sort((a, b) => b.estimatedRevenue - a.estimatedRevenue)[0];
+	const topAgent = [...agents].sort(
+		(a, b) => b.estimatedRevenue - a.estimatedRevenue,
+	)[0];
 	if (topAgent && topAgent.estimatedRevenue > 0) {
 		insights.push({
 			icon: "star",
@@ -1009,7 +1084,9 @@ function generateInsights(
 	}
 
 	if (demand.unmatchedDemand.length > 0) {
-		const queries = demand.unmatchedDemand.map((d) => `"${d.query}"`).join(", ");
+		const queries = demand.unmatchedDemand
+			.map((d) => `"${d.query}"`)
+			.join(", ");
 		insights.push({
 			icon: "gap",
 			label: "Product gap",
@@ -1027,7 +1104,9 @@ function generateInsights(
 		});
 	}
 	if (content.neededFullRate > 0) {
-		const fullAgents = journeys.filter((j) => j.steps.some((s) => s.action === "llms_txt_full"));
+		const fullAgents = journeys.filter((j) =>
+			j.steps.some((s) => s.action === "llms_txt_full"),
+		);
 		const names = fullAgents.map((j) => j.agentName ?? j.agentId).join(", ");
 		insights.push({
 			icon: "dots",
@@ -1037,7 +1116,9 @@ function generateInsights(
 		});
 	}
 
-	const topProduct = [...products].sort((a, b) => b.successfulCheckouts - a.successfulCheckouts)[0];
+	const topProduct = [...products].sort(
+		(a, b) => b.successfulCheckouts - a.successfulCheckouts,
+	)[0];
 	if (topProduct && topProduct.successfulCheckouts > 0) {
 		insights.push({
 			icon: "trophy",
@@ -1059,7 +1140,10 @@ function generateInsights(
 	return insights.sort((a, b) => a.priority - b.priority);
 }
 
-function emptySummary(period: string, merchantName: string): AgentAnalyticsSummary {
+function emptySummary(
+	period: string,
+	merchantName: string,
+): AgentAnalyticsSummary {
 	return {
 		period,
 		merchantName,

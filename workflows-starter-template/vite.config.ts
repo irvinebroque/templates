@@ -7,6 +7,7 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 // https://vite.dev/config/
 export default defineConfig({
 	fmt: {
+		printWidth: 80,
 		useTabs: true,
 		sortPackageJson: false,
 		ignorePatterns: [

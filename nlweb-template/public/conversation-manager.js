@@ -15,7 +15,8 @@ class ConversationManager {
 			try {
 				const userId = userInfo.id || userInfo.email;
 				const site = selectedSite;
-				const baseUrl = window.location.origin === "file://" ? "http://localhost:8000" : "";
+				const baseUrl =
+					window.location.origin === "file://" ? "http://localhost:8000" : "";
 				const url = `${baseUrl}/api/conversations?user_id=${encodeURIComponent(userId)}&site=${encodeURIComponent(site)}&limit=50`;
 
 				const response = await fetch(url, {
@@ -28,14 +29,19 @@ class ConversationManager {
 					const data = await response.json();
 
 					// Convert server conversations to our format
-					this.conversations = this.convertServerConversations(data.conversations);
+					this.conversations = this.convertServerConversations(
+						data.conversations,
+					);
 
 					// Also check localStorage for any unsaved conversations
 					this.mergeLocalConversations(selectedSite);
 
 					//console.log('Loaded', this.conversations.length, 'conversations from server');
 				} else {
-					console.error("Failed to load conversations from server:", response.status);
+					console.error(
+						"Failed to load conversations from server:",
+						response.status,
+					);
 					// Fall back to localStorage
 					this.loadLocalConversations(selectedSite);
 				}
@@ -67,7 +73,8 @@ class ConversationManager {
 				if (selectedSite && selectedSite !== "all") {
 					filteredConversations = filteredConversations.filter(
 						(conv) =>
-							conv.site === selectedSite || (conv.siteInfo && conv.siteInfo.site === selectedSite),
+							conv.site === selectedSite ||
+							(conv.siteInfo && conv.siteInfo.site === selectedSite),
 					);
 					//console.log('ConversationManager: After filtering by site', selectedSite, ':', filteredConversations.length);
 				}
@@ -132,7 +139,8 @@ class ConversationManager {
 			// Set title from first user prompt if not set
 			if (!conversation.title && entry.user_prompt) {
 				conversation.title =
-					entry.user_prompt.substring(0, 50) + (entry.user_prompt.length > 50 ? "..." : "");
+					entry.user_prompt.substring(0, 50) +
+					(entry.user_prompt.length > 50 ? "..." : "");
 			}
 		});
 
@@ -151,10 +159,16 @@ class ConversationManager {
 
 				// Add any local conversations that aren't on the server
 				localConversations.forEach((localConv) => {
-					if (!serverIds.has(localConv.id) && localConv.messages && localConv.messages.length > 0) {
+					if (
+						!serverIds.has(localConv.id) &&
+						localConv.messages &&
+						localConv.messages.length > 0
+					) {
 						// Check site filter
 						const convSite =
-							localConv.site || (localConv.siteInfo && localConv.siteInfo.site) || "all";
+							localConv.site ||
+							(localConv.siteInfo && localConv.siteInfo.site) ||
+							"all";
 						if (selectedSite === "all" || convSite === selectedSite) {
 							this.conversations.push(localConv);
 						}
@@ -195,13 +209,19 @@ class ConversationManager {
 					const userMsg = conv.messages[i];
 					const assistantMsg = conv.messages[i + 1];
 
-					if (userMsg.type === "user" && assistantMsg && assistantMsg.type === "assistant") {
+					if (
+						userMsg.type === "user" &&
+						assistantMsg &&
+						assistantMsg.type === "assistant"
+					) {
 						conversationsToMigrate.push({
 							thread_id: conv.id,
 							user_id: userId,
 							user_prompt: userMsg.content,
 							response: assistantMsg.content,
-							timestamp: new Date(userMsg.timestamp || Date.now()).toISOString(),
+							timestamp: new Date(
+								userMsg.timestamp || Date.now(),
+							).toISOString(),
 							site: conv.site || "all",
 						});
 					}
@@ -213,7 +233,8 @@ class ConversationManager {
 			//console.log('Migrating', conversationsToMigrate.length, 'conversation entries to server');
 
 			// Send to server
-			const baseUrl = window.location.origin === "file://" ? "http://localhost:8000" : "";
+			const baseUrl =
+				window.location.origin === "file://" ? "http://localhost:8000" : "";
 			const response = await fetch(`${baseUrl}/api/conversations`, {
 				method: "POST",
 				headers: {
@@ -242,7 +263,10 @@ class ConversationManager {
 		const conversationsToSave = this.conversations.filter(
 			(conv) => conv.messages && conv.messages.length > 0,
 		);
-		localStorage.setItem("nlweb-modern-conversations", JSON.stringify(conversationsToSave));
+		localStorage.setItem(
+			"nlweb-modern-conversations",
+			JSON.stringify(conversationsToSave),
+		);
 	}
 
 	loadConversation(id, chatInterface) {
@@ -274,7 +298,9 @@ class ConversationManager {
 			.map((m) => m.content);
 
 		chatInterface.lastAnswers = [];
-		const assistantMessages = conversation.messages.filter((m) => m.type === "assistant");
+		const assistantMessages = conversation.messages.filter(
+			(m) => m.type === "assistant",
+		);
 		if (assistantMessages.length > 0) {
 			// Get the last assistant message
 			const lastAssistant = assistantMessages[assistantMessages.length - 1];
@@ -305,7 +331,9 @@ class ConversationManager {
 
 	deleteConversation(conversationId, chatInterface) {
 		// Remove from conversations array
-		this.conversations = this.conversations.filter((conv) => conv.id !== conversationId);
+		this.conversations = this.conversations.filter(
+			(conv) => conv.id !== conversationId,
+		);
 
 		// Save updated list
 		this.saveConversations();
@@ -321,7 +349,8 @@ class ConversationManager {
 
 	updateConversationsList(chatInterface, container = null) {
 		// Use provided container or default to the sidebar conversations list
-		const targetContainer = container || chatInterface.elements.conversationsList;
+		const targetContainer =
+			container || chatInterface.elements.conversationsList;
 		if (!targetContainer) {
 			console.warn("No target container found for conversations list");
 			return;
@@ -366,7 +395,10 @@ class ConversationManager {
 			siteHeader.appendChild(siteName);
 
 			// Add chevron icon
-			const chevron = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+			const chevron = document.createElementNS(
+				"http://www.w3.org/2000/svg",
+				"svg",
+			);
 			chevron.setAttribute("class", "chevron");
 			chevron.setAttribute("viewBox", "0 0 24 24");
 			chevron.setAttribute("fill", "none");
@@ -399,7 +431,9 @@ class ConversationManager {
 				const titleSpan = document.createElement("span");
 				titleSpan.className = "conversation-title";
 				titleSpan.textContent = conv.title || "Untitled";
-				titleSpan.addEventListener("click", () => this.loadConversation(conv.id, chatInterface));
+				titleSpan.addEventListener("click", () =>
+					this.loadConversation(conv.id, chatInterface),
+				);
 				convContent.appendChild(titleSpan);
 
 				convItem.appendChild(convContent);
@@ -425,7 +459,9 @@ class ConversationManager {
 				conversationsContainer.style.display =
 					conversationsContainer.style.display === "none" ? "block" : "none";
 				chevron.style.transform =
-					conversationsContainer.style.display === "none" ? "rotate(-90deg)" : "";
+					conversationsContainer.style.display === "none"
+						? "rotate(-90deg)"
+						: "";
 			});
 		});
 	}

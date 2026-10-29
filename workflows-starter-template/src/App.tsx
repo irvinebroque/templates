@@ -20,7 +20,10 @@ function App() {
 	}, [workflowState.workflowStatus]);
 
 	useEffect(() => {
-		if (workflowState.workflowStatus === "running" && workflowState.currentStep) {
+		if (
+			workflowState.workflowStatus === "running" &&
+			workflowState.currentStep
+		) {
 			setIsStarting(false);
 		}
 	}, [workflowState.workflowStatus, workflowState.currentStep]);

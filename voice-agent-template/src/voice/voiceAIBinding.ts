@@ -69,7 +69,10 @@ export function createVoiceAIBinding(
 				try {
 					retryResponse = await Reflect.apply(target.run, target, retryArgs);
 				} catch (error) {
-					const outcome = hasAbortedSignal(args[2]) || isAbortError(error) ? "aborted" : "failed";
+					const outcome =
+						hasAbortedSignal(args[2]) || isAbortError(error)
+							? "aborted"
+							: "failed";
 					logVoiceMetric(metricContext, {
 						event: "voice_agent_llm_binding_fallback",
 						...voiceBindingFallbackLifecycle(outcome),

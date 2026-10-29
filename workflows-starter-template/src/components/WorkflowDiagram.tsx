@@ -302,7 +302,11 @@ export function WorkflowDiagram({
 												/>
 											</svg>
 										) : status === "running" ? (
-											<svg className="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+											<svg
+												className="w-3.5 h-3.5 animate-spin"
+												fill="none"
+												viewBox="0 0 24 24"
+											>
 												<circle
 													className="opacity-25"
 													cx="12"
@@ -318,7 +322,11 @@ export function WorkflowDiagram({
 												/>
 											</svg>
 										) : (
-											<svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+											<svg
+												className="w-3.5 h-3.5"
+												fill="currentColor"
+												viewBox="0 0 20 20"
+											>
 												<circle cx="10" cy="10" r="3" />
 											</svg>
 										)}
@@ -344,7 +352,8 @@ export function WorkflowDiagram({
 					if (node.type === "step") {
 						const step = node.step!;
 						const status = stepStatuses[step.name] || "pending";
-						const showApprovalButton = status === "waiting" && step.id === "wait-for-approval";
+						const showApprovalButton =
+							status === "waiting" && step.id === "wait-for-approval";
 
 						if (showApprovalButton) {
 							return (

@@ -31,14 +31,19 @@ export const handleAsk = async (
 
 	const rag = env.AI.autorag(ragId);
 
-	if (params.streaming !== "false" || request.headers.get("accept") === "text/event-stream") {
+	if (
+		params.streaming !== "false" ||
+		request.headers.get("accept") === "text/event-stream"
+	) {
 		return handleStreaming(rag, params, env, ctx);
 	}
 
 	return await handleDefault(rag, params, env);
 };
 
-const joinChunks = (item: Awaited<ReturnType<AutoRAG["search"]>>["data"][0]) => {
+const joinChunks = (
+	item: Awaited<ReturnType<AutoRAG["search"]>>["data"][0],
+) => {
 	return item.content.reduce((acc, curr) => {
 		return acc + curr.text;
 	}, " ");
@@ -101,7 +106,12 @@ export const handleDefault = async (rag: AutoRAG, params: Params, env: Env) => {
 	);
 };
 
-const handleStreaming = async (rag: AutoRAG, params: Params, env: Env, ctx: ExecutionContext) => {
+const handleStreaming = async (
+	rag: AutoRAG,
+	params: Params,
+	env: Env,
+	ctx: ExecutionContext,
+) => {
 	const { readable, writable } = new TransformStream();
 	const wrapper = new StreamingWrapper(writable);
 
@@ -146,7 +156,9 @@ const handleStreaming = async (rag: AutoRAG, params: Params, env: Env, ctx: Exec
 							site: item.filename,
 							siteUrl: item.filename,
 							score: item.score,
-							description: markdown(joinChunks(item)).replaceAll("\n", " ").substring(0, 420),
+							description: markdown(joinChunks(item))
+								.replaceAll("\n", " ")
+								.substring(0, 420),
 							schema_object: {
 								"@context": "http://schema.org/",
 								"@type": "ProductGroup",
@@ -158,7 +170,9 @@ const handleStreaming = async (rag: AutoRAG, params: Params, env: Env, ctx: Exec
 								},
 								description:
 									item.attributes?.file?.description ||
-									markdown(joinChunks(item)).replaceAll("\n", " ").substring(0, 420),
+									markdown(joinChunks(item))
+										.replaceAll("\n", " ")
+										.substring(0, 420),
 								image: item.attributes?.file?.image,
 							},
 						})),
@@ -177,11 +191,13 @@ const handleStreaming = async (rag: AutoRAG, params: Params, env: Env, ctx: Exec
 				} catch (error) {
 					await wrapper.writeStream({
 						message_type: "error",
-						message: (error as Error).message || "An unexpected error occurred.",
+						message:
+							(error as Error).message || "An unexpected error occurred.",
 					});
 					await wrapper.writeStream({
 						message_type: "summary",
-						message: (error as Error).message || "An unexpected error occurred.",
+						message:
+							(error as Error).message || "An unexpected error occurred.",
 						query_id: "",
 					});
 				}

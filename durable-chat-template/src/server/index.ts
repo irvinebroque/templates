@@ -1,4 +1,9 @@
-import { type Connection, Server, type WSMessage, routePartykitRequest } from "partyserver";
+import {
+	type Connection,
+	Server,
+	type WSMessage,
+	routePartykitRequest,
+} from "partyserver";
 
 import type { ChatMessage, Message } from "../shared";
 
@@ -21,7 +26,9 @@ export class Chat extends Server<Env> {
 		);
 
 		// load the messages from the database
-		this.messages = this.ctx.storage.sql.exec(`SELECT * FROM messages`).toArray() as ChatMessage[];
+		this.messages = this.ctx.storage.sql
+			.exec(`SELECT * FROM messages`)
+			.toArray() as ChatMessage[];
 	}
 
 	onConnect(connection: Connection) {
@@ -73,6 +80,9 @@ export class Chat extends Server<Env> {
 
 export default {
 	async fetch(request, env) {
-		return (await routePartykitRequest(request, { ...env })) || env.ASSETS.fetch(request);
+		return (
+			(await routePartykitRequest(request, { ...env })) ||
+			env.ASSETS.fetch(request)
+		);
 	},
 } satisfies ExportedHandler<Env>;

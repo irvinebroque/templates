@@ -24,7 +24,9 @@ export function buildVoiceGreeting(): string {
 	return `Hi, I'm ${DOCS_AGENT.name}, ${DOCS_AGENT.description}. How can I help?`;
 }
 
-export function buildVoiceSystemPrompt(additionalRules: readonly string[] = []): string {
+export function buildVoiceSystemPrompt(
+	additionalRules: readonly string[] = [],
+): string {
 	return [
 		"IDENTITY AND SCOPE:",
 		DOCS_AGENT.instructions,

@@ -49,14 +49,18 @@ function BookDetail({ bookData }) {
 								<div className="mb-6">
 									<span
 										className="inline-block border border-blue-800 text-blue-800 text-sm px-3 py-1 rounded-full font-sans cursor-pointer"
-										onClick={() => navigate(`/genre/${encodeURIComponent(book.genre)}`)}
+										onClick={() =>
+											navigate(`/genre/${encodeURIComponent(book.genre)}`)
+										}
 									>
 										{book.genre}
 									</span>
 								</div>
 							)}
 
-							<p className="text-gray-900 leading-relaxed">{book.description}</p>
+							<p className="text-gray-900 leading-relaxed">
+								{book.description}
+							</p>
 						</div>
 					</div>
 				</div>
@@ -65,7 +69,9 @@ function BookDetail({ bookData }) {
 				{relatedBooks.length > 0 && (
 					<section className="mb-12">
 						<h3 className="mb-6">
-							{book.genre ? `Other Books in ${book.genre}` : "You May Also Like"}
+							{book.genre
+								? `Other Books in ${book.genre}`
+								: "You May Also Like"}
 						</h3>
 						<div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4">
 							{relatedBooks.map((relBook) => (
@@ -81,8 +87,12 @@ function BookDetail({ bookData }) {
 											className="w-full h-full object-contain rounded-sm border border-gray-200"
 										/>
 									</div>
-									<div className="font-serif text-gray-900 mb-1 line-clamp-1">{relBook.title}</div>
-									<div className="text-gray-900 text-sm font-sans">{relBook.author}</div>
+									<div className="font-serif text-gray-900 mb-1 line-clamp-1">
+										{relBook.title}
+									</div>
+									<div className="text-gray-900 text-sm font-sans">
+										{relBook.author}
+									</div>
 								</div>
 							))}
 						</div>

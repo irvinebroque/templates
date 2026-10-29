@@ -9,7 +9,13 @@ export function Sidebar({ children }: { children: ReactNode }) {
 	);
 }
 
-export function SidebarSection({ label, children }: { label: string; children: ReactNode }) {
+export function SidebarSection({
+	label,
+	children,
+}: {
+	label: string;
+	children: ReactNode;
+}) {
 	return (
 		<div>
 			<div className="text-[10px] font-semibold uppercase tracking-[0.05em] text-neutral-500 px-3 pt-4 pb-1">

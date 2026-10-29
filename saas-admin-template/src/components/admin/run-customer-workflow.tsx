@@ -23,7 +23,11 @@ export function RunCustomerWorkflowButton({
 	const onSubmit = async () => {
 		try {
 			const url = new URL(window.location.href);
-			const response = await runCustomerWorkflow(customerId, url.origin, apiToken);
+			const response = await runCustomerWorkflow(
+				customerId,
+				url.origin,
+				apiToken,
+			);
 
 			if (!response.success) {
 				throw new Error("Failed to create subscription");
@@ -50,8 +54,9 @@ export function RunCustomerWorkflowButton({
 				</DialogHeader>
 
 				<DialogDescription>
-					This will run a workflow for the customer. This is completely customizable and can be used
-					to do whatever you want. Check out <code>src/workflows/customer.ts</code> to get started!
+					This will run a workflow for the customer. This is completely
+					customizable and can be used to do whatever you want. Check out{" "}
+					<code>src/workflows/customer.ts</code> to get started!
 				</DialogDescription>
 
 				<form onSubmit={onSubmit} className="space-y-4">

@@ -12,7 +12,9 @@ const send = vi.fn<SendEmail["send"]>();
 function createEnv(overrides: Partial<TestEnv> = {}): Env {
 	return {
 		ASSETS: {
-			fetch: vi.fn(() => Response.json({ error: "Not found" }, { status: 404 })),
+			fetch: vi.fn(() =>
+				Response.json({ error: "Not found" }, { status: 404 }),
+			),
 		} as unknown as Fetcher,
 		EMAIL: { send } as SendEmail,
 		FROM_ADDRESS: "notifications@test.invalid",
@@ -25,7 +27,9 @@ function createEnv(overrides: Partial<TestEnv> = {}): Env {
 function htmlAssets(html: string): Fetcher {
 	return {
 		fetch: vi.fn(() =>
-			Promise.resolve(new Response(html, { headers: { "Content-Type": "text/html" } })),
+			Promise.resolve(
+				new Response(html, { headers: { "Content-Type": "text/html" } }),
+			),
 		),
 	} as unknown as Fetcher;
 }
@@ -103,7 +107,10 @@ describe("Email Sending Worker", () => {
 	});
 
 	it("rejects requests without a bearer token", async () => {
-		const response = await handleRequest(request("/send", { method: "POST" }), createEnv());
+		const response = await handleRequest(
+			request("/send", { method: "POST" }),
+			createEnv(),
+		);
 
 		expect(response.status).toBe(401);
 		expect(response.headers.get("www-authenticate")).toBe("Bearer");
@@ -186,7 +193,9 @@ describe("Email Sending Worker", () => {
 	});
 
 	it("returns a sanitized error when sending fails", async () => {
-		const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+		const consoleError = vi
+			.spyOn(console, "error")
+			.mockImplementation(() => {});
 		send.mockRejectedValue(new Error("provider details"));
 
 		const response = await handleRequest(

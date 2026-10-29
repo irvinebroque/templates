@@ -1,5 +1,17 @@
-import { createExecutionContext, env, waitOnExecutionContext } from "cloudflare:test";
-import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite-plus/test";
+import {
+	createExecutionContext,
+	env,
+	waitOnExecutionContext,
+} from "cloudflare:test";
+import {
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vite-plus/test";
 import { fetchMock } from "./fetch-mock";
 import app, { resetDbInitialized } from "../src/index";
 
@@ -154,7 +166,9 @@ describe("Internal Sites Platform", () => {
 	// ── Unauthenticated: ctx.access is undefined ────────────────────────
 
 	it("returns 401 when ctx.access is not present", async () => {
-		const request = new Request("https://my-worker.my-account.workers.dev/deploy");
+		const request = new Request(
+			"https://my-worker.my-account.workers.dev/deploy",
+		);
 		const ctx = createNoAccessContext();
 		const response = await app.fetch(request, env, ctx);
 		await waitOnExecutionContext(ctx);
@@ -196,7 +210,9 @@ describe("Internal Sites Platform", () => {
 	// ── Authenticated on workers.dev and custom domains ──────────────────
 
 	it("serves the deploy page with ctx.access on workers.dev", async () => {
-		const request = new Request("https://my-worker.my-account.workers.dev/deploy");
+		const request = new Request(
+			"https://my-worker.my-account.workers.dev/deploy",
+		);
 		const ctx = createAccessContext();
 		const response = await app.fetch(request, env, ctx);
 		await waitOnExecutionContext(ctx);
@@ -229,14 +245,18 @@ describe("Internal Sites Platform", () => {
 			},
 		};
 
-		const request = new Request("https://my-worker.my-account.workers.dev/sites/test-site");
+		const request = new Request(
+			"https://my-worker.my-account.workers.dev/sites/test-site",
+		);
 		const workerEnv = { ...env, dispatcher: mockDispatcher };
 		const ctx = createNoAccessContext();
 		const response = await app.fetch(request, workerEnv, ctx);
 		await waitOnExecutionContext(ctx);
 
 		expect(response.status).toBe(401);
-		expect(await response.text()).toContain("Setup required: Enable Cloudflare Access");
+		expect(await response.text()).toContain(
+			"Setup required: Enable Cloudflare Access",
+		);
 		expect(dispatchCalls).toBe(0);
 	});
 
@@ -260,7 +280,9 @@ describe("Internal Sites Platform", () => {
 		await waitOnExecutionContext(ctx);
 
 		expect(response.status).toBe(401);
-		expect(await response.text()).toContain("Setup required: Enable Cloudflare Access");
+		expect(await response.text()).toContain(
+			"Setup required: Enable Cloudflare Access",
+		);
 		expect(dispatchCalls).toBe(0);
 	});
 
@@ -290,7 +312,11 @@ describe("Internal Sites Platform", () => {
 		mockCloudflareDeploymentFailure(slug);
 
 		const ctx = createAccessContext();
-		const response = await app.fetch(deploymentRequest(slug), deploymentEnv, ctx);
+		const response = await app.fetch(
+			deploymentRequest(slug),
+			deploymentEnv,
+			ctx,
+		);
 		await waitOnExecutionContext(ctx);
 
 		expect(response.status).toBe(502);
@@ -338,7 +364,11 @@ describe("Internal Sites Platform", () => {
 		mockCloudflareDeploymentFailure(slug);
 
 		const ctx = createAccessContext();
-		const response = await app.fetch(deploymentRequest(slug), cleanupFailingEnv, ctx);
+		const response = await app.fetch(
+			deploymentRequest(slug),
+			cleanupFailingEnv,
+			ctx,
+		);
 		await waitOnExecutionContext(ctx);
 
 		expect(response.status).toBe(502);
@@ -413,7 +443,11 @@ describe("Internal Sites Platform", () => {
 		const failingEnv = { ...deploymentEnv, DB: failingDb };
 
 		const ctx = createAccessContext();
-		const response = await app.fetch(deploymentRequest("d1-failure"), failingEnv, ctx);
+		const response = await app.fetch(
+			deploymentRequest("d1-failure"),
+			failingEnv,
+			ctx,
+		);
 		await waitOnExecutionContext(ctx);
 
 		expect(response.status).toBe(500);
@@ -457,7 +491,9 @@ describe("Internal Sites Platform", () => {
 			},
 		};
 
-		const request = new Request("http://localhost/sites/my-test-site/style.css");
+		const request = new Request(
+			"http://localhost/sites/my-test-site/style.css",
+		);
 		const noDbEnv = {
 			...env,
 			DB: throwingDb as D1Database,
@@ -517,13 +553,18 @@ describe("Internal Sites Platform", () => {
 			get() {
 				return {
 					fetch: async () =>
-						new Response("<html><script>document.body.textContent = 'ok'</script></html>", {
-							headers: { "content-type": "text/html" },
-						}),
+						new Response(
+							"<html><script>document.body.textContent = 'ok'</script></html>",
+							{
+								headers: { "content-type": "text/html" },
+							},
+						),
 				};
 			},
 		};
-		const request = new Request("https://my-worker.my-account.workers.dev/sites/test-site/");
+		const request = new Request(
+			"https://my-worker.my-account.workers.dev/sites/test-site/",
+		);
 		const workerEnv = { ...env, dispatcher: mockDispatcher };
 		const ctx = createAccessContext();
 		const response = await app.fetch(request, workerEnv, ctx);

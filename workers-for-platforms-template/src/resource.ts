@@ -21,7 +21,8 @@ const MakeHeaders = (env: Env): Record<string, string> => {
 export function checkEnvConfig(env: Env): { ok: boolean; missing: string[] } {
 	const missing: string[] = [];
 	if (!env.ACCOUNT_ID) missing.push("ACCOUNT_ID");
-	if (!env.DISPATCH_NAMESPACE_API_TOKEN) missing.push("DISPATCH_NAMESPACE_API_TOKEN");
+	if (!env.DISPATCH_NAMESPACE_API_TOKEN)
+		missing.push("DISPATCH_NAMESPACE_API_TOKEN");
 	if (!env.DISPATCH_NAMESPACE_NAME) missing.push("DISPATCH_NAMESPACE_NAME");
 	return { ok: missing.length === 0, missing };
 }
@@ -138,7 +139,8 @@ export async function PutScriptWithAssetsInDispatchNamespace(
 		};
 
 		if (!sessionData.success || !sessionData.result) {
-			const errorMsg = sessionData.errors?.[0]?.message || "Failed to create upload session";
+			const errorMsg =
+				sessionData.errors?.[0]?.message || "Failed to create upload session";
 			return { success: false, error: errorMsg };
 		}
 
@@ -176,7 +178,8 @@ export async function PutScriptWithAssetsInDispatchNamespace(
 				};
 
 				if (!uploadResponse.ok || !uploadData.success) {
-					const errorMsg = uploadData.errors?.[0]?.message || "Asset upload failed";
+					const errorMsg =
+						uploadData.errors?.[0]?.message || "Asset upload failed";
 					return { success: false, error: errorMsg };
 				}
 
@@ -246,7 +249,8 @@ export default {
 		};
 
 		if (!deployResponse.ok || !deployData.success) {
-			const errorMsg = deployData.errors?.[0]?.message || "Failed to deploy worker";
+			const errorMsg =
+				deployData.errors?.[0]?.message || "Failed to deploy worker";
 			return { success: false, error: errorMsg };
 		}
 

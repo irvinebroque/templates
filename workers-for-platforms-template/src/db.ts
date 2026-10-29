@@ -28,7 +28,10 @@ export async function Initialize(db: D1QB) {
 	}
 }
 
-export async function FetchTable(db: D1QB, table: string): Promise<ResourceRecord[] | undefined> {
+export async function FetchTable(
+	db: D1QB,
+	table: string,
+): Promise<ResourceRecord[] | undefined> {
 	return (
 		await db.fetchAll({
 			tableName: table,
@@ -50,7 +53,10 @@ export async function CreateProject(db: D1QB, project: Project) {
 	});
 }
 
-export async function GetProjectBySubdomain(db: D1QB, subdomain: string): Promise<Project | null> {
+export async function GetProjectBySubdomain(
+	db: D1QB,
+	subdomain: string,
+): Promise<Project | null> {
 	const result = await db.fetchOne({
 		tableName: "projects",
 		fields: "*",
@@ -85,7 +91,11 @@ export async function GetAllProjects(db: D1QB): Promise<Project[]> {
 	return (result.results as Project[]) || [];
 }
 
-export async function UpdateProject(db: D1QB, projectId: string, updates: Partial<Project>) {
+export async function UpdateProject(
+	db: D1QB,
+	projectId: string,
+	updates: Partial<Project>,
+) {
 	return db.update({
 		tableName: "projects",
 		data: updates as unknown as Record<string, string>,

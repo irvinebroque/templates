@@ -34,8 +34,12 @@ export class NLWebDropdownChat {
 		this.createDOM();
 
 		// Get references to elements
-		this.searchInput = this.container.querySelector(`.${this.config.cssPrefix}-search-input`);
-		this.dropdownResults = this.container.querySelector(`.${this.config.cssPrefix}-results`);
+		this.searchInput = this.container.querySelector(
+			`.${this.config.cssPrefix}-search-input`,
+		);
+		this.dropdownResults = this.container.querySelector(
+			`.${this.config.cssPrefix}-results`,
+		);
 		this.messagesContainer = this.container.querySelector(
 			`.${this.config.cssPrefix}-messages-container`,
 		);
@@ -45,8 +49,12 @@ export class NLWebDropdownChat {
 		this.dropdownConversationsPanel = this.container.querySelector(
 			`.${this.config.cssPrefix}-conversations-panel`,
 		);
-		this.historyIcon = this.container.querySelector(`.${this.config.cssPrefix}-history-icon`);
-		this.rememberedList = this.container.querySelector(`.${this.config.cssPrefix}-remembered-list`);
+		this.historyIcon = this.container.querySelector(
+			`.${this.config.cssPrefix}-history-icon`,
+		);
+		this.rememberedList = this.container.querySelector(
+			`.${this.config.cssPrefix}-remembered-list`,
+		);
 
 		// Import required modules
 		try {
@@ -178,13 +186,16 @@ export class NLWebDropdownChat {
 
 	setupChatInterfaceOverrides() {
 		// Override createNewChat to ensure site is set
-		const originalCreateNewChat = this.chatInterface.createNewChat.bind(this.chatInterface);
+		const originalCreateNewChat = this.chatInterface.createNewChat.bind(
+			this.chatInterface,
+		);
 		this.chatInterface.createNewChat = (searchInputId, site) => {
 			originalCreateNewChat(searchInputId, site || this.config.site);
 
-			const conversation = this.chatInterface.conversationManager.findConversation(
-				this.chatInterface.currentConversationId,
-			);
+			const conversation =
+				this.chatInterface.conversationManager.findConversation(
+					this.chatInterface.currentConversationId,
+				);
 			if (conversation) {
 				if (!conversation.site) {
 					conversation.site = this.config.site;
@@ -197,7 +208,9 @@ export class NLWebDropdownChat {
 		};
 
 		// Override sendMessage to show dropdown
-		const originalSendMessage = this.chatInterface.sendMessage.bind(this.chatInterface);
+		const originalSendMessage = this.chatInterface.sendMessage.bind(
+			this.chatInterface,
+		);
 		this.chatInterface.sendMessage = (message) => {
 			this.showDropdown();
 			originalSendMessage(message);
@@ -213,14 +226,17 @@ export class NLWebDropdownChat {
 		};
 
 		// Override addMessage
-		const originalAddMessage = this.chatInterface.addMessage.bind(this.chatInterface);
+		const originalAddMessage = this.chatInterface.addMessage.bind(
+			this.chatInterface,
+		);
 		this.chatInterface.addMessage = (content, type) => {
 			originalAddMessage(content, type);
 
 			// Access conversations through conversationManager
-			const conversation = this.chatInterface.conversationManager.findConversation(
-				this.chatInterface.currentConversationId,
-			);
+			const conversation =
+				this.chatInterface.conversationManager.findConversation(
+					this.chatInterface.currentConversationId,
+				);
 			if (conversation) {
 				if (conversation.site !== this.config.site) {
 					conversation.site = this.config.site;
@@ -233,7 +249,9 @@ export class NLWebDropdownChat {
 		};
 
 		// Override endStreaming
-		const originalEndStreaming = this.chatInterface.endStreaming.bind(this.chatInterface);
+		const originalEndStreaming = this.chatInterface.endStreaming.bind(
+			this.chatInterface,
+		);
 		this.chatInterface.endStreaming = () => {
 			originalEndStreaming();
 			this.dropdownResults.classList.add("loaded");
@@ -243,9 +261,8 @@ export class NLWebDropdownChat {
 
 		// Override addRememberedItem if it exists
 		if (this.chatInterface.addRememberedItem) {
-			const originalAddRememberedItem = this.chatInterface.addRememberedItem.bind(
-				this.chatInterface,
-			);
+			const originalAddRememberedItem =
+				this.chatInterface.addRememberedItem.bind(this.chatInterface);
 			this.chatInterface.addRememberedItem = (item) => {
 				originalAddRememberedItem(item);
 				this.updateRememberedItems();
@@ -272,8 +289,12 @@ export class NLWebDropdownChat {
 		}
 
 		// Chat input and send button
-		const chatInput = this.container.querySelector(`.${this.config.cssPrefix}-chat-input`);
-		const sendButton = this.container.querySelector(`.${this.config.cssPrefix}-send-button`);
+		const chatInput = this.container.querySelector(
+			`.${this.config.cssPrefix}-chat-input`,
+		);
+		const sendButton = this.container.querySelector(
+			`.${this.config.cssPrefix}-send-button`,
+		);
 
 		if (chatInput && sendButton) {
 			// Override the chat interface elements
@@ -348,9 +369,13 @@ export class NLWebDropdownChat {
 	updateConversationsList() {
 		this.dropdownConversationsList.innerHTML = "";
 
-		const allConversations = this.chatInterface.conversationManager.getConversations();
+		const allConversations =
+			this.chatInterface.conversationManager.getConversations();
 		const siteConversations = allConversations.filter(
-			(conv) => conv.site === this.config.site && conv.messages && conv.messages.length > 0,
+			(conv) =>
+				conv.site === this.config.site &&
+				conv.messages &&
+				conv.messages.length > 0,
 		);
 
 		siteConversations.sort((a, b) => {
@@ -383,7 +408,10 @@ export class NLWebDropdownChat {
 
 			item.addEventListener("click", (e) => {
 				e.stopPropagation();
-				this.chatInterface.conversationManager.loadConversation(conv.id, this.chatInterface);
+				this.chatInterface.conversationManager.loadConversation(
+					conv.id,
+					this.chatInterface,
+				);
 
 				const firstUserMessage = conv.messages.find((m) => m.type === "user");
 				if (firstUserMessage) {
@@ -411,7 +439,10 @@ export class NLWebDropdownChat {
 
 	deleteConversation(conversationId) {
 		// Use conversationManager's deleteConversation method
-		this.chatInterface.conversationManager.deleteConversation(conversationId, this.chatInterface);
+		this.chatInterface.conversationManager.deleteConversation(
+			conversationId,
+			this.chatInterface,
+		);
 
 		if (this.chatInterface.currentConversationId === conversationId) {
 			this.chatInterface.createNewChat(null, this.config.site);
@@ -440,7 +471,9 @@ export class NLWebDropdownChat {
 		}
 
 		if (this.messagesContainer) {
-			const closeButton = this.messagesContainer.querySelector(`.${this.config.cssPrefix}-close`);
+			const closeButton = this.messagesContainer.querySelector(
+				`.${this.config.cssPrefix}-close`,
+			);
 			this.messagesContainer.innerHTML = "";
 			if (closeButton) {
 				this.messagesContainer.appendChild(closeButton);
@@ -511,7 +544,9 @@ export class NLWebDropdownChat {
 
 	removeRememberedItem(index) {
 		if (this.chatInterface && this.chatInterface.removeRememberedItem) {
-			this.chatInterface.removeRememberedItem(this.chatInterface.rememberedItems[index]);
+			this.chatInterface.removeRememberedItem(
+				this.chatInterface.rememberedItems[index],
+			);
 		}
 	}
 

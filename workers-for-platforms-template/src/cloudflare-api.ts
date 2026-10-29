@@ -16,7 +16,8 @@ function getAuthHeaders(env: Env): Record<string, string> {
 }
 
 function isApiConfigured(env: Env): boolean {
-	const hasAuth = !!env.CLOUDFLARE_API_TOKEN || !!env.DISPATCH_NAMESPACE_API_TOKEN;
+	const hasAuth =
+		!!env.CLOUDFLARE_API_TOKEN || !!env.DISPATCH_NAMESPACE_API_TOKEN;
 	const configured = !!(env.CLOUDFLARE_ZONE_ID && hasAuth);
 	if (!configured) {
 		console.error("Custom hostname API not configured:", {
@@ -28,7 +29,10 @@ function isApiConfigured(env: Env): boolean {
 	return configured;
 }
 
-export async function createCustomHostname(env: Env, hostname: string): Promise<boolean> {
+export async function createCustomHostname(
+	env: Env,
+	hostname: string,
+): Promise<boolean> {
 	if (!isApiConfigured(env)) {
 		return false;
 	}
@@ -128,7 +132,8 @@ export async function getCustomHostnameStatus(
 			ssl: hostnameData.ssl
 				? {
 						status: hostnameData.ssl.status,
-						validation_method: hostnameData.ssl.method || hostnameData.ssl.validation_method,
+						validation_method:
+							hostnameData.ssl.method || hostnameData.ssl.validation_method,
 						validation_errors: hostnameData.ssl.validation_errors || [],
 						validation_records: hostnameData.ssl.validation_records || [],
 					}
@@ -140,7 +145,10 @@ export async function getCustomHostnameStatus(
 	}
 }
 
-export async function deleteCustomHostname(env: Env, hostname: string): Promise<boolean> {
+export async function deleteCustomHostname(
+	env: Env,
+	hostname: string,
+): Promise<boolean> {
 	if (!isApiConfigured(env)) {
 		return false;
 	}
@@ -156,7 +164,11 @@ export async function deleteCustomHostname(env: Env, hostname: string): Promise<
 
 		const listResult = await listResponse.json();
 
-		if (!listResponse.ok || !listResult.result || listResult.result.length === 0) {
+		if (
+			!listResponse.ok ||
+			!listResult.result ||
+			listResult.result.length === 0
+		) {
 			return false;
 		}
 

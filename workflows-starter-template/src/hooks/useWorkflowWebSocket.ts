@@ -1,5 +1,9 @@
 import { useEffect, useReducer } from "react";
-import type { WorkflowState, WorkflowUpdateMessage, StepStatus } from "../types";
+import type {
+	WorkflowState,
+	WorkflowUpdateMessage,
+	StepStatus,
+} from "../types";
 import { WORKFLOW_STEPS } from "../types";
 
 type Action =

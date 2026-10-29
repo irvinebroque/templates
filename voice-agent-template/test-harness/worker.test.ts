@@ -1,4 +1,11 @@
-import { afterAll, afterEach, beforeAll, describe, expect, it } from "vite-plus/test";
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	describe,
+	expect,
+	it,
+} from "vite-plus/test";
 import { createTestHarness } from "wrangler";
 
 const TOKEN = "test-harness-voice-agent-token";
@@ -50,7 +57,9 @@ describe("production Worker bundle", () => {
 		server.clearLogs();
 		const response = await server.fetch(`/agents/voice-agent/${instanceName}`);
 		expect(response.status).toBe(401);
-		expect(JSON.stringify(server.getLogs())).not.toContain("voice agent initialized");
+		expect(JSON.stringify(server.getLogs())).not.toContain(
+			"voice agent initialized",
+		);
 	});
 
 	it("rejects a WebSocket upgrade before initializing the Durable Object", async () => {
@@ -60,7 +69,9 @@ describe("production Worker bundle", () => {
 		});
 
 		expect(response.status).toBe(401);
-		expect(JSON.stringify(server.getLogs())).not.toContain("voice agent initialized");
+		expect(JSON.stringify(server.getLogs())).not.toContain(
+			"voice agent initialized",
+		);
 	});
 
 	it("routes the fixed Agent with the configured credential", async () => {
@@ -79,7 +90,9 @@ describe("production Worker bundle", () => {
 				voice: "asteria",
 			},
 		});
-		expect(JSON.stringify(server.getLogs())).toContain("voice agent initialized");
+		expect(JSON.stringify(server.getLogs())).toContain(
+			"voice agent initialized",
+		);
 	});
 
 	it("does not include supplied or configured credentials in runtime logs", async () => {

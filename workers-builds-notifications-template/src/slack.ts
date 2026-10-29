@@ -2,7 +2,13 @@
  * Slack Block Kit message formatting for build notifications.
  */
 
-import type { SectionBlock, ContextBlock, KnownBlock, MrkdwnElement, Button } from "@slack/types";
+import type {
+	SectionBlock,
+	ContextBlock,
+	KnownBlock,
+	MrkdwnElement,
+	Button,
+} from "@slack/types";
 
 import type { CloudflareEvent } from "./types";
 import {
@@ -125,7 +131,10 @@ function buildSuccessMessage(
 	return { blocks };
 }
 
-function buildFailureMessage(event: CloudflareEvent, logs: string[]): SlackPayload {
+function buildFailureMessage(
+	event: CloudflareEvent,
+	logs: string[],
+): SlackPayload {
 	const workerName = event.source?.workerName || "Worker";
 	const dashUrl = getDashboardUrl(event);
 	const error = extractBuildError(logs);

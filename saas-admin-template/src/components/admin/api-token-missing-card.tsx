@@ -1,4 +1,10 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 export default () => {
@@ -7,8 +13,8 @@ export default () => {
 			<CardHeader>
 				<CardTitle>API token not configured</CardTitle>
 				<CardDescription>
-					Requests to the API, including from the frontend UI, will not work until an API token is
-					configured.
+					Requests to the API, including from the frontend UI, will not work
+					until an API token is configured.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-4">

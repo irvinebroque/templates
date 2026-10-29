@@ -93,7 +93,11 @@ export function CreateCustomerButton({ apiToken }: { apiToken: string }) {
 								<FormItem>
 									<FormLabel>Email</FormLabel>
 									<FormControl>
-										<Input type="email" placeholder="Enter customer email" {...field} />
+										<Input
+											type="email"
+											placeholder="Enter customer email"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -107,7 +111,10 @@ export function CreateCustomerButton({ apiToken }: { apiToken: string }) {
 								<FormItem>
 									<FormLabel>Notes</FormLabel>
 									<FormControl>
-										<Textarea placeholder="Enter any additional notes" {...field} />
+										<Textarea
+											placeholder="Enter any additional notes"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>

@@ -2,7 +2,11 @@ import type { ColumnDef } from "@tanstack/react-table";
 
 import { DataTable } from "@/components/admin/data-table";
 
-import { createColumnHelper, getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import {
+	createColumnHelper,
+	getCoreRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
 
 export type Customer = {
 	id: number;
@@ -24,7 +28,10 @@ const columns: ColumnDef<Customer>[] = [
 		header: "Name",
 		cell: (info) => {
 			return (
-				<a className="text-primary underline" href={`/admin/customers/${info.row.original.id}`}>
+				<a
+					className="text-primary underline"
+					href={`/admin/customers/${info.row.original.id}`}
+				>
 					{info.getValue()}
 				</a>
 			);

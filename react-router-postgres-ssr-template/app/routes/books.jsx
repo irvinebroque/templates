@@ -12,7 +12,9 @@ export async function loader({ request, context }) {
 		const booksService = context?.cloudflare?.env?.BOOKS_SERVICE;
 
 		if (!booksService) {
-			console.warn("[Books Loader] BOOKS_SERVICE binding not available, returning empty array");
+			console.warn(
+				"[Books Loader] BOOKS_SERVICE binding not available, returning empty array",
+			);
 			return { books: [], source: "fallback" };
 		}
 

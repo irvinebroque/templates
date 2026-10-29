@@ -64,7 +64,9 @@ describe("Commerce llms.txt", () => {
 
 	it("returns single product by slug", async () => {
 		// Use a known slug from the sample catalog to avoid needing two requests
-		const response = await SELF.fetch("https://example.com/api/products/little-ripper-70-skis");
+		const response = await SELF.fetch(
+			"https://example.com/api/products/little-ripper-70-skis",
+		);
 		expect(response.status).toBe(200);
 		const json = (await response.json()) as {
 			product: { slug: string; name: string; agentSummary: string };
@@ -75,7 +77,9 @@ describe("Commerce llms.txt", () => {
 	});
 
 	it("returns 404 for unknown product slug", async () => {
-		const response = await SELF.fetch("https://example.com/api/products/nonexistent-product-xyz");
+		const response = await SELF.fetch(
+			"https://example.com/api/products/nonexistent-product-xyz",
+		);
 		expect(response.status).toBe(404);
 		const json = (await response.json()) as { error: string };
 		expect(json.error).toBe("Product not found");

@@ -29,7 +29,10 @@ export default {
 					message: "Workflow started successfully",
 				});
 			} catch {
-				return Response.json({ error: "Failed to start workflow" }, { status: 500 });
+				return Response.json(
+					{ error: "Failed to start workflow" },
+					{ status: 500 },
+				);
 			}
 		}
 
@@ -37,7 +40,10 @@ export default {
 		if (url.pathname.startsWith("/api/workflow/status/")) {
 			const instanceId = url.pathname.split("/").pop();
 			if (!instanceId) {
-				return Response.json({ error: "Instance ID required" }, { status: 400 });
+				return Response.json(
+					{ error: "Instance ID required" },
+					{ status: 400 },
+				);
 			}
 
 			try {
@@ -45,15 +51,24 @@ export default {
 				const status = await instance.status();
 				return Response.json(status);
 			} catch {
-				return Response.json({ error: "Failed to get workflow status" }, { status: 500 });
+				return Response.json(
+					{ error: "Failed to get workflow status" },
+					{ status: 500 },
+				);
 			}
 		}
 
 		// API: Send event to workflow instance
-		if (url.pathname.startsWith("/api/workflow/event/") && request.method === "POST") {
+		if (
+			url.pathname.startsWith("/api/workflow/event/") &&
+			request.method === "POST"
+		) {
 			const instanceId = url.pathname.split("/").pop();
 			if (!instanceId) {
-				return Response.json({ error: "Instance ID required" }, { status: 400 });
+				return Response.json(
+					{ error: "Instance ID required" },
+					{ status: 400 },
+				);
 			}
 
 			try {
@@ -73,7 +88,10 @@ export default {
 					message: "Event sent successfully",
 				});
 			} catch {
-				return Response.json({ error: "Failed to send event" }, { status: 500 });
+				return Response.json(
+					{ error: "Failed to send event" },
+					{ status: 500 },
+				);
 			}
 		}
 

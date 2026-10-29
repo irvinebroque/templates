@@ -1185,7 +1185,10 @@ hr.solid {
 }
 `;
 
-export const renderPage = (body: string, options?: { customDomain?: string }) => `
+export const renderPage = (
+	body: string,
+	options?: { customDomain?: string },
+) => `
 <!DOCTYPE html><html>
 <head>
   <title>Build a Website</title>

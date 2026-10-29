@@ -74,7 +74,9 @@ export class SubscriptionService {
 		console.log(subscriptionData);
 		const { name, description, price, features } = subscriptionData;
 
-		const subscriptionResponse = await this.DB.prepare(SUBSCRIPTION_QUERIES.INSERT_SUBSCRIPTION)
+		const subscriptionResponse = await this.DB.prepare(
+			SUBSCRIPTION_QUERIES.INSERT_SUBSCRIPTION,
+		)
 			.bind(name, description, price)
 			.run();
 
@@ -90,7 +92,9 @@ export class SubscriptionService {
 					.bind(feature.name, feature.description || null)
 					.run();
 
-				const featureIdResponse = await this.DB.prepare(SUBSCRIPTION_QUERIES.SELECT_FEATURE_ID)
+				const featureIdResponse = await this.DB.prepare(
+					SUBSCRIPTION_QUERIES.SELECT_FEATURE_ID,
+				)
 					.bind(feature.name)
 					.all();
 
@@ -106,7 +110,9 @@ export class SubscriptionService {
 					.run();
 
 				if (!relationshipResponse.success) {
-					throw new Error(`Failed to link feature ${feature.name} to subscription`);
+					throw new Error(
+						`Failed to link feature ${feature.name} to subscription`,
+					);
 				}
 			}
 		}

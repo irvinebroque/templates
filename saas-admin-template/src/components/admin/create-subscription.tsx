@@ -139,7 +139,10 @@ export function CreateSubscriptionButton({ apiToken }: { apiToken: string }) {
 								<FormItem>
 									<FormLabel>Description</FormLabel>
 									<FormControl>
-										<Textarea placeholder="Enter subscription description" {...field} />
+										<Textarea
+											placeholder="Enter subscription description"
+											{...field}
+										/>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -170,11 +173,16 @@ export function CreateSubscriptionButton({ apiToken }: { apiToken: string }) {
 
 							<div className="space-y-2">
 								{features.map((feature, index) => (
-									<div key={index} className="flex items-center gap-2 p-2 border rounded-md">
+									<div
+										key={index}
+										className="flex items-center gap-2 p-2 border rounded-md"
+									>
 										<div className="flex-1">
 											<div className="font-medium">{feature.name}</div>
 											{feature.description && (
-												<div className="text-sm text-gray-500">{feature.description}</div>
+												<div className="text-sm text-gray-500">
+													{feature.description}
+												</div>
 											)}
 										</div>
 										<Button
@@ -194,7 +202,9 @@ export function CreateSubscriptionButton({ apiToken }: { apiToken: string }) {
 									<Input
 										placeholder="Feature name"
 										value={newFeature.name}
-										onChange={(e) => setNewFeature({ ...newFeature, name: e.target.value })}
+										onChange={(e) =>
+											setNewFeature({ ...newFeature, name: e.target.value })
+										}
 									/>
 									<Input
 										placeholder="Feature description (optional)"
@@ -207,7 +217,11 @@ export function CreateSubscriptionButton({ apiToken }: { apiToken: string }) {
 										}
 									/>
 								</div>
-								<Button type="button" onClick={addFeature} className="self-start">
+								<Button
+									type="button"
+									onClick={addFeature}
+									className="self-start"
+								>
 									Add Feature
 								</Button>
 							</div>

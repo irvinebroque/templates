@@ -15,7 +15,10 @@ export async function POST({
 }) {
 	const { API_TOKEN, CUSTOMER_WORKFLOW } = locals.runtime.env;
 
-	const invalidTokenResponse = await validateApiTokenResponse(request, API_TOKEN);
+	const invalidTokenResponse = await validateApiTokenResponse(
+		request,
+		API_TOKEN,
+	);
 	if (invalidTokenResponse) return invalidTokenResponse;
 
 	const { id } = params;

@@ -5,14 +5,21 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { cn } from "@/lib/utils";
 
-const methodStyles = (method: string) => cn(method === "POST" ? "bg-green-700" : "");
+const methodStyles = (method: string) =>
+	cn(method === "POST" ? "bg-green-700" : "");
 
 export const APIDocumentation = () => {
 	return (
@@ -21,8 +28,8 @@ export const APIDocumentation = () => {
 				<CardHeader>
 					<CardTitle>Authentication</CardTitle>
 					<CardDescription>
-						All requests must be authenticated by passing the API token as a request header. The API
-						token is configured using{" "}
+						All requests must be authenticated by passing the API token as a
+						request header. The API token is configured using{" "}
 						<a
 							className="text-primary underline"
 							href="https://developers.cloudflare.com/workers/configuration/secrets/"
@@ -80,9 +87,13 @@ export const APIDocumentation = () => {
 												{endpoint.parameters.map((param, paramIndex) => (
 													<div key={paramIndex} className="border-b pb-2">
 														<div className="flex items-center gap-2">
-															<code className="text-sm font-mono">{param.name}</code>
+															<code className="text-sm font-mono">
+																{param.name}
+															</code>
 															<Badge variant="outline">{param.type}</Badge>
-															{param.required && <Badge variant="destructive">Required</Badge>}
+															{param.required && (
+																<Badge variant="destructive">Required</Badge>
+															)}
 														</div>
 														<p className="text-sm text-muted-foreground mt-1">
 															{param.description}
@@ -111,16 +122,23 @@ export const APIDocumentation = () => {
 								)}
 
 								{endpoint.responses.map((response, responseIndex) => (
-									<AccordionItem key={responseIndex} value={`response-${responseIndex}`}>
+									<AccordionItem
+										key={responseIndex}
+										value={`response-${responseIndex}`}
+									>
 										<AccordionTrigger>
-											{endpoint.responses.length === 1 ? "Response" : response.name}
+											{endpoint.responses.length === 1
+												? "Response"
+												: response.name}
 										</AccordionTrigger>
 										<AccordionContent>
 											<pre className="bg-muted p-4 rounded-lg overflow-auto">
 												{JSON.stringify(response.example, null, 2)}
 											</pre>
 											{response.description && (
-												<p className="text-sm text-muted-foreground mt-2">{response.description}</p>
+												<p className="text-sm text-muted-foreground mt-2">
+													{response.description}
+												</p>
 											)}
 										</AccordionContent>
 									</AccordionItem>

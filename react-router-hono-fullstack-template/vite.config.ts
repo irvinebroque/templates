@@ -6,6 +6,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
 	fmt: {
+		printWidth: 80,
 		useTabs: true,
 		sortPackageJson: false,
 		ignorePatterns: [

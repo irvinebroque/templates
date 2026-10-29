@@ -1,7 +1,11 @@
 // Workers for Platforms Template - Test Suite
 // Tests the core functionality of the website hosting platform
 
-import { env, createExecutionContext, waitOnExecutionContext } from "cloudflare:test";
+import {
+	env,
+	createExecutionContext,
+	waitOnExecutionContext,
+} from "cloudflare:test";
 import { describe, it, expect, beforeEach } from "vite-plus/test";
 import app from "../src/index";
 
@@ -17,7 +21,10 @@ interface TestEnv {
 
 describe("Workers for Platforms Template", () => {
 	// Helper to make requests to the app
-	async function makeRequest(path: string, options?: RequestInit): Promise<Response> {
+	async function makeRequest(
+		path: string,
+		options?: RequestInit,
+	): Promise<Response> {
 		const request = new Request(`http://localhost${path}`, options);
 		const ctx = createExecutionContext();
 		const response = await app.fetch(request, env as unknown as TestEnv, ctx);
@@ -98,7 +105,8 @@ describe("Workers for Platforms Template", () => {
 				body: JSON.stringify({
 					name: "Test Project",
 					subdomain: "Invalid_Subdomain!",
-					script_content: "export default { fetch() { return new Response('ok'); } }",
+					script_content:
+						"export default { fetch() { return new Response('ok'); } }",
 				}),
 			});
 
@@ -147,7 +155,10 @@ describe("Workers for Platforms Template", () => {
 });
 
 describe("Input Validation", () => {
-	async function makeRequest(path: string, options?: RequestInit): Promise<Response> {
+	async function makeRequest(
+		path: string,
+		options?: RequestInit,
+	): Promise<Response> {
 		const request = new Request(`http://localhost${path}`, options);
 		const ctx = createExecutionContext();
 		const response = await app.fetch(request, env as unknown as TestEnv, ctx);
@@ -162,7 +173,8 @@ describe("Input Validation", () => {
 			body: JSON.stringify({
 				name: "My Test Site",
 				subdomain: "my-test-site",
-				script_content: "export default { fetch() { return new Response('ok'); } }",
+				script_content:
+					"export default { fetch() { return new Response('ok'); } }",
 			}),
 		});
 
@@ -179,7 +191,8 @@ describe("Input Validation", () => {
 			body: JSON.stringify({
 				name: "Site 123",
 				subdomain: "site123",
-				script_content: "export default { fetch() { return new Response('ok'); } }",
+				script_content:
+					"export default { fetch() { return new Response('ok'); } }",
 			}),
 		});
 

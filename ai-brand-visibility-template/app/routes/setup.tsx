@@ -27,9 +27,15 @@ export default function Setup() {
 	const [brandName, setBrandName] = useState("");
 	const [competitorInput, setCompetitorInput] = useState("");
 	const [competitors, setCompetitors] = useState<string[]>([]);
-	const [suggestions, setSuggestions] = useState<{ text: string; tag: string }[]>([]);
-	const [selectedPrompts, setSelectedPrompts] = useState<Set<string>>(new Set());
-	const [models, setModels] = useState<{ name: string; id: string; provider: string }[]>([]);
+	const [suggestions, setSuggestions] = useState<
+		{ text: string; tag: string }[]
+	>([]);
+	const [selectedPrompts, setSelectedPrompts] = useState<Set<string>>(
+		new Set(),
+	);
+	const [models, setModels] = useState<
+		{ name: string; id: string; provider: string }[]
+	>([]);
 	const [enabledModels, setEnabledModels] = useState<Set<string>>(new Set());
 	const [loading, setLoading] = useState(false);
 	const [generating, setGenerating] = useState(false);
@@ -50,7 +56,13 @@ export default function Setup() {
 			const h = el.offsetHeight;
 			if (h > 0) setCardHeight(h);
 		}
-	}, [step, suggestions.length, models.length, selectedPrompts.size, competitors.length]);
+	}, [
+		step,
+		suggestions.length,
+		models.length,
+		selectedPrompts.size,
+		competitors.length,
+	]);
 
 	// Step 0 → 1: just save site + load models (fast, no AI call)
 	// Brand detection is a simple domain parse — AI generation comes later on demand
@@ -179,7 +191,12 @@ export default function Setup() {
 		<div className="fixed inset-0 z-50 bg-canvas flex flex-col">
 			<header className="sticky top-0 isolate flex h-[58px] shrink-0 items-center justify-between border-b border-neutral-200/60 px-4 sm:px-6 bg-surface">
 				<a href="/" className="flex items-center">
-					<svg height="18" viewBox="0 0 109 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+					<svg
+						height="18"
+						viewBox="0 0 109 40"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
 						<path
 							d="M88.17 23.63l.31-.94c.37-1.27.23-2.44-.39-3.33-.58-.8-1.53-1.27-2.7-1.33l-21.8-.28a.32.32 0 01-.25-.17.31.31 0 01.02-.32.38.38 0 01.39-.33l21.93-.28c2.6-.12 5.42-2.25 6.4-4.85l1.25-3.28a.34.34 0 00.01-.43c-1.43-6.44-7.14-11.24-13.97-11.24-6.28 0-11.62 4.08-13.54 9.75-1.29-.98-2.93-1.43-4.54-1.27-3.01.3-5.44 2.73-5.74 5.73a7.16 7.16 0 00.17 2.25c-4.93.14-8.89 4.2-8.89 9.17 0 .44.03.88.1 1.32a.35.35 0 00.34.3l40.16.01a.35.35 0 00.32-.33z"
 							fill="#F6821F"
@@ -223,11 +240,24 @@ export default function Setup() {
 						/>
 						<Cross left="calc(50% - 313px)" top={FRAME_TOP - 3} rot={0} />
 						<Cross left="calc(50% + 307px)" top={FRAME_TOP - 3} rot={90} />
-						<Cross left="calc(50% - 313px)" top={FRAME_BOTTOM_TOP - 3} rot={-90} anim />
-						<Cross left="calc(50% + 307px)" top={FRAME_BOTTOM_TOP - 3} rot={180} anim />
+						<Cross
+							left="calc(50% - 313px)"
+							top={FRAME_BOTTOM_TOP - 3}
+							rot={-90}
+							anim
+						/>
+						<Cross
+							left="calc(50% + 307px)"
+							top={FRAME_BOTTOM_TOP - 3}
+							rot={180}
+							anim
+						/>
 					</div>
 
-					<div className="w-full max-w-[38rem] absolute px-6" style={{ top: COL_TOP }}>
+					<div
+						className="w-full max-w-[38rem] absolute px-6"
+						style={{ top: COL_TOP }}
+					>
 						<h1
 							className="hidden xl:block absolute text-[15px] font-medium text-neutral-900 whitespace-nowrap text-right leading-snug"
 							style={{ right: "calc(100% + 4rem)", top: -8 }}
@@ -282,7 +312,8 @@ export default function Setup() {
 														: "translateY(210%) scale(1)",
 										transition:
 											"transform 0.6s cubic-bezier(0.3,1,0.35,1), opacity 0.6s cubic-bezier(0.3,1,0.35,1)",
-										pointerEvents: v === "current" || v === "previous" ? "auto" : "none",
+										pointerEvents:
+											v === "current" || v === "previous" ? "auto" : "none",
 										paddingBottom: 32,
 									}}
 									onClick={() => {
@@ -296,7 +327,9 @@ export default function Setup() {
 									}}
 									tabIndex={v === "previous" ? 0 : -1}
 									role={v === "previous" ? "button" : undefined}
-									aria-label={v === "previous" ? `Go back to ${stepLabels[i]}` : undefined}
+									aria-label={
+										v === "previous" ? `Go back to ${stepLabels[i]}` : undefined
+									}
 									aria-hidden={v !== "current" && v !== "previous"}
 								>
 									<div className="rounded-xl bg-neutral-100 ring ring-neutral-950/10">
@@ -364,7 +397,9 @@ export default function Setup() {
 															>
 																Skip
 															</Button>
-															<Button onClick={saveAndContinueFromCompetitors}>Continue</Button>
+															<Button onClick={saveAndContinueFromCompetitors}>
+																Continue
+															</Button>
 														</div>
 													</>
 												)}
@@ -388,7 +423,10 @@ export default function Setup() {
 														</Button>
 														<Button
 															onClick={runAnalysis}
-															disabled={enabledModels.size === 0 || selectedPrompts.size === 0}
+															disabled={
+																enabledModels.size === 0 ||
+																selectedPrompts.size === 0
+															}
 														>
 															Run analysis
 														</Button>
@@ -410,7 +448,9 @@ export default function Setup() {
 function StepSite({ domain, setDomain, loading, onSubmit }: any) {
 	return (
 		<>
-			<div className="text-[17px]/[1.25] font-medium text-neutral-900">Enter your site</div>
+			<div className="text-[17px]/[1.25] font-medium text-neutral-900">
+				Enter your site
+			</div>
 			<div className="text-sm text-neutral-500 mb-3 leading-relaxed">
 				Enter the domain you want to monitor.
 			</div>
@@ -439,11 +479,16 @@ function StepCompetitors({
 }: any) {
 	return (
 		<>
-			<div className="text-[17px]/[1.25] font-medium text-neutral-900">Brand &amp; competitors</div>
-			<div className="text-sm text-neutral-500 mb-3 leading-relaxed">
-				Confirm your brand name and optionally add competitors for comparison prompts.
+			<div className="text-[17px]/[1.25] font-medium text-neutral-900">
+				Brand &amp; competitors
 			</div>
-			<label className="text-[12px] font-medium text-neutral-500 mb-1 block">Brand name</label>
+			<div className="text-sm text-neutral-500 mb-3 leading-relaxed">
+				Confirm your brand name and optionally add competitors for comparison
+				prompts.
+			</div>
+			<label className="text-[12px] font-medium text-neutral-500 mb-1 block">
+				Brand name
+			</label>
 			<input
 				type="text"
 				value={brandName}
@@ -463,7 +508,11 @@ function StepCompetitors({
 						>
 							{c}
 							<button
-								onClick={() => setCompetitors((prev: string[]) => prev.filter((x) => x !== c))}
+								onClick={() =>
+									setCompetitors((prev: string[]) =>
+										prev.filter((x) => x !== c),
+									)
+								}
 								className="text-neutral-400 hover:text-neutral-700 transition-colors"
 							>
 								<XIcon size={12} weight="bold" />
@@ -512,9 +561,12 @@ function StepPrompts({
 }: any) {
 	return (
 		<>
-			<div className="text-[17px]/[1.25] font-medium text-neutral-900">Select prompts to test</div>
+			<div className="text-[17px]/[1.25] font-medium text-neutral-900">
+				Select prompts to test
+			</div>
 			<div className="text-sm text-neutral-500 mb-3 leading-relaxed">
-				Check the prompts you want to test. Generate AI suggestions or add your own.
+				Check the prompts you want to test. Generate AI suggestions or add your
+				own.
 			</div>
 			{suggestions.length === 0 && (
 				<button
@@ -546,7 +598,9 @@ function StepPrompts({
 								onChange={() => togglePrompt(s.text)}
 								className="w-4 h-4 accent-brand rounded cursor-pointer shrink-0"
 							/>
-							<span className="flex-1 text-[13px] text-neutral-900 leading-snug">{s.text}</span>
+							<span className="flex-1 text-[13px] text-neutral-900 leading-snug">
+								{s.text}
+							</span>
 							<span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-neutral-100 text-neutral-500 ring-1 ring-neutral-950/5 shrink-0">
 								{s.tag}
 							</span>
@@ -580,7 +634,12 @@ function StepPrompts({
 					placeholder="Add a custom prompt..."
 					className="flex-1 h-9 px-3 text-sm bg-white ring ring-neutral-950/10 rounded-lg shadow-xs outline-none focus:ring-neutral-400 transition-shadow"
 				/>
-				<Button variant="secondary" size="md" onClick={addCustom} className="h-9">
+				<Button
+					variant="secondary"
+					size="md"
+					onClick={addCustom}
+					className="h-9"
+				>
 					Add
 				</Button>
 			</div>
@@ -591,7 +650,9 @@ function StepPrompts({
 function StepModels({ models, enabledModels, setEnabledModels }: any) {
 	return (
 		<>
-			<div className="text-[17px]/[1.25] font-medium text-neutral-900">Confirm models</div>
+			<div className="text-[17px]/[1.25] font-medium text-neutral-900">
+				Confirm models
+			</div>
 			<div className="text-sm text-neutral-500 mb-3 leading-relaxed">
 				Select which AI models to test. Usage charges apply.
 			</div>
@@ -613,15 +674,17 @@ function StepModels({ models, enabledModels, setEnabledModels }: any) {
 							}}
 							className="w-4 h-4 accent-brand rounded cursor-pointer shrink-0"
 						/>
-						<span className="flex-1 text-[13px] font-medium text-neutral-900">{m.name}</span>
+						<span className="flex-1 text-[13px] font-medium text-neutral-900">
+							{m.name}
+						</span>
 						<ProviderPill provider={m.provider} />
 					</label>
 				))}
 			</div>
 			<div className="mt-4 p-3 bg-blue-50 rounded-[10px] ring-1 ring-blue-100 text-xs text-blue-800">
 				Third-party models (OpenAI, Anthropic, Google) use{" "}
-				<strong>AI Gateway Unified Billing</strong>. Workers AI models use standard pricing. No API
-				keys needed.
+				<strong>AI Gateway Unified Billing</strong>. Workers AI models use
+				standard pricing. No API keys needed.
 			</div>
 		</>
 	);

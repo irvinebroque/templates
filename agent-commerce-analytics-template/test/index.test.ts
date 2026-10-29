@@ -33,7 +33,9 @@ describe("Agent Commerce Analytics", () => {
 	});
 
 	it("returns just the funnel on /api/dashboard/funnel", async () => {
-		const response = await SELF.fetch("https://example.com/api/dashboard/funnel");
+		const response = await SELF.fetch(
+			"https://example.com/api/dashboard/funnel",
+		);
 		expect(response.status).toBe(200);
 		const json = (await response.json()) as {
 			discoveryReads: number;
@@ -44,7 +46,9 @@ describe("Agent Commerce Analytics", () => {
 	});
 
 	it("returns agent profiles on /api/dashboard/agents", async () => {
-		const response = await SELF.fetch("https://example.com/api/dashboard/agents");
+		const response = await SELF.fetch(
+			"https://example.com/api/dashboard/agents",
+		);
 		expect(response.status).toBe(200);
 		const json = (await response.json()) as Array<{ agentId: string }>;
 		expect(json).toBeInstanceOf(Array);
@@ -114,20 +118,23 @@ describe("Agent Commerce Analytics", () => {
 	});
 
 	it("records an event from cf-agent-* headers and surfaces it in the dashboard", async () => {
-		const response = await SELF.fetch("https://example.com/api/events/from-headers", {
-			method: "POST",
-			body: JSON.stringify({
-				path: "/api/products/little-ripper-toddler-skis",
-				statusCode: 200,
-			}),
-			headers: {
-				"content-type": "application/json",
-				"cf-agent-id": "test:headers-agent",
-				"cf-agent-name": "Headers Test Bot",
-				"cf-agent-network": "mastercard",
-				"cf-agent-verified": "true",
+		const response = await SELF.fetch(
+			"https://example.com/api/events/from-headers",
+			{
+				method: "POST",
+				body: JSON.stringify({
+					path: "/api/products/little-ripper-toddler-skis",
+					statusCode: 200,
+				}),
+				headers: {
+					"content-type": "application/json",
+					"cf-agent-id": "test:headers-agent",
+					"cf-agent-name": "Headers Test Bot",
+					"cf-agent-network": "mastercard",
+					"cf-agent-verified": "true",
+				},
 			},
-		});
+		);
 		expect(response.status).toBe(200);
 
 		// The dashboard will include both the seeded demo agents and the agent

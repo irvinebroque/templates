@@ -51,7 +51,9 @@ export function isTestingMode(request: Request, env: Env): boolean {
 
 // ── Public auth API ──────────────────────────────────────────────────────────
 
-function toAccessIdentity(identity: CloudflareAccessIdentity | undefined): AccessIdentity {
+function toAccessIdentity(
+	identity: CloudflareAccessIdentity | undefined,
+): AccessIdentity {
 	return {
 		email: identity?.email ?? "unknown",
 		userId: identity?.user_uuid,
@@ -64,7 +66,9 @@ function toAccessIdentity(identity: CloudflareAccessIdentity | undefined): Acces
  * ctx.access is populated by the Workers runtime when Cloudflare Access
  * authenticates the request. Returns null if Access did not run.
  */
-export async function getAccessIdentity(ctx: ExecutionContext): Promise<AccessIdentity | null> {
+export async function getAccessIdentity(
+	ctx: ExecutionContext,
+): Promise<AccessIdentity | null> {
 	if (!ctx.access) {
 		return null;
 	}

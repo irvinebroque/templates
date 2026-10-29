@@ -130,7 +130,9 @@ describe("Task API Integration Tests", () => {
 
 		it("should return a 404 error if task is not found", async () => {
 			const nonExistentId = 9999;
-			const response = await SELF.fetch(`http://local.test/tasks/${nonExistentId}`);
+			const response = await SELF.fetch(
+				`http://local.test/tasks/${nonExistentId}`,
+			);
 			const body = await response.json();
 
 			expect(response.status).toBe(404);
@@ -185,11 +187,14 @@ describe("Task API Integration Tests", () => {
 				completed: true,
 				due_date: "2025-07-15T10:00:00.000Z",
 			};
-			const response = await SELF.fetch(`http://local.test/tasks/${nonExistentId}`, {
-				method: "PUT",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(updatedData),
-			});
+			const response = await SELF.fetch(
+				`http://local.test/tasks/${nonExistentId}`,
+				{
+					method: "PUT",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(updatedData),
+				},
+			);
 
 			expect(response.status).toBe(404);
 		});
@@ -225,9 +230,12 @@ describe("Task API Integration Tests", () => {
 			};
 			const taskId = await createTask(taskData);
 
-			const deleteResponse = await SELF.fetch(`http://local.test/tasks/${taskId}`, {
-				method: "DELETE",
-			});
+			const deleteResponse = await SELF.fetch(
+				`http://local.test/tasks/${taskId}`,
+				{
+					method: "DELETE",
+				},
+			);
 			const deleteBody = await deleteResponse.json<{
 				success: boolean;
 				result: any;
@@ -244,9 +252,12 @@ describe("Task API Integration Tests", () => {
 
 		it("should return 404 when trying to delete a non-existent task", async () => {
 			const nonExistentId = 9999;
-			const response = await SELF.fetch(`http://local.test/tasks/${nonExistentId}`, {
-				method: "DELETE",
-			});
+			const response = await SELF.fetch(
+				`http://local.test/tasks/${nonExistentId}`,
+				{
+					method: "DELETE",
+				},
+			);
 			const body = await response.json();
 
 			expect(response.status).toBe(404);

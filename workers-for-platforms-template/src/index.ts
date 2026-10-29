@@ -42,7 +42,10 @@ import {
 import { handleDispatchError, withDb } from "./router";
 import { renderPage, BuildTable, BuildWebsitePage } from "./render";
 import { Project } from "./types";
-import { createCustomHostname, getCustomHostnameStatus } from "./cloudflare-api";
+import {
+	createCustomHostname,
+	getCustomHostnameStatus,
+} from "./cloudflare-api";
 import { D1QB } from "workers-qb";
 
 // Initialize Hono app with type-safe environment bindings
@@ -145,7 +148,16 @@ app.use("*", withDbAndInit, async (c, next) => {
 			const subdomain = path.substring(1).split("/")[0];
 
 			// Reserved paths for platform functionality
-			if (["admin", "projects", "upload", "init", "dispatch", "favicon.ico"].includes(subdomain)) {
+			if (
+				[
+					"admin",
+					"projects",
+					"upload",
+					"init",
+					"dispatch",
+					"favicon.ico",
+				].includes(subdomain)
+			) {
 				await next();
 				return;
 			}
@@ -178,7 +190,11 @@ app.use("*", withDbAndInit, async (c, next) => {
 			return await worker.fetch(requestToForward);
 		} catch (e) {
 			// Worker may not be deployed yet - deploy it from stored script content
-			await PutScriptInDispatchNamespace(c.env, project.subdomain, project.script_content);
+			await PutScriptInDispatchNamespace(
+				c.env,
+				project.subdomain,
+				project.script_content,
+			);
 			const worker = c.env.dispatcher.get(project.subdomain);
 
 			let requestToForward = c.req.raw;
@@ -261,7 +277,10 @@ app.get("/admin", withDbAndInit, async (c) => {
 
 				if (project.custom_hostname) {
 					try {
-						const status = await getCustomHostnameStatus(c.env, project.custom_hostname);
+						const status = await getCustomHostnameStatus(
+							c.env,
+							project.custom_hostname,
+						);
 						hostnameStatus = status.status;
 						sslStatus = status.ssl?.status || "-";
 						hostnameErrors = status.verification_errors || [];
@@ -273,7 +292,8 @@ app.get("/admin", withDbAndInit, async (c) => {
 				}
 
 				const statusBadge = (status: string) => {
-					if (status === "active") return `<span class="status-badge status-active">Active</span>`;
+					if (status === "active")
+						return `<span class="status-badge status-active">Active</span>`;
 					if (
 						status === "pending" ||
 						status === "pending_validation" ||
@@ -298,7 +318,9 @@ app.get("/admin", withDbAndInit, async (c) => {
 
 					const fallbackOrigin =
 						c.env.FALLBACK_ORIGIN ||
-						(c.env.CUSTOM_DOMAIN ? `my.${c.env.CUSTOM_DOMAIN}` : "your-platform-domain");
+						(c.env.CUSTOM_DOMAIN
+							? `my.${c.env.CUSTOM_DOMAIN}`
+							: "your-platform-domain");
 					if (
 						rawError.includes("a or aaaa records") ||
 						rawError.includes("ownership verification")
@@ -320,12 +342,16 @@ app.get("/admin", withDbAndInit, async (c) => {
 				const getSSLMessage = (status: string, method: string) => {
 					const sslFallbackOrigin =
 						c.env.FALLBACK_ORIGIN ||
-						(c.env.CUSTOM_DOMAIN ? `my.${c.env.CUSTOM_DOMAIN}` : "your-platform-domain");
+						(c.env.CUSTOM_DOMAIN
+							? `my.${c.env.CUSTOM_DOMAIN}`
+							: "your-platform-domain");
 					const messages: Record<string, string> = {
 						pending_validation:
 							"Waiting for SSL certificate validation. This happens automatically once DNS is verified.",
-						pending_issuance: "SSL certificate is being issued. This usually takes a few minutes.",
-						pending_deployment: "SSL certificate is being deployed to edge servers.",
+						pending_issuance:
+							"SSL certificate is being issued. This usually takes a few minutes.",
+						pending_deployment:
+							"SSL certificate is being deployed to edge servers.",
 						validation_timed_out: `SSL validation timed out. Make sure your domain points to <strong>${sslFallbackOrigin}</strong> and click refresh.`,
 						expired: "SSL certificate has expired and needs renewal.",
 						initializing: "SSL certificate is being set up.",
@@ -333,7 +359,8 @@ app.get("/admin", withDbAndInit, async (c) => {
 					return messages[status] || "";
 				};
 
-				const hasHostnameErrors = hostnameErrors.length > 0 && hostnameStatus !== "active";
+				const hasHostnameErrors =
+					hostnameErrors.length > 0 && hostnameStatus !== "active";
 				const hasSSLDetails = sslStatus !== "active" && sslStatus !== "-";
 				const rowId = `row-${subdomain}`;
 
@@ -445,7 +472,9 @@ app.get("/init", withDbAndInit, async (c) => {
 	// Handle case where scripts is null/undefined (e.g., in tests or when API unavailable)
 	if (scripts && Array.isArray(scripts)) {
 		await Promise.all(
-			scripts.map(async (script) => DeleteScriptInDispatchNamespace(c.env, script.id)),
+			scripts.map(async (script) =>
+				DeleteScriptInDispatchNamespace(c.env, script.id),
+			),
 		);
 	}
 	await Initialize(c.var.db);
@@ -477,7 +506,8 @@ app.post("/projects", withDbAndInit, async (c) => {
 			);
 		}
 
-		const { name, subdomain, script_content, custom_hostname, assets } = await c.req.json();
+		const { name, subdomain, script_content, custom_hostname, assets } =
+			await c.req.json();
 
 		// Validate input - either script_content OR assets required
 		if (!name || !subdomain) {
@@ -490,18 +520,27 @@ app.post("/projects", withDbAndInit, async (c) => {
 
 		// Validate subdomain format
 		if (!/^[a-z0-9-]+$/.test(subdomain)) {
-			return c.text("Subdomain must only contain lowercase letters, numbers, and hyphens", 400);
+			return c.text(
+				"Subdomain must only contain lowercase letters, numbers, and hyphens",
+				400,
+			);
 		}
 
 		// Check if subdomain already exists
 		const existingProject = await GetProjectBySubdomain(c.var.db, subdomain);
 		if (existingProject) {
-			return c.text("This URL is already taken. Please choose a different name.", 409);
+			return c.text(
+				"This URL is already taken. Please choose a different name.",
+				409,
+			);
 		}
 
 		// Check if custom hostname already exists
 		if (custom_hostname) {
-			const existingCustomHostname = await GetProjectByCustomHostname(c.var.db, custom_hostname);
+			const existingCustomHostname = await GetProjectByCustomHostname(
+				c.var.db,
+				custom_hostname,
+			);
 			if (existingCustomHostname) {
 				return c.text("This domain is already active on the platform", 409);
 			}
@@ -516,7 +555,10 @@ app.post("/projects", withDbAndInit, async (c) => {
 				(a: AssetFile) => a.path && a.content && a.content.length > 0,
 			);
 			if (validAssets.length === 0) {
-				return c.text("No valid files found. Files may be empty or unsupported.", 400);
+				return c.text(
+					"No valid files found. Files may be empty or unsupported.",
+					400,
+				);
 			}
 
 			// Check for index.html
@@ -549,7 +591,11 @@ app.post("/projects", withDbAndInit, async (c) => {
 			scriptPlaceholder = `/* Static site with ${validAssets.length} assets deployed via Assets API */`;
 		} else {
 			// Deploy regular script
-			const deployResult = await PutScriptInDispatchNamespace(c.env, subdomain, script_content);
+			const deployResult = await PutScriptInDispatchNamespace(
+				c.env,
+				subdomain,
+				script_content,
+			);
 			if (!deployResult.ok) {
 				return c.text("Failed to deploy website. Please try again.", 500);
 			}
@@ -581,7 +627,8 @@ app.post("/projects", withDbAndInit, async (c) => {
 
 		return c.text("Project created successfully", 201);
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : "Unknown error";
+		const errorMessage =
+			error instanceof Error ? error.message : "Unknown error";
 		console.error("POST /projects error:", errorMessage, error);
 		return c.text(`Internal server error: ${errorMessage}`, 500);
 	}
@@ -590,44 +637,52 @@ app.post("/projects", withDbAndInit, async (c) => {
 /*
  * Check custom domain status
  */
-app.get("/projects/:subdomain/custom-domain-status", withDbAndInit, async (c) => {
-	try {
-		const subdomain = c.req.param("subdomain");
+app.get(
+	"/projects/:subdomain/custom-domain-status",
+	withDbAndInit,
+	async (c) => {
+		try {
+			const subdomain = c.req.param("subdomain");
 
-		// Get project by subdomain
-		const project = await GetProjectBySubdomain(c.var.db, subdomain);
-		if (!project) {
-			return c.text("Project not found", 404);
-		}
+			// Get project by subdomain
+			const project = await GetProjectBySubdomain(c.var.db, subdomain);
+			if (!project) {
+				return c.text("Project not found", 404);
+			}
 
-		// Check if project has custom hostname
-		if (!project.custom_hostname) {
+			// Check if project has custom hostname
+			if (!project.custom_hostname) {
+				return c.json({
+					has_custom_domain: false,
+					worker_url: c.env.CUSTOM_DOMAIN
+						? `https://${subdomain}.${c.env.CUSTOM_DOMAIN}`
+						: `https://${c.env.WORKERS_DEV_SUBDOMAIN || "my-worker"}.workers.dev/${subdomain}`,
+				});
+			}
+
+			// Get custom hostname status from Cloudflare
+			const status = await getCustomHostnameStatus(
+				c.env,
+				project.custom_hostname,
+			);
+
 			return c.json({
-				has_custom_domain: false,
+				has_custom_domain: true,
+				custom_domain: project.custom_hostname,
+				status: status.status,
+				ssl_status: status.ssl?.status,
+				verification_errors: status.verification_errors || [],
 				worker_url: c.env.CUSTOM_DOMAIN
 					? `https://${subdomain}.${c.env.CUSTOM_DOMAIN}`
 					: `https://${c.env.WORKERS_DEV_SUBDOMAIN || "my-worker"}.workers.dev/${subdomain}`,
+				is_active: status.status === "active",
 			});
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error ? error.message : "Unknown error";
+			return c.text(`Internal server error: ${errorMessage}`, 500);
 		}
-
-		// Get custom hostname status from Cloudflare
-		const status = await getCustomHostnameStatus(c.env, project.custom_hostname);
-
-		return c.json({
-			has_custom_domain: true,
-			custom_domain: project.custom_hostname,
-			status: status.status,
-			ssl_status: status.ssl?.status,
-			verification_errors: status.verification_errors || [],
-			worker_url: c.env.CUSTOM_DOMAIN
-				? `https://${subdomain}.${c.env.CUSTOM_DOMAIN}`
-				: `https://${c.env.WORKERS_DEV_SUBDOMAIN || "my-worker"}.workers.dev/${subdomain}`,
-			is_active: status.status === "active",
-		});
-	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : "Unknown error";
-		return c.text(`Internal server error: ${errorMessage}`, 500);
-	}
-});
+	},
+);
 
 export default app;

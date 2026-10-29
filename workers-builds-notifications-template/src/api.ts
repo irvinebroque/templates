@@ -28,7 +28,8 @@ export async function fetchBuildUrls(
 	event: CloudflareEvent,
 	env: Env,
 ): Promise<{ previewUrl: string | null; liveUrl: string | null }> {
-	const workerName = event.source?.workerName || event.payload.buildTriggerMetadata?.repoName;
+	const workerName =
+		event.source?.workerName || event.payload.buildTriggerMetadata?.repoName;
 	const accountId = event.metadata.accountId;
 
 	if (!workerName || !accountId || !env.CLOUDFLARE_API_TOKEN) {
@@ -79,7 +80,10 @@ export async function fetchBuildUrls(
  * Fetches build logs for a failed build.
  * Handles pagination automatically.
  */
-export async function fetchBuildLogs(event: CloudflareEvent, env: Env): Promise<string[]> {
+export async function fetchBuildLogs(
+	event: CloudflareEvent,
+	env: Env,
+): Promise<string[]> {
 	const accountId = event.metadata.accountId;
 
 	if (!accountId || !env.CLOUDFLARE_API_TOKEN) {
@@ -109,7 +113,9 @@ export async function fetchBuildLogs(event: CloudflareEvent, env: Env): Promise<
 		} while (cursor && pageCount < MAX_LOG_PAGES);
 
 		if (pageCount >= MAX_LOG_PAGES) {
-			console.warn(`Reached max log pages (${MAX_LOG_PAGES}) for build ${event.payload.buildUuid}`);
+			console.warn(
+				`Reached max log pages (${MAX_LOG_PAGES}) for build ${event.payload.buildUuid}`,
+			);
 		}
 	} catch (error) {
 		console.error("Failed to fetch logs:", error);

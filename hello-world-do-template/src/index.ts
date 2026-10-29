@@ -33,7 +33,9 @@ export class MyDurableObject extends DurableObject<Env> {
 	 * @returns The greeting to be sent back to the Worker
 	 */
 	async sayHello(): Promise<string> {
-		let result = this.ctx.storage.sql.exec("SELECT 'Hello, World!' as greeting").one() as {
+		let result = this.ctx.storage.sql
+			.exec("SELECT 'Hello, World!' as greeting")
+			.one() as {
 			greeting: string;
 		};
 		return result.greeting;
@@ -54,7 +56,9 @@ export default {
 		// class. The name of class is used to identify the Durable Object.
 		// Requests from all Workers to the instance named
 		// will go to a single globally unique Durable Object instance.
-		const id: DurableObjectId = env.MY_DURABLE_OBJECT.idFromName(new URL(request.url).pathname);
+		const id: DurableObjectId = env.MY_DURABLE_OBJECT.idFromName(
+			new URL(request.url).pathname,
+		);
 
 		// Create a stub to open a communication channel with the Durable
 		// Object instance.

@@ -16,7 +16,9 @@ export function Header({ currentPath }: { currentPath: string }) {
 				<a
 					className={cn(
 						"text-sm font-medium leading-none text-foreground",
-						currentPath === link.href ? "text-foreground" : "text-muted-foreground",
+						currentPath === link.href
+							? "text-foreground"
+							: "text-muted-foreground",
 					)}
 					href={link.href}
 					aria-current={currentPath === link.href ? "page" : undefined}

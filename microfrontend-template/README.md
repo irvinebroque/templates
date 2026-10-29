@@ -56,7 +56,8 @@ The router rewrites URLs to maintain proper asset resolution across microfronten
 **After rewriting:**
 
 ```html
-<img src="/docs/assets/logo.png" /> <link rel="stylesheet" href="/docs/static/app.css" />
+<img src="/docs/assets/logo.png" />
+<link rel="stylesheet" href="/docs/static/app.css" />
 ```
 
 This ensures assets load correctly even though each microfrontend is deployed separately.

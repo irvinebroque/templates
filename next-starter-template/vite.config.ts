@@ -2,6 +2,7 @@ import { defineConfig } from "vite-plus";
 
 export default defineConfig({
 	fmt: {
+		printWidth: 80,
 		useTabs: true,
 		sortPackageJson: false,
 		ignorePatterns: [

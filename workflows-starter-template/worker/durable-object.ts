@@ -23,16 +23,22 @@ export class WorkflowStatusDO extends DurableObject {
 
 		// Load state from durable storage to survive hibernation/eviction
 		ctx.blockConcurrencyWhile(async () => {
-			const storedStatuses = await ctx.storage.get<Record<string, string>>("stepStatuses");
+			const storedStatuses =
+				await ctx.storage.get<Record<string, string>>("stepStatuses");
 			const storedCurrent = await ctx.storage.get<string | null>("currentStep");
-			const storedWorkflowStatus = await ctx.storage.get<"running" | "completed" | "error">(
-				"workflowStatus",
-			);
+			const storedWorkflowStatus = await ctx.storage.get<
+				"running" | "completed" | "error"
+			>("workflowStatus");
 
 			if (storedStatuses) {
 				this.stepStatuses = new Map(Object.entries(storedStatuses));
 			} else {
-				const steps = ["process data", "wait 2 seconds", "wait for approval", "final"];
+				const steps = [
+					"process data",
+					"wait 2 seconds",
+					"wait for approval",
+					"final",
+				];
 				steps.forEach((s) => this.stepStatuses.set(s, "pending"));
 			}
 
@@ -69,13 +75,18 @@ export class WorkflowStatusDO extends DurableObject {
 			this.currentStep = stepName;
 		}
 
-		const allCompleted = Array.from(this.stepStatuses.values()).every((s) => s === "completed");
+		const allCompleted = Array.from(this.stepStatuses.values()).every(
+			(s) => s === "completed",
+		);
 		if (allCompleted) {
 			this.workflowStatus = "completed";
 			this.currentStep = null;
 		}
 
-		await this.ctx.storage.put("stepStatuses", Object.fromEntries(this.stepStatuses));
+		await this.ctx.storage.put(
+			"stepStatuses",
+			Object.fromEntries(this.stepStatuses),
+		);
 		await this.ctx.storage.put("currentStep", this.currentStep);
 		await this.ctx.storage.put("workflowStatus", this.workflowStatus);
 

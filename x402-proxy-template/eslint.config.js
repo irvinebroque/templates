@@ -39,6 +39,11 @@ export default [
 	// Disable ESLint rules that conflict with Prettier
 	prettierConfig,
 	{
-		ignores: ["node_modules/**", "dist/**", ".wrangler/**", "worker-configuration.d.ts"],
+		ignores: [
+			"node_modules/**",
+			"dist/**",
+			".wrangler/**",
+			"worker-configuration.d.ts",
+		],
 	},
 ];

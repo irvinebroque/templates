@@ -28,7 +28,11 @@
 			body {
 				font-family: "Inter", sans-serif;
 				background-color: var(--color-bg);
-				background-image: radial-gradient(circle, rgba(249, 115, 22, 0.4) 1px, transparent 1px);
+				background-image: radial-gradient(
+					circle,
+					rgba(249, 115, 22, 0.4) 1px,
+					transparent 1px
+				);
 				background-size: 24px 24px;
 				color: var(--color-text);
 				min-height: 100vh;
@@ -328,12 +332,17 @@
 				<img src="/x402-icon.svg" alt="x402 Icon" class="hero-icon" />
 				<h1>Payment-Gated<br /><span>Reverse Proxy</span></h1>
 				<p>
-					A Cloudflare Worker that sits in front of any backend and gates access to protected routes
-					with USDC payments. Zero backend modifications required.
+					A Cloudflare Worker that sits in front of any backend and gates access
+					to protected routes with USDC payments. Zero backend modifications
+					required.
 				</p>
 				<div class="hero-buttons">
-					<a href="/__x402/protected" class="btn-primary">Try Protected Route</a>
-					<a href="https://developers.cloudflare.com/agents/x402/" class="btn-outline"
+					<a href="/__x402/protected" class="btn-primary"
+						>Try Protected Route</a
+					>
+					<a
+						href="https://developers.cloudflare.com/agents/x402/"
+						class="btn-outline"
 						>View Documentation</a
 					>
 				</div>
@@ -349,8 +358,8 @@
 						<div class="feature-content">
 							<h3>Transparent Proxying</h3>
 							<p>
-								All non-protected requests pass through unchanged to your origin server. Your
-								backend stays untouched.
+								All non-protected requests pass through unchanged to your origin
+								server. Your backend stays untouched.
 							</p>
 						</div>
 					</div>
@@ -359,8 +368,8 @@
 						<div class="feature-content">
 							<h3>Pattern-Based Protection</h3>
 							<p>
-								Configure routes with exact paths like <code>/premium</code> or wildcards like
-								<code>/api/private/*</code>.
+								Configure routes with exact paths like <code>/premium</code> or
+								wildcards like <code>/api/private/*</code>.
 							</p>
 						</div>
 					</div>
@@ -369,8 +378,8 @@
 						<div class="feature-content">
 							<h3>JWT Session Caching</h3>
 							<p>
-								After payment, a secure HttpOnly cookie grants 1-hour access without additional
-								payments.
+								After payment, a secure HttpOnly cookie grants 1-hour access
+								without additional payments.
 							</p>
 						</div>
 					</div>
@@ -379,7 +388,8 @@
 						<div class="feature-content">
 							<h3>Configurable Pricing</h3>
 							<p>
-								Set custom USDC prices per route. Works on Base Sepolia (testnet) or Base mainnet.
+								Set custom USDC prices per route. Works on Base Sepolia
+								(testnet) or Base mainnet.
 							</p>
 						</div>
 					</div>
@@ -388,8 +398,8 @@
 						<div class="feature-content">
 							<h3>Edge-Native</h3>
 							<p>
-								Runs entirely on Cloudflare Workers. Stateless design with no server-side session
-								storage.
+								Runs entirely on Cloudflare Workers. Stateless design with no
+								server-side session storage.
 							</p>
 						</div>
 					</div>
@@ -511,8 +521,17 @@
 							stroke="var(--color-primary)"
 							stroke-width="2"
 						/>
-						<polygon points="175,150 170,140 180,140" fill="var(--color-primary)" />
-						<text x="125" y="110" fill="var(--color-text)" font-family="monospace" font-size="9">
+						<polygon
+							points="175,150 170,140 180,140"
+							fill="var(--color-primary)"
+						/>
+						<text
+							x="125"
+							y="110"
+							fill="var(--color-text)"
+							font-family="monospace"
+							font-size="9"
+						>
 							GET /api/*
 						</text>
 
@@ -525,11 +544,26 @@
 							stroke="var(--color-primary)"
 							stroke-width="2"
 						/>
-						<polygon points="225,70 220,80 230,80" fill="var(--color-primary)" />
-						<text x="235" y="100" fill="var(--color-text)" font-family="monospace" font-size="9">
+						<polygon
+							points="225,70 220,80 230,80"
+							fill="var(--color-primary)"
+						/>
+						<text
+							x="235"
+							y="100"
+							fill="var(--color-text)"
+							font-family="monospace"
+							font-size="9"
+						>
 							402
 						</text>
-						<text x="235" y="115" fill="var(--color-text)" font-family="monospace" font-size="8">
+						<text
+							x="235"
+							y="115"
+							fill="var(--color-text)"
+							font-family="monospace"
+							font-size="8"
+						>
 							or 200
 						</text>
 
@@ -542,8 +576,17 @@
 							stroke="var(--color-primary)"
 							stroke-width="2"
 						/>
-						<polygon points="175,300 170,290 180,290" fill="var(--color-primary)" />
-						<text x="125" y="255" fill="var(--color-text)" font-family="monospace" font-size="9">
+						<polygon
+							points="175,300 170,290 180,290"
+							fill="var(--color-primary)"
+						/>
+						<text
+							x="125"
+							y="255"
+							fill="var(--color-text)"
+							font-family="monospace"
+							font-size="9"
+						>
 							Forward
 						</text>
 
@@ -556,8 +599,17 @@
 							stroke="var(--color-primary)"
 							stroke-width="2"
 						/>
-						<polygon points="225,210 220,220 230,220" fill="var(--color-primary)" />
-						<text x="235" y="255" fill="var(--color-text)" font-family="monospace" font-size="9">
+						<polygon
+							points="225,210 220,220 230,220"
+							fill="var(--color-primary)"
+						/>
+						<text
+							x="235"
+							y="255"
+							fill="var(--color-text)"
+							font-family="monospace"
+							font-size="9"
+						>
 							Response
 						</text>
 
@@ -571,8 +623,17 @@
 							stroke-width="2"
 							stroke-dasharray="4"
 						/>
-						<polygon points="335,180 325,175 325,185" fill="var(--color-primary)" />
-						<text x="300" y="170" fill="var(--color-text)" font-family="monospace" font-size="8">
+						<polygon
+							points="335,180 325,175 325,185"
+							fill="var(--color-primary)"
+						/>
+						<text
+							x="300"
+							y="170"
+							fill="var(--color-text)"
+							font-family="monospace"
+							font-size="8"
+						>
 							verify
 						</text>
 
@@ -628,8 +689,8 @@
 						<h3><span class="method">GET</span> Health Check</h3>
 						<div class="path">/__x402/health</div>
 						<p>
-							Public endpoint to verify the proxy is running. Returns JSON with status and
-							timestamp.
+							Public endpoint to verify the proxy is running. Returns JSON with
+							status and timestamp.
 						</p>
 						<span class="status public">Always accessible</span>
 					</div>
@@ -637,8 +698,8 @@
 						<h3><span class="method">GET</span> Protected Test</h3>
 						<div class="path">/__x402/protected</div>
 						<p>
-							Test payment flow without an origin server. Requires valid payment or session cookie
-							to access.
+							Test payment flow without an origin server. Requires valid payment
+							or session cookie to access.
 						</p>
 						<span class="status protected">Requires payment</span>
 					</div>

@@ -3,7 +3,9 @@ function MockDataBanner() {
 		<div className="mock-data-banner">
 			<div className="banner-content">
 				<h2>Demo Mode: Using Mock Data</h2>
-				<p>You're viewing this app with mock data. To connect to a real database:</p>
+				<p>
+					You're viewing this app with mock data. To connect to a real database:
+				</p>
 				<ol>
 					<li>
 						<a

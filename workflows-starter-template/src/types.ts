@@ -2,7 +2,12 @@
  * Shared TypeScript types for the Workflows starter template
  */
 
-export type StepStatus = "pending" | "running" | "waiting" | "completed" | "error";
+export type StepStatus =
+	| "pending"
+	| "running"
+	| "waiting"
+	| "completed"
+	| "error";
 export type WorkflowStatus = "idle" | "running" | "completed" | "error";
 
 export interface StepDefinition {

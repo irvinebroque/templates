@@ -3,7 +3,12 @@
  * All models run through AI Gateway Unified Billing.
  */
 import { Hono } from "hono";
-import { MODELS, RETENTION_DAYS, SYSTEM_PROMPT, SETUP_MODEL } from "../src/config";
+import {
+	MODELS,
+	RETENTION_DAYS,
+	SYSTEM_PROMPT,
+	SETUP_MODEL,
+} from "../src/config";
 import type { ModelConfig } from "../src/config";
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -108,7 +113,9 @@ apiRoutes.post("/sites", async (c) => {
 
 apiRoutes.delete("/sites", async (c) => {
 	const b = await c.req.json<{ domain: string }>();
-	const sites = (await getSites(c.env)).filter((s) => s.domain !== clean(b.domain));
+	const sites = (await getSites(c.env)).filter(
+		(s) => s.domain !== clean(b.domain),
+	);
 	await c.env.AEO_KV.put("sites", JSON.stringify(sites));
 	return c.json(sites);
 });
@@ -125,7 +132,10 @@ apiRoutes.post("/sites/:domain/prompts", async (c) => {
 	const toAdd = b.prompts ?? (b.prompt ? [b.prompt] : []);
 	const cur = await getPrompts(c.env, d);
 	const newPrompts: Prompt[] = toAdd.map((text) => ({ text, active: true }));
-	await c.env.AEO_KV.put(`site:${d}:prompts`, JSON.stringify([...cur, ...newPrompts]));
+	await c.env.AEO_KV.put(
+		`site:${d}:prompts`,
+		JSON.stringify([...cur, ...newPrompts]),
+	);
 	return c.json(await getPrompts(c.env, d));
 });
 
@@ -133,7 +143,9 @@ apiRoutes.patch("/sites/:domain/prompts", async (c) => {
 	const d = c.req.param("domain");
 	const b = await c.req.json<{ prompt: string; active: boolean }>();
 	const prompts = await getPrompts(c.env, d);
-	const updated = prompts.map((p) => (p.text === b.prompt ? { ...p, active: b.active } : p));
+	const updated = prompts.map((p) =>
+		p.text === b.prompt ? { ...p, active: b.active } : p,
+	);
 	await c.env.AEO_KV.put(`site:${d}:prompts`, JSON.stringify(updated));
 	return c.json(updated);
 });
@@ -165,7 +177,8 @@ apiRoutes.post("/sites/:domain/test", async (c) => {
 	const d = c.req.param("domain");
 	const allPrompts = await getPrompts(c.env, d);
 	const prompts = allPrompts.filter((p) => p.active).map((p) => p.text);
-	if (!prompts.length) return c.json({ error: "No active prompts configured" }, 400);
+	if (!prompts.length)
+		return c.json({ error: "No active prompts configured" }, 400);
 
 	const enabled = await getEnabledModels(c.env, d);
 	const models = MODELS.filter((m) => enabled.includes(m.id));
@@ -206,7 +219,9 @@ apiRoutes.post("/sites/:domain/test", async (c) => {
 
 	// Enqueue in batches of 25
 	for (let i = 0; i < jobs.length; i += 25) {
-		await c.env.BRAND_VISIBILITY_QUEUE.sendBatch(jobs.slice(i, i + 25).map((j) => ({ body: j })));
+		await c.env.BRAND_VISIBILITY_QUEUE.sendBatch(
+			jobs.slice(i, i + 25).map((j) => ({ body: j })),
+		);
 	}
 
 	return c.json(run);
@@ -216,7 +231,10 @@ apiRoutes.post("/sites/:domain/test", async (c) => {
 
 apiRoutes.get("/tests/:id/status", async (c) => {
 	const testId = c.req.param("id");
-	const run = (await c.env.AEO_KV.get(`test:${testId}`, "json")) as TestRun | null;
+	const run = (await c.env.AEO_KV.get(
+		`test:${testId}`,
+		"json",
+	)) as TestRun | null;
 	if (!run) return c.json({ error: "Not found" }, 404);
 
 	// Assemble citations from per-job KV keys
@@ -254,7 +272,10 @@ apiRoutes.get("/tests/:id/status", async (c) => {
 			rate: run.summary.rate,
 			modelCount: new Set(citations.map((ci) => ci.model)).size,
 		});
-		await c.env.AEO_KV.put(`site:${run.domain}:results`, JSON.stringify(index.slice(0, 90)));
+		await c.env.AEO_KV.put(
+			`site:${run.domain}:results`,
+			JSON.stringify(index.slice(0, 90)),
+		);
 	}
 
 	return c.json({
@@ -276,14 +297,20 @@ apiRoutes.get("/sites/:domain/results", async (c) => {
 
 apiRoutes.get("/results/:id/csv", async (c) => {
 	const testId = c.req.param("id");
-	const run = (await c.env.AEO_KV.get(`test:${testId}`, "json")) as TestRun | null;
+	const run = (await c.env.AEO_KV.get(
+		`test:${testId}`,
+		"json",
+	)) as TestRun | null;
 	if (!run) return c.json({ error: "Not found" }, 404);
 
 	// Assemble citations if not already present
 	if (!run.citations?.length) {
 		const list = await c.env.AEO_KV.list({ prefix: `test:${testId}:cite:` });
 		for (const key of list.keys) {
-			const cite = (await c.env.AEO_KV.get(key.name, "json")) as Citation | null;
+			const cite = (await c.env.AEO_KV.get(
+				key.name,
+				"json",
+			)) as Citation | null;
 			if (cite) run.citations.push(cite);
 		}
 	}
@@ -312,13 +339,19 @@ apiRoutes.get("/results/:id/csv", async (c) => {
 
 apiRoutes.get("/results/:id", async (c) => {
 	const testId = c.req.param("id");
-	const run = (await c.env.AEO_KV.get(`test:${testId}`, "json")) as TestRun | null;
+	const run = (await c.env.AEO_KV.get(
+		`test:${testId}`,
+		"json",
+	)) as TestRun | null;
 	if (!run) return c.json({ error: "Not found" }, 404);
 
 	if (!run.citations?.length && run.status === "complete") {
 		const list = await c.env.AEO_KV.list({ prefix: `test:${testId}:cite:` });
 		for (const key of list.keys) {
-			const cite = (await c.env.AEO_KV.get(key.name, "json")) as Citation | null;
+			const cite = (await c.env.AEO_KV.get(
+				key.name,
+				"json",
+			)) as Citation | null;
 			if (cite) run.citations.push(cite);
 		}
 	}
@@ -382,7 +415,12 @@ async function getPrompts(env: Env, domain: string): Promise<Prompt[]> {
 }
 
 async function getIndex(env: Env, domain: string): Promise<IndexEntry[]> {
-	return ((await env.AEO_KV.get(`site:${domain}:results`, "json")) as IndexEntry[]) ?? [];
+	return (
+		((await env.AEO_KV.get(
+			`site:${domain}:results`,
+			"json",
+		)) as IndexEntry[]) ?? []
+	);
 }
 
 async function getEnabledModels(env: Env, domain: string): Promise<string[]> {
@@ -413,7 +451,9 @@ async function handleSetup(
 		if (res.ok) {
 			const html = await res.text();
 			const t = html.match(/<title[^>]*>([^<]+)<\/title>/i);
-			const d = html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i);
+			const d = html.match(
+				/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["']/i,
+			);
 			const og = html.match(
 				/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["']/i,
 			);
@@ -434,12 +474,16 @@ async function handleSetup(
 				.filter((h) => h.length > 3 && h.length < 200)
 				.slice(0, 15);
 
-			const navLinks = [...html.matchAll(/<a[^>]+href=["'][^"']*["'][^>]*>([^<]{3,60})<\/a>/gi)]
+			const navLinks = [
+				...html.matchAll(/<a[^>]+href=["'][^"']*["'][^>]*>([^<]{3,60})<\/a>/gi),
+			]
 				.map((m) => m[1].trim())
 				.filter((l) => !l.includes("<") && l.length > 3);
 			const uniqueNav = [...new Set(navLinks)].slice(0, 20);
 
-			const keywords = html.match(/<meta[^>]+name=["']keywords["'][^>]+content=["']([^"']+)["']/i);
+			const keywords = html.match(
+				/<meta[^>]+name=["']keywords["'][^>]+content=["']([^"']+)["']/i,
+			);
 
 			const stripped = html
 				.replace(/<script[\s\S]*?<\/script>/gi, "")
@@ -543,7 +587,10 @@ Respond with ONLY valid JSON:
 			const m = text.match(/"([^"]{15,})"/g);
 			const ex = (m ?? [])
 				.map((x: string) => x.slice(1, -1))
-				.filter((x: string) => x.includes("?") || /^(what|how|compare|which)/i.test(x))
+				.filter(
+					(x: string) =>
+						x.includes("?") || /^(what|how|compare|which)/i.test(x),
+				)
 				.slice(0, 5);
 
 			const brandFallback = [
@@ -558,10 +605,15 @@ Respond with ONLY valid JSON:
 
 			parsed = {
 				description: `Website at ${domain}`,
-				prompts: (ex.length ? ex : brandFallback).map((t: string, i: number) => ({
-					text: t,
-					tag: ["Branded", "Branded", "Category", "Competitive", "Category"][i] || "Category",
-				})),
+				prompts: (ex.length ? ex : brandFallback).map(
+					(t: string, i: number) => ({
+						text: t,
+						tag:
+							["Branded", "Branded", "Category", "Competitive", "Category"][
+								i
+							] || "Category",
+					}),
+				),
 			};
 		}
 

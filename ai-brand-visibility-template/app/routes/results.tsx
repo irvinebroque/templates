@@ -41,15 +41,24 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const sites = ((await env.AEO_KV.get("sites", "json")) as any[]) ?? [];
 	const url = new URL(request.url);
 	const siteParam = url.searchParams.get("site");
-	const site = siteParam ? sites.find((s: any) => s.domain === siteParam) : sites[0];
+	const site = siteParam
+		? sites.find((s: any) => s.domain === siteParam)
+		: sites[0];
 	if (!site) return { site: null, latest: null, prompts: [], models: [] };
-	const history = ((await env.AEO_KV.get(`site:${site.domain}:results`, "json")) as any[]) ?? [];
+	const history =
+		((await env.AEO_KV.get(`site:${site.domain}:results`, "json")) as any[]) ??
+		[];
 	let latest = null;
-	if (history.length) latest = await env.AEO_KV.get(`test:${history[0].id}`, "json");
+	if (history.length)
+		latest = await env.AEO_KV.get(`test:${history[0].id}`, "json");
 
 	// Fetch prompts and models for validation
-	const prompts = ((await env.AEO_KV.get(`site:${site.domain}:prompts`, "json")) as any[]) ?? [];
-	const models = ((await env.AEO_KV.get(`site:${site.domain}:models`, "json")) as any[]) ?? [];
+	const prompts =
+		((await env.AEO_KV.get(`site:${site.domain}:prompts`, "json")) as any[]) ??
+		[];
+	const models =
+		((await env.AEO_KV.get(`site:${site.domain}:models`, "json")) as any[]) ??
+		[];
 
 	return { site, latest, prompts, models };
 }
@@ -66,10 +75,17 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 	const [promptFilter, setPromptFilter] = useState("all");
 
 	const citations: any[] = (latest as any)?.citations ?? [];
-	const testTimestamp = (latest as any)?.startedAt ?? (latest as any)?.timestamp ?? null;
+	const testTimestamp =
+		(latest as any)?.startedAt ?? (latest as any)?.timestamp ?? null;
 
-	const uniqueModels = useMemo(() => [...new Set(citations.map((c) => c.model))], [citations]);
-	const uniquePrompts = useMemo(() => [...new Set(citations.map((c) => c.prompt))], [citations]);
+	const uniqueModels = useMemo(
+		() => [...new Set(citations.map((c) => c.model))],
+		[citations],
+	);
+	const uniquePrompts = useMemo(
+		() => [...new Set(citations.map((c) => c.prompt))],
+		[citations],
+	);
 	const filtered = useMemo(
 		() =>
 			citations.filter(
@@ -114,8 +130,8 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 			while (!cancelled) {
 				await new Promise((r) => setTimeout(r, 3000));
 				try {
-					const s = (await fetch(`/api/tests/${activeTestId}/status`).then((r) =>
-						r.json(),
+					const s = (await fetch(`/api/tests/${activeTestId}/status`).then(
+						(r) => r.json(),
 					)) as TestStatus;
 					if (cancelled) break;
 					setProgress({ completed: s.completed, total: s.total });
@@ -148,7 +164,9 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 		if (!site) return;
 
 		// Re-check conditions at runtime
-		const activePromptsCheck = Array.isArray(prompts) ? prompts.filter((p: any) => p.active) : [];
+		const activePromptsCheck = Array.isArray(prompts)
+			? prompts.filter((p: any) => p.active)
+			: [];
 		const hasPromptsCheck = activePromptsCheck.length > 0;
 		const hasModelsCheck = Array.isArray(models) && models.length > 0;
 
@@ -164,9 +182,12 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 		setTesting(true);
 		setProgress({ completed: 0, total: 0 });
 		try {
-			const response = await fetch(`/api/sites/${encodeURIComponent(site.domain)}/test`, {
-				method: "POST",
-			});
+			const response = await fetch(
+				`/api/sites/${encodeURIComponent(site.domain)}/test`,
+				{
+					method: "POST",
+				},
+			);
 			const data = (await response.json()) as TestStart | ApiError;
 
 			if (!response.ok) {
@@ -187,7 +208,10 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 
 	const deleteSite = useCallback(async () => {
 		if (!site) return;
-		if (!confirm(`Delete ${site.domain} and all its data? This cannot be undone.`)) return;
+		if (
+			!confirm(`Delete ${site.domain} and all its data? This cannot be undone.`)
+		)
+			return;
 		await fetch("/api/sites", {
 			method: "DELETE",
 			headers: { "Content-Type": "application/json" },
@@ -204,7 +228,9 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 		const rows = filtered
 			.map((c) => {
 				const esc = (s: string) =>
-					s.includes(",") || s.includes('"') || s.includes("\n") ? `"${s.replace(/"/g, '""')}"` : s;
+					s.includes(",") || s.includes('"') || s.includes("\n")
+						? `"${s.replace(/"/g, '""')}"`
+						: s;
 				return [
 					testTimestamp ?? "",
 					c.model,
@@ -261,12 +287,16 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 				{!canRunTest && !testing && (
 					<Card>
 						<CardBody className="flex items-center gap-3 bg-amber-50 border border-amber-200">
-							<InfoIcon size={18} weight="fill" className="text-amber-600 shrink-0" />
+							<InfoIcon
+								size={18}
+								weight="fill"
+								className="text-amber-600 shrink-0"
+							/>
 							<div className="flex-1 text-[13px] text-neutral-700">
 								{!hasActivePrompts && !hasEnabledModels ? (
 									<>
-										<strong>Setup required:</strong> Add prompts and enable models before running a
-										test.{" "}
+										<strong>Setup required:</strong> Add prompts and enable
+										models before running a test.{" "}
 										<a href="/prompts" className="text-brand hover:underline">
 											Configure prompts
 										</a>
@@ -277,15 +307,16 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 									</>
 								) : !hasActivePrompts ? (
 									<>
-										<strong>No active prompts:</strong> Add and activate at least one prompt to run
-										a test.{" "}
+										<strong>No active prompts:</strong> Add and activate at
+										least one prompt to run a test.{" "}
 										<a href="/prompts" className="text-brand hover:underline">
 											Configure prompts
 										</a>
 									</>
 								) : (
 									<>
-										<strong>No models enabled:</strong> Enable at least one AI model to run a test.{" "}
+										<strong>No models enabled:</strong> Enable at least one AI
+										model to run a test.{" "}
 										<a href="/models" className="text-brand hover:underline">
 											Select models
 										</a>
@@ -359,7 +390,10 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 								<span className="text-[12px] text-neutral-400 tabular-nums">
 									{filtered.length} result{filtered.length !== 1 ? "s" : ""}
 								</span>
-								<DownloadButton onClick={downloadFilteredCsv} label="Export current view" />
+								<DownloadButton
+									onClick={downloadFilteredCsv}
+									label="Export current view"
+								/>
 							</div>
 						</div>
 
@@ -379,10 +413,17 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 										{paginated.map((c: any, i: number) => (
 											<Tr key={i}>
 												<Td className="text-neutral-500 text-xs whitespace-nowrap">
-													{testTimestamp ? new Date(testTimestamp).toLocaleDateString() : ""}
+													{testTimestamp
+														? new Date(testTimestamp).toLocaleDateString()
+														: ""}
 												</Td>
-												<Td className="font-medium whitespace-nowrap text-[13px]">{c.model}</Td>
-												<Td className="max-w-[240px] truncate text-[13px]" title={c.prompt}>
+												<Td className="font-medium whitespace-nowrap text-[13px]">
+													{c.model}
+												</Td>
+												<Td
+													className="max-w-[240px] truncate text-[13px]"
+													title={c.prompt}
+												>
 													{c.prompt}
 												</Td>
 												<Td
@@ -400,7 +441,8 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 								{totalPages > 1 && (
 									<div className="flex items-center justify-between px-4 py-3 border-t border-neutral-100 text-[13px]">
 										<span className="text-neutral-500">
-											{page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of{" "}
+											{page * PAGE_SIZE + 1}–
+											{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of{" "}
 											{filtered.length}
 										</span>
 										<div className="flex items-center gap-1">
@@ -421,7 +463,9 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 												</button>
 											))}
 											<button
-												onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+												onClick={() =>
+													setPage((p) => Math.min(totalPages - 1, p + 1))
+												}
 												disabled={page >= totalPages - 1}
 												className="w-8 h-8 flex items-center justify-center rounded-md text-neutral-500 hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
 											>
@@ -437,7 +481,8 @@ export default function Results({ loaderData }: Route.ComponentProps) {
 					<Card>
 						<CardBody>
 							<div className="py-12 text-center text-neutral-500 text-[13px]">
-								No results yet. Click "Run test" to analyze AI visibility for {site.domain}.
+								No results yet. Click "Run test" to analyze AI visibility for{" "}
+								{site.domain}.
 							</div>
 						</CardBody>
 					</Card>
@@ -488,7 +533,8 @@ function cleanResponse(text: string | undefined): string {
 	if (s.startsWith("{") || s.startsWith("[")) {
 		try {
 			const parsed = JSON.parse(s);
-			if (parsed.choices?.[0]?.message?.content) s = parsed.choices[0].message.content;
+			if (parsed.choices?.[0]?.message?.content)
+				s = parsed.choices[0].message.content;
 			else if (parsed.choices?.[0]?.message?.reasoning_content)
 				s = parsed.choices[0].message.reasoning_content;
 			else if (parsed.candidates?.[0]?.content?.parts?.[0]?.text)

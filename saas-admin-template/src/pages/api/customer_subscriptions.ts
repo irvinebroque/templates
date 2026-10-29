@@ -4,7 +4,10 @@ import { CustomerSubscriptionService } from "@/lib/services/customer_subscriptio
 export async function GET({ locals, params, request }) {
 	const { API_TOKEN, DB } = locals.runtime.env;
 
-	const invalidTokenResponse = await validateApiTokenResponse(request, API_TOKEN);
+	const invalidTokenResponse = await validateApiTokenResponse(
+		request,
+		API_TOKEN,
+	);
 	if (invalidTokenResponse) return invalidTokenResponse;
 
 	const customerSubscriptionService = new CustomerSubscriptionService(DB);
@@ -15,14 +18,20 @@ export async function GET({ locals, params, request }) {
 			customer_subscriptions: customerSubscriptions,
 		});
 	} else {
-		return Response.json({ message: "Couldn't load customer subscriptions" }, { status: 500 });
+		return Response.json(
+			{ message: "Couldn't load customer subscriptions" },
+			{ status: 500 },
+		);
 	}
 }
 
 export async function POST({ locals, request }) {
 	const { API_TOKEN, DB } = locals.runtime.env;
 
-	const invalidTokenResponse = await validateApiTokenResponse(request, API_TOKEN);
+	const invalidTokenResponse = await validateApiTokenResponse(
+		request,
+		API_TOKEN,
+	);
 	if (invalidTokenResponse) return invalidTokenResponse;
 
 	const body = await request.json();

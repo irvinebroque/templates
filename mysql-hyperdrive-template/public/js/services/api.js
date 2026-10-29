@@ -10,8 +10,14 @@ export async function checkTables() {
 	console.log("Checking tables...");
 	const response = await fetch("/api/check-tables");
 	if (!response.ok) {
-		console.error("Failed to check tables:", response.status, response.statusText);
-		throw new Error(`Failed to check tables: ${response.status} ${response.statusText}`);
+		console.error(
+			"Failed to check tables:",
+			response.status,
+			response.statusText,
+		);
+		throw new Error(
+			`Failed to check tables: ${response.status} ${response.statusText}`,
+		);
 	}
 	const data = await response.json();
 	console.log("Tables check result:", data);
@@ -28,8 +34,14 @@ export async function fetchOrganizations() {
 	console.log("Fetching organizations...");
 	const response = await fetch("/api/organizations");
 	if (!response.ok) {
-		console.error("Failed to fetch organizations:", response.status, response.statusText);
-		throw new Error(`Failed to fetch organizations: ${response.status} ${response.statusText}`);
+		console.error(
+			"Failed to fetch organizations:",
+			response.status,
+			response.statusText,
+		);
+		throw new Error(
+			`Failed to fetch organizations: ${response.status} ${response.statusText}`,
+		);
 	}
 	const data = await response.json();
 	console.log("Organizations fetched:", data);
@@ -38,11 +50,19 @@ export async function fetchOrganizations() {
 
 export async function fetchUsers(orgFilter = "") {
 	console.log("Fetching users with filter:", orgFilter);
-	const url = orgFilter ? `/api/users?organization_id=${orgFilter}` : "/api/users";
+	const url = orgFilter
+		? `/api/users?organization_id=${orgFilter}`
+		: "/api/users";
 	const response = await fetch(url);
 	if (!response.ok) {
-		console.error("Failed to fetch users:", response.status, response.statusText);
-		throw new Error(`Failed to fetch users: ${response.status} ${response.statusText}`);
+		console.error(
+			"Failed to fetch users:",
+			response.status,
+			response.statusText,
+		);
+		throw new Error(
+			`Failed to fetch users: ${response.status} ${response.statusText}`,
+		);
 	}
 	const data = await response.json();
 	console.log("Users fetched:", data);

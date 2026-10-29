@@ -22,7 +22,9 @@ export const validateApiToken = async (request, apiToken) => {
 		}
 
 		if (!apiToken) {
-			console.error("No API token provided. Set one as an environment variable.");
+			console.error(
+				"No API token provided. Set one as an environment variable.",
+			);
 			return false;
 		}
 

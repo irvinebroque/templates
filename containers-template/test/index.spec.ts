@@ -62,7 +62,11 @@ afterEach(() => vi.restoreAllMocks());
 describe("Worker routes", () => {
 	it("lists routes without starting a container", async () => {
 		const { env, getByName } = createEnv();
-		const response = await worker.request("http://example.com/", undefined, env);
+		const response = await worker.request(
+			"http://example.com/",
+			undefined,
+			env,
+		);
 		expect(response.status).toBe(200);
 		expect(await response.text()).toContain("GET /container/<ID>");
 		expect(getByName).not.toHaveBeenCalled();
@@ -71,7 +75,11 @@ describe("Worker routes", () => {
 	it("routes the same name consistently and different names separately", async () => {
 		const { env, getByName } = createEnv();
 		for (const name of ["one", "one", "two"]) {
-			await worker.request(`http://example.com/container/${name}`, undefined, env);
+			await worker.request(
+				`http://example.com/container/${name}`,
+				undefined,
+				env,
+			);
 		}
 		expect(getByName.mock.calls).toEqual([
 			["/container/one"],
@@ -99,7 +107,11 @@ describe("Worker routes", () => {
 		vi.spyOn(console, "error").mockImplementation(() => {});
 		const { env, fetch, getByName } = createEnv();
 		fetch.mockRejectedValue(new Error("container exited"));
-		const response = await worker.request("http://example.com/error", undefined, env);
+		const response = await worker.request(
+			"http://example.com/error",
+			undefined,
+			env,
+		);
 		expect(getByName).toHaveBeenCalledWith("error-test");
 		expect(response.status).toBe(502);
 		expect(await response.text()).toContain("Check the Worker logs");
@@ -107,7 +119,11 @@ describe("Worker routes", () => {
 
 	it("returns 404 without a container for an unknown route", async () => {
 		const { env, getByName } = createEnv();
-		const response = await worker.request("http://example.com/missing", undefined, env);
+		const response = await worker.request(
+			"http://example.com/missing",
+			undefined,
+			env,
+		);
 		expect(response.status).toBe(404);
 		expect(getByName).not.toHaveBeenCalled();
 	});
@@ -163,9 +179,9 @@ describe("Container lifecycle and proxy", () => {
 		vi.spyOn(scheduler, "wait").mockResolvedValue(undefined);
 		const { object, container, health, forward } = createContainer();
 		health.mockResolvedValue(new Response(null, { status: 503 }));
-		await expect(object.fetch(new Request("https://example.com/one"))).rejects.toThrow(
-			"did not become ready",
-		);
+		await expect(
+			object.fetch(new Request("https://example.com/one")),
+		).rejects.toThrow("did not become ready");
 		expect(health).toHaveBeenCalledTimes(100);
 		expect(forward).not.toHaveBeenCalled();
 		health.mockResolvedValue(new Response(null, { status: 200 }));
@@ -199,9 +215,9 @@ describe("Container lifecycle and proxy", () => {
 	it("does not replay a failed application request", async () => {
 		const { object, forward } = createContainer();
 		forward.mockRejectedValue(new Error("connection closed"));
-		await expect(object.fetch(new Request("https://example.com/error"))).rejects.toThrow(
-			"connection closed",
-		);
+		await expect(
+			object.fetch(new Request("https://example.com/error")),
+		).rejects.toThrow("connection closed");
 		expect(forward).toHaveBeenCalledOnce();
 	});
 

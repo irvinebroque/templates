@@ -59,7 +59,11 @@ export class JsonRenderer {
 		// Check if there's a type-specific renderer
 		// Handle array/list items by using first element
 
-		if (item.schema_object && Array.isArray(item.schema_object) && item.schema_object.length > 0) {
+		if (
+			item.schema_object &&
+			Array.isArray(item.schema_object) &&
+			item.schema_object.length > 0
+		) {
 			item.schema_object = item.schema_object[0];
 		}
 		if (item.schema_object && item.schema_object["@type"]) {
@@ -253,7 +257,9 @@ export class JsonRenderer {
 		// Handle array of schema objects
 		if (Array.isArray(schema_object)) {
 			// Look for ImageObject first
-			const imageObj = schema_object.find((obj) => obj["@type"] === "ImageObject");
+			const imageObj = schema_object.find(
+				(obj) => obj["@type"] === "ImageObject",
+			);
 			if (imageObj && imageObj.url) {
 				return imageObj.url;
 			}
@@ -265,7 +271,9 @@ export class JsonRenderer {
 			}
 
 			// Look for Article object with thumbnailUrl
-			const articleObj = schema_object.find((obj) => obj["@type"] === "Article");
+			const articleObj = schema_object.find(
+				(obj) => obj["@type"] === "Article",
+			);
 			if (articleObj && articleObj.thumbnailUrl) {
 				return articleObj.thumbnailUrl;
 			}
@@ -488,7 +496,10 @@ export class JsonRenderer {
 		// This is a safe way to unescape HTML entities
 		// It parses the HTML but only returns the text content, not any executable HTML/scripts
 		const parser = new DOMParser();
-		const doc = parser.parseFromString(`<!DOCTYPE html><body>${str}`, "text/html");
+		const doc = parser.parseFromString(
+			`<!DOCTYPE html><body>${str}`,
+			"text/html",
+		);
 		return doc.body.textContent || "";
 	}
 }

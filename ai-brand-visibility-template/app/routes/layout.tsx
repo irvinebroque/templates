@@ -1,7 +1,12 @@
 import { Outlet, NavLink, useLoaderData, useSearchParams } from "react-router";
 import type { Route } from "./+types/layout";
 import { Header } from "~/components/header";
-import { Sidebar, SidebarSection, SidebarNav, SidebarNavItem } from "~/components/sidebar";
+import {
+	Sidebar,
+	SidebarSection,
+	SidebarNav,
+	SidebarNavItem,
+} from "~/components/sidebar";
 import { ChartBar, ListBullets, Cube, Plus } from "@phosphor-icons/react";
 
 export async function loader({ context, request }: Route.LoaderArgs) {
@@ -67,10 +72,16 @@ export default function DashboardLayout({ loaderData }: Route.ComponentProps) {
 							<SidebarNavItem to={siteLink("/")} icon={<ChartBar size={16} />}>
 								Results
 							</SidebarNavItem>
-							<SidebarNavItem to={siteLink("/prompts")} icon={<ListBullets size={16} />}>
+							<SidebarNavItem
+								to={siteLink("/prompts")}
+								icon={<ListBullets size={16} />}
+							>
 								Prompts
 							</SidebarNavItem>
-							<SidebarNavItem to={siteLink("/models")} icon={<Cube size={16} />}>
+							<SidebarNavItem
+								to={siteLink("/models")}
+								icon={<Cube size={16} />}
+							>
 								Models
 							</SidebarNavItem>
 						</SidebarNav>

@@ -27,7 +27,8 @@ export function requirePaymentOrCookie(paymentMw: MiddlewareHandler) {
 			if (!jwtSecret) {
 				return c.json(
 					{
-						error: "Server misconfigured: JWT_SECRET not set. See README for setup instructions.",
+						error:
+							"Server misconfigured: JWT_SECRET not set. See README for setup instructions.",
 					},
 					500,
 				);
@@ -80,11 +81,14 @@ export function createProtectedRoute(config: ProtectedRouteConfig) {
 		// Normalize the path by removing trailing slashes (except for root "/")
 		// This matches how x402's findMatchingRoute normalizes incoming request paths
 		const rawPath = c.req.path;
-		const routePath = rawPath.length > 1 ? rawPath.replace(/\/+$/, "") : rawPath;
+		const routePath =
+			rawPath.length > 1 ? rawPath.replace(/\/+$/, "") : rawPath;
 
 		// Create payment middleware dynamically with config from env
 		// Facilitator is optional - x402 uses its own default when not provided
-		const facilitator = c.env.FACILITATOR_URL ? { url: c.env.FACILITATOR_URL } : undefined;
+		const facilitator = c.env.FACILITATOR_URL
+			? { url: c.env.FACILITATOR_URL }
+			: undefined;
 
 		const paymentMw = paymentMiddleware(
 			c.env.PAY_TO as `0x${string}`,

@@ -119,7 +119,10 @@ async function sendMessage() {
 						const jsonData = JSON.parse(data);
 						// Handle both Workers AI format (response) and OpenAI format (choices[0].delta.content)
 						let content = "";
-						if (typeof jsonData.response === "string" && jsonData.response.length > 0) {
+						if (
+							typeof jsonData.response === "string" &&
+							jsonData.response.length > 0
+						) {
 							content = jsonData.response;
 						} else if (jsonData.choices?.[0]?.delta?.content) {
 							content = jsonData.choices[0].delta.content;
@@ -149,7 +152,10 @@ async function sendMessage() {
 					const jsonData = JSON.parse(data);
 					// Handle both Workers AI format (response) and OpenAI format (choices[0].delta.content)
 					let content = "";
-					if (typeof jsonData.response === "string" && jsonData.response.length > 0) {
+					if (
+						typeof jsonData.response === "string" &&
+						jsonData.response.length > 0
+					) {
 						content = jsonData.response;
 					} else if (jsonData.choices?.[0]?.delta?.content) {
 						content = jsonData.choices[0].delta.content;
@@ -173,7 +179,10 @@ async function sendMessage() {
 		}
 	} catch (error) {
 		console.error("Error:", error);
-		addMessageToChat("assistant", "Sorry, there was an error processing your request.");
+		addMessageToChat(
+			"assistant",
+			"Sorry, there was an error processing your request.",
+		);
 	} finally {
 		// Hide typing indicator
 		typingIndicator.classList.remove("visible");

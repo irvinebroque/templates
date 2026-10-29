@@ -8,7 +8,11 @@ export type VoiceEphemeralPhase = "filler" | "recovery";
 export type VoiceEphemeralOutcome = "succeeded" | "failed" | "aborted";
 export type VoiceToolsOutcome = "ready" | "timeout" | "aborted" | "error";
 export type VoiceBindingFallbackOutcome = "succeeded" | "failed" | "aborted";
-export type VoiceTextStreamOutcome = "output" | "error" | "no_output" | "aborted";
+export type VoiceTextStreamOutcome =
+	| "output"
+	| "error"
+	| "no_output"
+	| "aborted";
 export type VoiceBindingResponseShape =
 	| "stream"
 	| "chat-completion"
@@ -17,7 +21,11 @@ export type VoiceBindingResponseShape =
 	| "empty"
 	| "unknown"
 	| "error";
-export type VoiceToolExecutionOutcome = "succeeded" | "timeout" | "error" | "aborted";
+export type VoiceToolExecutionOutcome =
+	| "succeeded"
+	| "timeout"
+	| "error"
+	| "aborted";
 
 type VoiceMetricStage =
 	| "input"
@@ -147,7 +155,8 @@ const messages = {
 	voice_agent_ephemeral_speech: "voice ephemeral speech completed",
 	voice_agent_guardrail_check: "voice guardrail check completed",
 	voice_agent_docs_tools_ready: "voice docs tools readiness completed",
-	voice_agent_llm_binding_fallback: "voice LLM binding retried without streaming",
+	voice_agent_llm_binding_fallback:
+		"voice LLM binding retried without streaming",
 	voice_agent_tool_call: "voice tool called",
 	voice_agent_tool_execution: "voice tool execution attempt completed",
 	voice_agent_llm_step_completed: "voice LLM step completed",
@@ -265,7 +274,9 @@ export function voiceBindingFallbackLifecycle(
 	};
 }
 
-export function voiceLlmStepLifecycle(finishReason: FinishReason): VoiceMetricLifecycle {
+export function voiceLlmStepLifecycle(
+	finishReason: FinishReason,
+): VoiceMetricLifecycle {
 	return finishReason === "error"
 		? {
 				stage: "model",
@@ -282,7 +293,9 @@ export function voiceLlmStepLifecycle(finishReason: FinishReason): VoiceMetricLi
 			};
 }
 
-export function voiceTextStreamLifecycle(outcome: VoiceTextStreamOutcome): VoiceMetricLifecycle {
+export function voiceTextStreamLifecycle(
+	outcome: VoiceTextStreamOutcome,
+): VoiceMetricLifecycle {
 	if (outcome === "output") {
 		return {
 			stage: "model",
@@ -336,7 +349,10 @@ export function createVoiceTextStreamFinalizer(
 	context: VoiceMetricContext,
 	llmModel: string,
 	toolCount: number,
-): (outcome: VoiceTextStreamOutcome, summary: VoiceTextStreamMetricSummary) => void {
+): (
+	outcome: VoiceTextStreamOutcome,
+	summary: VoiceTextStreamMetricSummary,
+) => void {
 	let finalized = false;
 	return (outcome, summary) => {
 		if (finalized) return;
@@ -352,7 +368,10 @@ export function createVoiceTextStreamFinalizer(
 	};
 }
 
-export function logVoiceMetric(context: VoiceMetricContext, metric: VoiceMetric): void {
+export function logVoiceMetric(
+	context: VoiceMetricContext,
+	metric: VoiceMetric,
+): void {
 	try {
 		const previousSequence = flowSequences.get(context);
 		if (previousSequence === undefined) return;

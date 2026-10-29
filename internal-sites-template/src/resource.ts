@@ -67,7 +67,12 @@ export async function GetScriptsInDispatchNamespace(env: Env) {
 	);
 
 	if (!data.success) {
-		throw new Error(formatCloudflareError("Could not list scripts in dispatch namespace", data));
+		throw new Error(
+			formatCloudflareError(
+				"Could not list scripts in dispatch namespace",
+				data,
+			),
+		);
 	}
 
 	return data.result;
@@ -79,7 +84,10 @@ export async function GetScriptsInDispatchNamespace(env: Env) {
  * Throws if Cloudflare reports a failure. A 404 (Worker already gone)
  * is treated as success so the caller can safely clean up D1.
  */
-export async function DeleteScriptInDispatchNamespace(env: Env, scriptName: string): Promise<void> {
+export async function DeleteScriptInDispatchNamespace(
+	env: Env,
+	scriptName: string,
+): Promise<void> {
 	const response = await fetch(`${ScriptsURI(env)}/${scriptName}`, {
 		method: "DELETE",
 		headers: AuthHeaders(env),
@@ -112,7 +120,11 @@ export async function PutStaticSiteInDispatchNamespace(
 
 	const normalizedAssets = normalizeAssets(assets);
 	const manifest = await buildAssetManifest(scriptName, normalizedAssets);
-	const uploadSession = await createAssetsUploadSession(env, scriptName, manifest);
+	const uploadSession = await createAssetsUploadSession(
+		env,
+		scriptName,
+		manifest,
+	);
 
 	// Build a hash -> asset lookup for bucket uploads
 	const assetsByHash = new Map<string, UploadedAsset>();
@@ -123,13 +135,21 @@ export async function PutStaticSiteInDispatchNamespace(
 	// Upload each bucket and track the latest completion JWT
 	let completionJwt = uploadSession.jwt;
 	for (const bucket of uploadSession.buckets || []) {
-		completionJwt = await uploadAssetBucket(env, bucket, assetsByHash, uploadSession.jwt);
+		completionJwt = await uploadAssetBucket(
+			env,
+			bucket,
+			assetsByHash,
+			uploadSession.jwt,
+		);
 	}
 
 	// Deploy the Worker with the completion JWT
 	await putStaticAssetWorker(env, scriptName, completionJwt);
 
-	const totalBytes = normalizedAssets.reduce((sum, asset) => sum + asset.content.byteLength, 0);
+	const totalBytes = normalizedAssets.reduce(
+		(sum, asset) => sum + asset.content.byteLength,
+		0,
+	);
 
 	return {
 		deploymentId: `deployment-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
@@ -202,7 +222,10 @@ async function buildAssetManifest(
  * Truncated to 32 hex chars (16 bytes) per the CF API spec.
  * The salt ensures asset isolation between sites in the namespace.
  */
-async function hashAsset(scriptName: string, asset: UploadedAsset): Promise<string> {
+async function hashAsset(
+	scriptName: string,
+	asset: UploadedAsset,
+): Promise<string> {
 	const prefix = new TextEncoder().encode(`${scriptName}\0${asset.path}\0`);
 	const bytes = new Uint8Array(prefix.byteLength + asset.content.byteLength);
 	bytes.set(prefix, 0);
@@ -223,14 +246,17 @@ async function createAssetsUploadSession(
 	scriptName: string,
 	manifest: AssetManifest,
 ): Promise<AssetsUploadSessionResult> {
-	const response = await fetch(`${ScriptsURI(env)}/${scriptName}/assets-upload-session`, {
-		method: "POST",
-		headers: {
-			...AuthHeaders(env),
-			"Content-Type": "application/json",
+	const response = await fetch(
+		`${ScriptsURI(env)}/${scriptName}/assets-upload-session`,
+		{
+			method: "POST",
+			headers: {
+				...AuthHeaders(env),
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({ manifest }),
 		},
-		body: JSON.stringify({ manifest }),
-	});
+	);
 
 	const data = await readCloudflareResponse<AssetsUploadSessionResult>(
 		response,
@@ -238,7 +264,9 @@ async function createAssetsUploadSession(
 	);
 
 	if (!data.success) {
-		throw new Error(formatCloudflareError("Could not create asset upload session", data));
+		throw new Error(
+			formatCloudflareError("Could not create asset upload session", data),
+		);
 	}
 
 	return data.result;
@@ -284,7 +312,9 @@ async function uploadAssetBucket(
 	);
 
 	if (!data.success) {
-		throw new Error(formatCloudflareError("Could not upload static assets", data));
+		throw new Error(
+			formatCloudflareError("Could not upload static assets", data),
+		);
 	}
 
 	return data.result.jwt;
@@ -292,7 +322,11 @@ async function uploadAssetBucket(
 
 // ── Worker deploy ────────────────────────────────────────────────────────────
 
-async function putStaticAssetWorker(env: Env, scriptName: string, assetJwt: string): Promise<void> {
+async function putStaticAssetWorker(
+	env: Env,
+	scriptName: string,
+	assetJwt: string,
+): Promise<void> {
 	const scriptFileName = "index.js";
 	const formData = new FormData();
 
@@ -358,7 +392,9 @@ async function readCloudflareResponse<T>(
 	}
 
 	if (!response.ok) {
-		throw new Error(formatCloudflareError(`${context}: ${response.status}`, data));
+		throw new Error(
+			formatCloudflareError(`${context}: ${response.status}`, data),
+		);
 	}
 
 	return data;
@@ -375,7 +411,10 @@ function bytesToBase64(bytes: Uint8Array): string {
 	return btoa(binary);
 }
 
-function formatCloudflareError<T>(message: string, data: CloudflareApiResponse<T>): string {
+function formatCloudflareError<T>(
+	message: string,
+	data: CloudflareApiResponse<T>,
+): string {
 	const errors = data.errors
 		?.map((error) => error.message)
 		.filter(Boolean)

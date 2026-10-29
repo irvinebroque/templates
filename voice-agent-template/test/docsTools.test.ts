@@ -10,10 +10,19 @@ import {
 	type CloudflareDocsAttemptEvent,
 	type DocsToolRuntime,
 } from "../src/voice/docsTools";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vite-plus/test";
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vite-plus/test";
 
 function runtime(
-	execute: (options: ToolExecutionOptions<unknown>) => unknown | PromiseLike<unknown>,
+	execute: (
+		options: ToolExecutionOptions<unknown>,
+	) => unknown | PromiseLike<unknown>,
 	onAttempt?: (event: CloudflareDocsAttemptEvent) => void,
 ): DocsToolRuntime {
 	return resolveDocsTools(
@@ -34,7 +43,10 @@ function runtime(
 	);
 }
 
-function executeDocsTool(docsRuntime: DocsToolRuntime, signal?: AbortSignal): Promise<unknown> {
+function executeDocsTool(
+	docsRuntime: DocsToolRuntime,
+	signal?: AbortSignal,
+): Promise<unknown> {
 	const execute = docsRuntime.tools[CLOUDFLARE_DOCS_TOOL_KEY]?.execute;
 	if (typeof execute !== "function") throw new Error("Docs tool missing");
 	return Promise.resolve(
@@ -67,12 +79,16 @@ describe("Cloudflare Docs MCP tool", () => {
 	it("exposes only the exact read-only Docs search tool", () => {
 		const docsRuntime = runtime(() => "result");
 		expect(Object.keys(docsRuntime.tools)).toEqual([CLOUDFLARE_DOCS_TOOL_KEY]);
-		expect(docsRuntime.promptRules.join(" ")).toContain("Ground Cloudflare answers");
+		expect(docsRuntime.promptRules.join(" ")).toContain(
+			"Ground Cloudflare answers",
+		);
 	});
 
 	it("returns the first successful result without retrying", async () => {
 		const execute = vi.fn(() => "official result");
-		await expect(executeDocsTool(runtime(execute))).resolves.toBe("official result");
+		await expect(executeDocsTool(runtime(execute))).resolves.toBe(
+			"official result",
+		);
 		expect(execute).toHaveBeenCalledTimes(1);
 	});
 
@@ -81,7 +97,9 @@ describe("Cloudflare Docs MCP tool", () => {
 			.fn()
 			.mockRejectedValueOnce(new Error("temporary"))
 			.mockResolvedValueOnce("official result");
-		await expect(executeDocsTool(runtime(execute))).resolves.toBe("official result");
+		await expect(executeDocsTool(runtime(execute))).resolves.toBe(
+			"official result",
+		);
 		expect(execute).toHaveBeenCalledTimes(2);
 	});
 
@@ -105,11 +123,16 @@ describe("Cloudflare Docs MCP tool", () => {
 	it("times out each attempt and degrades after the second", async () => {
 		const events: CloudflareDocsAttemptEvent[] = [];
 		const pending = () => new Promise<never>(() => undefined);
-		const result = executeDocsTool(runtime(pending, (event) => events.push(event)));
+		const result = executeDocsTool(
+			runtime(pending, (event) => events.push(event)),
+		);
 
 		await vi.advanceTimersByTimeAsync(CLOUDFLARE_DOCS_ATTEMPT_TIMEOUT_MS * 2);
 		await expect(result).resolves.toBe(CLOUDFLARE_DOCS_UNAVAILABLE_RESULT);
-		expect(events.map(({ outcome }) => outcome)).toEqual(["timeout", "timeout"]);
+		expect(events.map(({ outcome }) => outcome)).toEqual([
+			"timeout",
+			"timeout",
+		]);
 	});
 
 	it("reports readiness timeout and cancellation", async () => {

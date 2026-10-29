@@ -23,7 +23,9 @@ export class BooksService extends WorkerEntrypoint {
 				return { sql: null, dbAvailable: false };
 			}
 		} else {
-			console.log("[BooksService] No Hyperdrive binding available, using mock data");
+			console.log(
+				"[BooksService] No Hyperdrive binding available, using mock data",
+			);
 			return { sql: null, dbAvailable: false };
 		}
 	}
@@ -141,7 +143,10 @@ export class BooksService extends WorkerEntrypoint {
 				const book = mockBooks.find((book) => book.id === bookIdNum);
 
 				if (!book) {
-					console.log("[BooksService] Book not found for related books in mock data", { bookId });
+					console.log(
+						"[BooksService] Book not found for related books in mock data",
+						{ bookId },
+					);
 					return { error: "Book not found", status: 404 };
 				}
 
@@ -153,7 +158,9 @@ export class BooksService extends WorkerEntrypoint {
 					.slice(0, 3);
 
 				// Generate mock recent books
-				const recentBooks = mockBooks.filter((b) => b.id !== bookIdNum).slice(0, 2);
+				const recentBooks = mockBooks
+					.filter((b) => b.id !== bookIdNum)
+					.slice(0, 2);
 
 				// Generate mock genre counts
 				const genres = {};

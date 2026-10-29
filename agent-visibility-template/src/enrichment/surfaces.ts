@@ -122,7 +122,10 @@ export function renderIndexJson(ctx: RenderCtx) {
 // ---------------------------------------------------------------------------
 // /<slug>.md — per-page Markdown, ideal for grounding/citation.
 // ---------------------------------------------------------------------------
-export function renderResourceMd(args: { resource: Resource; site: SiteConfig }): string {
+export function renderResourceMd(args: {
+	resource: Resource;
+	site: SiteConfig;
+}): string {
 	const r = args.resource;
 	const lines: string[] = [];
 	lines.push(`# ${r.title}`);
@@ -207,7 +210,10 @@ export function renderWebsiteJsonLd(ctx: RenderCtx): object {
 	};
 }
 
-export function renderResourceJsonLd(args: { resource: Resource; site: SiteConfig }): object {
+export function renderResourceJsonLd(args: {
+	resource: Resource;
+	site: SiteConfig;
+}): object {
 	const r = args.resource;
 	return {
 		"@context": "https://schema.org",

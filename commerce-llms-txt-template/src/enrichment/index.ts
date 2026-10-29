@@ -83,13 +83,16 @@ ${specsText}`;
 
 		return {
 			...product,
-			agentSummary: parsed.agentSummary ?? fallbackEnrichment(product).agentSummary,
+			agentSummary:
+				parsed.agentSummary ?? fallbackEnrichment(product).agentSummary,
 			useCaseTags: Array.isArray(parsed.useCaseTags) ? parsed.useCaseTags : [],
 			highlights: Array.isArray(parsed.highlights) ? parsed.highlights : [],
 			bestFor: parsed.bestFor ?? "",
 		};
 	} catch (err) {
-		console.error(`Enrichment failed for ${product.slug}: ${err}. Using fallback.`);
+		console.error(
+			`Enrichment failed for ${product.slug}: ${err}. Using fallback.`,
+		);
 		return fallbackEnrichment(product);
 	}
 }
@@ -112,7 +115,9 @@ export async function enrichCatalog(
 
 	for (let i = 0; i < products.length; i += BATCH_SIZE) {
 		const batch = products.slice(i, i + BATCH_SIZE);
-		const enriched = await Promise.all(batch.map((p) => enrichProduct(p, ai, vertical, model)));
+		const enriched = await Promise.all(
+			batch.map((p) => enrichProduct(p, ai, vertical, model)),
+		);
 		results.push(...enriched);
 	}
 
@@ -153,7 +158,10 @@ export function fallbackEnrichment(product: RawProduct): EnrichedProduct {
  */
 const FALLBACK_ENRICHMENTS: Record<
 	string,
-	Pick<EnrichedProduct, "agentSummary" | "useCaseTags" | "highlights" | "bestFor">
+	Pick<
+		EnrichedProduct,
+		"agentSummary" | "useCaseTags" | "highlights" | "bestFor"
+	>
 > = {
 	"little-ripper-70-skis": {
 		agentSummary:
@@ -183,7 +191,13 @@ const FALLBACK_ENRICHMENTS: Record<
 			"most kid helmets start at 52cm and wobble on a 3-year-old. Dial-adjust sizing means " +
 			"it grows with the child for 2-3 seasons instead of being replaced every year. " +
 			"Built-in ear pads keep little ears warm without needing a hat underneath.",
-		useCaseTags: ["toddler skiing", "ski school", "sledding", "snow play", "ages 2-5"],
+		useCaseTags: [
+			"toddler skiing",
+			"ski school",
+			"sledding",
+			"snow play",
+			"ages 2-5",
+		],
 		highlights: [
 			"Starts at 48cm — actually fits a 2-3 year old (most helmets don't)",
 			"Dial-adjust grows with your child for 2-3 seasons",
@@ -199,7 +213,12 @@ const FALLBACK_ENRICHMENTS: Record<
 			"parents aren't wrestling a squirming 3-year-old's foot into a stiff boot in a " +
 			"parking lot. Insulated to -10C so little toes stay warm through a full morning " +
 			"lesson. Compatible with all standard toddler bindings.",
-		useCaseTags: ["first ski boots", "toddler ski lessons", "resort skiing", "ages 2-5"],
+		useCaseTags: [
+			"first ski boots",
+			"toddler ski lessons",
+			"resort skiing",
+			"ages 2-5",
+		],
 		highlights: [
 			"Single buckle — no complicated latches for cold fingers",
 			"Wide rear opening so a toddler's foot slides in without a fight",
@@ -215,7 +234,13 @@ const FALLBACK_ENRICHMENTS: Record<
 			"any gaps where snow can get in. The full-length zipper makes diaper changes possible " +
 			"without removing the whole suit. Fold-over mitt cuffs mean one less thing to lose, " +
 			"and reflective trim helps you spot your kid on a crowded bunny hill.",
-		useCaseTags: ["toddler skiing", "snow play", "sledding", "winter outdoor play", "ages 2-5"],
+		useCaseTags: [
+			"toddler skiing",
+			"snow play",
+			"sledding",
+			"winter outdoor play",
+			"ages 2-5",
+		],
 		highlights: [
 			"One-piece design — no gaps where snow creeps in at the waist",
 			"Diaper-friendly zipper design for quick changes",

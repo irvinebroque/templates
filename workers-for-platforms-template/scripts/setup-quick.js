@@ -45,7 +45,9 @@ function getVarFromWranglerToml(varName) {
 	const jsoncConfigPath = path.join(PROJECT_ROOT, "wrangler.jsonc");
 	if (fs.existsSync(jsoncConfigPath)) {
 		const content = fs.readFileSync(jsoncConfigPath, "utf-8");
-		const match = content.match(new RegExp(`"${varName}"\\s*:\\s*["']([^"']*)["']`));
+		const match = content.match(
+			new RegExp(`"${varName}"\\s*:\\s*["']([^"']*)["']`),
+		);
 		if (match && match[1] && match[1] !== "") {
 			return match[1];
 		}
@@ -65,12 +67,18 @@ function getConfig() {
 
 	return {
 		accountId:
-			process.env.CF_ACCOUNT_ID || process.env.CLOUDFLARE_ACCOUNT_ID || process.env.ACCOUNT_ID,
+			process.env.CF_ACCOUNT_ID ||
+			process.env.CLOUDFLARE_ACCOUNT_ID ||
+			process.env.ACCOUNT_ID,
 		apiToken: deployToken, // Use deploy token for setup operations (namespace creation, etc)
 		userApiToken: userToken, // User's token with SSL permissions for custom hostnames
-		customDomain: process.env.CUSTOM_DOMAIN || getVarFromWranglerToml("CUSTOM_DOMAIN"),
-		zoneId: process.env.CLOUDFLARE_ZONE_ID || getVarFromWranglerToml("CLOUDFLARE_ZONE_ID"),
-		fallbackOrigin: process.env.FALLBACK_ORIGIN || getVarFromWranglerToml("FALLBACK_ORIGIN"),
+		customDomain:
+			process.env.CUSTOM_DOMAIN || getVarFromWranglerToml("CUSTOM_DOMAIN"),
+		zoneId:
+			process.env.CLOUDFLARE_ZONE_ID ||
+			getVarFromWranglerToml("CLOUDFLARE_ZONE_ID"),
+		fallbackOrigin:
+			process.env.FALLBACK_ORIGIN || getVarFromWranglerToml("FALLBACK_ORIGIN"),
 	};
 }
 
@@ -86,10 +94,14 @@ function getDispatchNamespaceFromConfig() {
 
 	if (fs.existsSync(configPath)) {
 		const content = fs.readFileSync(configPath, "utf-8");
-		const match = content.match(/\[\[dispatch_namespaces\]\][\s\S]*?namespace\s*=\s*['"](.*?)['"]/);
+		const match = content.match(
+			/\[\[dispatch_namespaces\]\][\s\S]*?namespace\s*=\s*['"](.*?)['"]/,
+		);
 		if (match) return match[1];
 
-		const varMatch = content.match(/DISPATCH_NAMESPACE_NAME\s*=\s*['"](.*?)['"]/);
+		const varMatch = content.match(
+			/DISPATCH_NAMESPACE_NAME\s*=\s*['"](.*?)['"]/,
+		);
 		if (varMatch) return varMatch[1];
 	}
 
@@ -118,7 +130,10 @@ function ensureDispatchNamespace(namespaceName) {
 	} catch (error) {
 		const output = error.stdout?.toString() || error.stderr?.toString() || "";
 
-		if (output.includes("already exists") || output.includes("A namespace with this name")) {
+		if (
+			output.includes("already exists") ||
+			output.includes("A namespace with this name")
+		) {
 			log(green, `✅ Dispatch namespace '${namespaceName}' already exists`);
 			return true;
 		}
@@ -128,14 +143,20 @@ function ensureDispatchNamespace(namespaceName) {
 			return false;
 		}
 
-		log(yellow, `⚠️  Could not create dispatch namespace: ${output || error.message}`);
+		log(
+			yellow,
+			`⚠️  Could not create dispatch namespace: ${output || error.message}`,
+		);
 		return false;
 	}
 }
 
 async function createPermanentToken(config) {
 	if (!config.apiToken || !config.accountId) {
-		log(yellow, "⚠️  No API token or account ID - cannot create permanent token");
+		log(
+			yellow,
+			"⚠️  No API token or account ID - cannot create permanent token",
+		);
 		return null;
 	}
 
@@ -151,9 +172,18 @@ async function createPermanentToken(config) {
 		const permGroupsData = await permGroupsResponse.json();
 
 		if (!permGroupsData.success) {
-			log(yellow, "⚠️  Could not fetch permission groups - deploy token has limited permissions");
-			log(yellow, "   Custom domains will not work until you add a token with SSL permissions");
-			log(yellow, "   See README for instructions on creating a full-access token");
+			log(
+				yellow,
+				"⚠️  Could not fetch permission groups - deploy token has limited permissions",
+			);
+			log(
+				yellow,
+				"   Custom domains will not work until you add a token with SSL permissions",
+			);
+			log(
+				yellow,
+				"   See README for instructions on creating a full-access token",
+			);
 			return null;
 		}
 
@@ -207,16 +237,21 @@ async function createPermanentToken(config) {
 			return null;
 		}
 
-		const tokenResponse = await fetch("https://api.cloudflare.com/client/v4/user/tokens", {
-			method: "POST",
-			headers: getAuthHeaders(config.apiToken),
-			body: JSON.stringify({
-				name: `Workers Platform Template - ${new Date().toISOString().split("T")[0]}`,
-				policies,
-				condition: {},
-				expires_on: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
-			}),
-		});
+		const tokenResponse = await fetch(
+			"https://api.cloudflare.com/client/v4/user/tokens",
+			{
+				method: "POST",
+				headers: getAuthHeaders(config.apiToken),
+				body: JSON.stringify({
+					name: `Workers Platform Template - ${new Date().toISOString().split("T")[0]}`,
+					policies,
+					condition: {},
+					expires_on: new Date(
+						Date.now() + 365 * 24 * 60 * 60 * 1000,
+					).toISOString(),
+				}),
+			},
+		);
 
 		const tokenData = await tokenResponse.json();
 
@@ -293,7 +328,12 @@ async function detectZoneId(config) {
 }
 
 function updateWranglerConfig(config) {
-	if (!config.accountId && !config.customDomain && !config.zoneId && !config.fallbackOrigin) {
+	if (
+		!config.accountId &&
+		!config.customDomain &&
+		!config.zoneId &&
+		!config.fallbackOrigin
+	) {
 		return false;
 	}
 
@@ -310,7 +350,10 @@ function updateWranglerConfig(config) {
 	// Add ACCOUNT_ID to vars if not present
 	if (config.accountId) {
 		if (content.includes('ACCOUNT_ID = "')) {
-			content = content.replace(/ACCOUNT_ID = ".*"/, `ACCOUNT_ID = "${config.accountId}"`);
+			content = content.replace(
+				/ACCOUNT_ID = ".*"/,
+				`ACCOUNT_ID = "${config.accountId}"`,
+			);
 		} else {
 			// Add after DISPATCH_NAMESPACE_NAME
 			content = content.replace(
@@ -324,7 +367,10 @@ function updateWranglerConfig(config) {
 
 	// Update CUSTOM_DOMAIN if set
 	if (config.customDomain && config.customDomain !== "") {
-		content = content.replace(/CUSTOM_DOMAIN = ".*"/, `CUSTOM_DOMAIN = "${config.customDomain}"`);
+		content = content.replace(
+			/CUSTOM_DOMAIN = ".*"/,
+			`CUSTOM_DOMAIN = "${config.customDomain}"`,
+		);
 		content = content.replace(/workers_dev = true/, "workers_dev = false");
 		modified = true;
 		log(green, `✅ Set CUSTOM_DOMAIN = "${config.customDomain}"`);
@@ -350,10 +396,14 @@ function updateWranglerConfig(config) {
 
 	// Set fallback origin (default to my.{domain})
 	const fallbackOrigin =
-		config.fallbackOrigin || (config.customDomain ? `my.${config.customDomain}` : "");
+		config.fallbackOrigin ||
+		(config.customDomain ? `my.${config.customDomain}` : "");
 	if (fallbackOrigin) {
 		if (content.includes('FALLBACK_ORIGIN = "')) {
-			content = content.replace(/FALLBACK_ORIGIN = ".*"/, `FALLBACK_ORIGIN = "${fallbackOrigin}"`);
+			content = content.replace(
+				/FALLBACK_ORIGIN = ".*"/,
+				`FALLBACK_ORIGIN = "${fallbackOrigin}"`,
+			);
 		} else if (config.zoneId) {
 			content = content.replace(
 				`CLOUDFLARE_ZONE_ID = "${config.zoneId}"`,
@@ -367,7 +417,10 @@ function updateWranglerConfig(config) {
 	// Add routes if custom domain and zone ID are configured
 	if (config.customDomain && config.customDomain !== "" && config.zoneId) {
 		// Remove any existing routes section
-		content = content.replace(/\n# Routes for custom domain\nroutes = \[[\s\S]*?\]\n/g, "");
+		content = content.replace(
+			/\n# Routes for custom domain\nroutes = \[[\s\S]*?\]\n/g,
+			"",
+		);
 		content = content.replace(/\nroutes = \[[\s\S]*?\]\n/g, "");
 
 		const routesSection = `
@@ -380,12 +433,21 @@ routes = [
 
 		// Insert routes after workers_dev line (top-level config area)
 		if (content.includes("workers_dev = false")) {
-			content = content.replace("workers_dev = false", `workers_dev = false\n${routesSection}`);
+			content = content.replace(
+				"workers_dev = false",
+				`workers_dev = false\n${routesSection}`,
+			);
 		} else if (content.includes("workers_dev = true")) {
-			content = content.replace("workers_dev = true", `workers_dev = false\n${routesSection}`);
+			content = content.replace(
+				"workers_dev = true",
+				`workers_dev = false\n${routesSection}`,
+			);
 		} else {
 			// Fallback: add after compatibility_flags or at top
-			content = content.replace(/(compatibility_flags = \[.*?\])/, `$1\n${routesSection}`);
+			content = content.replace(
+				/(compatibility_flags = \[.*?\])/,
+				`$1\n${routesSection}`,
+			);
 		}
 
 		modified = true;
@@ -406,13 +468,19 @@ async function setWranglerSecrets(config) {
 	// Set user-provided API token if available (for custom hostnames)
 	if (config.userApiToken) {
 		try {
-			execSync(`echo "${config.userApiToken}" | npx wrangler secret put CLOUDFLARE_API_TOKEN`, {
-				stdio: "pipe",
-				cwd: PROJECT_ROOT,
-			});
+			execSync(
+				`echo "${config.userApiToken}" | npx wrangler secret put CLOUDFLARE_API_TOKEN`,
+				{
+					stdio: "pipe",
+					cwd: PROJECT_ROOT,
+				},
+			);
 			log(green, "✅ Set CLOUDFLARE_API_TOKEN secret (for custom domains)");
 		} catch (error) {
-			log(yellow, `⚠️  Could not set CLOUDFLARE_API_TOKEN secret: ${error.message}`);
+			log(
+				yellow,
+				`⚠️  Could not set CLOUDFLARE_API_TOKEN secret: ${error.message}`,
+			);
 		}
 	}
 
@@ -420,13 +488,19 @@ async function setWranglerSecrets(config) {
 	const dispatchToken = config.runtimeToken || config.apiToken;
 	if (dispatchToken) {
 		try {
-			execSync(`echo "${dispatchToken}" | npx wrangler secret put DISPATCH_NAMESPACE_API_TOKEN`, {
-				stdio: "pipe",
-				cwd: PROJECT_ROOT,
-			});
+			execSync(
+				`echo "${dispatchToken}" | npx wrangler secret put DISPATCH_NAMESPACE_API_TOKEN`,
+				{
+					stdio: "pipe",
+					cwd: PROJECT_ROOT,
+				},
+			);
 			log(green, "✅ Set DISPATCH_NAMESPACE_API_TOKEN secret");
 		} catch (error) {
-			log(yellow, `⚠️  Could not set DISPATCH_NAMESPACE_API_TOKEN secret: ${error.message}`);
+			log(
+				yellow,
+				`⚠️  Could not set DISPATCH_NAMESPACE_API_TOKEN secret: ${error.message}`,
+			);
 			log(yellow, "   You may need to set it manually in the dashboard");
 		}
 	}
@@ -441,10 +515,22 @@ async function main() {
 	// Debug: show what env vars are available
 	log(cyan, "📋 Environment variables available:");
 	log(cyan, `   CF_API_TOKEN: ${process.env.CF_API_TOKEN ? "set" : "not set"}`);
-	log(cyan, `   CF_ACCOUNT_ID: ${process.env.CF_ACCOUNT_ID ? "set" : "not set"}`);
-	log(cyan, `   CLOUDFLARE_API_TOKEN: ${process.env.CLOUDFLARE_API_TOKEN ? "set" : "not set"}`);
-	log(cyan, `   CUSTOM_DOMAIN (env): ${process.env.CUSTOM_DOMAIN || "not set"}`);
-	log(cyan, `   CUSTOM_DOMAIN (toml): ${getVarFromWranglerToml("CUSTOM_DOMAIN") || "not set"}`);
+	log(
+		cyan,
+		`   CF_ACCOUNT_ID: ${process.env.CF_ACCOUNT_ID ? "set" : "not set"}`,
+	);
+	log(
+		cyan,
+		`   CLOUDFLARE_API_TOKEN: ${process.env.CLOUDFLARE_API_TOKEN ? "set" : "not set"}`,
+	);
+	log(
+		cyan,
+		`   CUSTOM_DOMAIN (env): ${process.env.CUSTOM_DOMAIN || "not set"}`,
+	);
+	log(
+		cyan,
+		`   CUSTOM_DOMAIN (toml): ${getVarFromWranglerToml("CUSTOM_DOMAIN") || "not set"}`,
+	);
 	console.log("");
 
 	const config = getConfig();
@@ -467,7 +553,10 @@ async function main() {
 			`   User API Token: ${config.userApiToken.substring(0, 8)}... (will use for custom domains)`,
 		);
 	} else if (config.customDomain) {
-		log(yellow, "   User API Token: (not provided - custom domains may not work)");
+		log(
+			yellow,
+			"   User API Token: (not provided - custom domains may not work)",
+		);
 	}
 	if (config.customDomain) {
 		log(cyan, `   Custom Domain: ${config.customDomain}`);
@@ -513,7 +602,10 @@ async function main() {
 		// If user provided API token with SSL permissions, store it for custom hostname operations
 		if (config.userApiToken) {
 			devVarsContent += `CLOUDFLARE_API_TOKEN="${config.userApiToken}"\n`;
-			log(green, `   ✅ CLOUDFLARE_API_TOKEN (user-provided, for custom domains)`);
+			log(
+				green,
+				`   ✅ CLOUDFLARE_API_TOKEN (user-provided, for custom domains)`,
+			);
 		}
 
 		// Set the token for dispatch namespace operations
@@ -536,7 +628,8 @@ async function main() {
 		}
 
 		const fallbackOrigin =
-			config.fallbackOrigin || (config.customDomain ? `my.${config.customDomain}` : "");
+			config.fallbackOrigin ||
+			(config.customDomain ? `my.${config.customDomain}` : "");
 		if (fallbackOrigin) {
 			devVarsContent += `FALLBACK_ORIGIN="${fallbackOrigin}"\n`;
 		}
@@ -559,9 +652,12 @@ async function main() {
 				const match = devVarsContent.match(new RegExp(`${name}="([^"]*)"`));
 				return match ? match[1] : null;
 			};
-			config.userApiToken = config.userApiToken || getVar("CLOUDFLARE_API_TOKEN");
+			config.userApiToken =
+				config.userApiToken || getVar("CLOUDFLARE_API_TOKEN");
 			config.runtimeToken =
-				config.runtimeToken || getVar("DISPATCH_NAMESPACE_API_TOKEN") || config.apiToken;
+				config.runtimeToken ||
+				getVar("DISPATCH_NAMESPACE_API_TOKEN") ||
+				config.apiToken;
 		}
 		await setWranglerSecrets(config);
 	}

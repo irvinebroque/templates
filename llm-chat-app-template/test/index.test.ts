@@ -12,7 +12,8 @@ function setup() {
 	);
 	const assets = vi.fn().mockResolvedValue(new Response("frontend"));
 	const env: Env = { AI: { run } as unknown as Ai, ASSETS: { fetch: assets } };
-	const fetch = (request: Request) => worker.fetch(request, env, {} as ExecutionContext);
+	const fetch = (request: Request) =>
+		worker.fetch(request, env, {} as ExecutionContext);
 	return { run, assets, fetch };
 }
 
@@ -28,24 +29,32 @@ describe("chat routes", () => {
 	});
 	it("rejects unsupported chat methods without calling AI", async () => {
 		const { fetch, run } = setup();
-		expect((await fetch(new Request("https://example.com/api/chat"))).status).toBe(405);
+		expect(
+			(await fetch(new Request("https://example.com/api/chat"))).status,
+		).toBe(405);
 		expect(run).not.toHaveBeenCalled();
 	});
 	it("returns 404 for unknown API routes", async () => {
 		const { fetch } = setup();
-		expect((await fetch(new Request("https://example.com/api/missing"))).status).toBe(404);
+		expect(
+			(await fetch(new Request("https://example.com/api/missing"))).status,
+		).toBe(404);
 	});
 	it("streams chat responses and supplies a default system prompt", async () => {
 		const { fetch, run } = setup();
 		const response = await fetch(
 			new Request("https://example.com/api/chat", {
 				method: "POST",
-				body: JSON.stringify({ messages: [{ role: "user", content: "Hello" }] }),
+				body: JSON.stringify({
+					messages: [{ role: "user", content: "Hello" }],
+				}),
 			}),
 			{},
 		);
 		expect(response.status).toBe(200);
-		expect(response.headers.get("content-type")).toBe("text/event-stream; charset=utf-8");
+		expect(response.headers.get("content-type")).toBe(
+			"text/event-stream; charset=utf-8",
+		);
 		expect(run).toHaveBeenCalledWith(
 			"@cf/meta/llama-3.1-8b-instruct-fp8",
 			expect.objectContaining({
@@ -70,6 +79,8 @@ describe("chat routes", () => {
 			{},
 		);
 		expect(response.status).toBe(500);
-		expect(await response.json()).toEqual({ error: "Failed to process request" });
+		expect(await response.json()).toEqual({
+			error: "Failed to process request",
+		});
 	});
 });

@@ -10,14 +10,20 @@ import type { WorkflowEvent } from "cloudflare:workers";
  *
  * @see https://developers.cloudflare.com/workflows
  */
-export class MyWorkflow extends WorkflowEntrypoint<Env, Record<string, unknown>> {
+export class MyWorkflow extends WorkflowEntrypoint<
+	Env,
+	Record<string, unknown>
+> {
 	async run(event: WorkflowEvent<Record<string, unknown>>, step: WorkflowStep) {
 		const instanceId = event.instanceId;
 
 		// Notify Durable Object of step progress. Called outside step.do, so this
 		// operation may repeat. Safe here because updateStep is idempotent.
 		// Refer to: https://developers.cloudflare.com/workflows/build/rules-of-workflows/
-		const notifyStep = async (stepName: string, status: "running" | "completed" | "waiting") => {
+		const notifyStep = async (
+			stepName: string,
+			status: "running" | "completed" | "waiting",
+		) => {
 			try {
 				const doId = this.env.WORKFLOW_STATUS.idFromName(instanceId);
 				const stub = this.env.WORKFLOW_STATUS.get(doId);
