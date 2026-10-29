@@ -6,11 +6,7 @@ interface Env {
 }
 
 export default {
-	async fetch(
-		request: Request,
-		env: Env,
-		ctx: ExecutionContext,
-	): Promise<Response> {
+	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
 
 		// Handle API requests
@@ -52,9 +48,7 @@ async function handleApiRequest(
         AND (table_name = 'organizations' OR table_name = 'users')
       `);
 
-			const existingTables = (tables as any[]).map(
-				(t) => t.TABLE_NAME || t.table_name,
-			);
+			const existingTables = (tables as any[]).map((t) => t.TABLE_NAME || t.table_name);
 
 			return Response.json({
 				organizations: existingTables.includes("organizations"),
@@ -93,9 +87,7 @@ async function handleApiRequest(
 
 		// API endpoint for Organizations GET operation
 		if (url.pathname === "/api/organizations" && request.method === "GET") {
-			const [rows] = await connection.query(
-				"SELECT * FROM organizations ORDER BY id",
-			);
+			const [rows] = await connection.query("SELECT * FROM organizations ORDER BY id");
 			return Response.json(rows);
 		}
 
@@ -104,16 +96,12 @@ async function handleApiRequest(
 			const body = await request.json<{ name: string }>();
 
 			if (!body.name || typeof body.name !== "string") {
-				return Response.json(
-					{ error: "Organization name is required" },
-					{ status: 400 },
-				);
+				return Response.json({ error: "Organization name is required" }, { status: 400 });
 			}
 
-			const [result] = await connection.query(
-				"INSERT INTO organizations (name) VALUES (?)",
-				[body.name],
-			);
+			const [result] = await connection.query("INSERT INTO organizations (name) VALUES (?)", [
+				body.name,
+			]);
 
 			return Response.json({
 				success: true,
@@ -123,10 +111,7 @@ async function handleApiRequest(
 		}
 
 		// API endpoint for Organizations DELETE operation
-		if (
-			url.pathname.startsWith("/api/organizations/") &&
-			request.method === "DELETE"
-		) {
+		if (url.pathname.startsWith("/api/organizations/") && request.method === "DELETE") {
 			const orgId = Number(url.pathname.split("/").pop());
 
 			// First check if there are any users associated with this organization
@@ -178,10 +163,7 @@ async function handleApiRequest(
 			}>();
 
 			if (!body.username || typeof body.username !== "string") {
-				return Response.json(
-					{ error: "Username is required" },
-					{ status: 400 },
-				);
+				return Response.json({ error: "Username is required" }, { status: 400 });
 			}
 
 			// Organization ID is optional (can be null)
@@ -189,16 +171,12 @@ async function handleApiRequest(
 
 			// If organization_id is provided, verify it exists
 			if (orgId !== null) {
-				const [orgCheck] = await connection.query(
-					"SELECT id FROM organizations WHERE id = ?",
-					[orgId],
-				);
+				const [orgCheck] = await connection.query("SELECT id FROM organizations WHERE id = ?", [
+					orgId,
+				]);
 
 				if ((orgCheck as any[]).length === 0) {
-					return Response.json(
-						{ error: "Organization not found" },
-						{ status: 400 },
-					);
+					return Response.json({ error: "Organization not found" }, { status: 400 });
 				}
 			}
 
@@ -223,10 +201,7 @@ async function handleApiRequest(
 			}>();
 
 			if (!body.username || typeof body.username !== "string") {
-				return Response.json(
-					{ error: "Username is required" },
-					{ status: 400 },
-				);
+				return Response.json({ error: "Username is required" }, { status: 400 });
 			}
 
 			// Organization ID is optional (can be null)
@@ -239,16 +214,12 @@ async function handleApiRequest(
 
 			// If organization_id is provided, verify it exists
 			if (orgId !== undefined && orgId !== null) {
-				const [orgCheck] = await connection.query(
-					"SELECT id FROM organizations WHERE id = ?",
-					[orgId],
-				);
+				const [orgCheck] = await connection.query("SELECT id FROM organizations WHERE id = ?", [
+					orgId,
+				]);
 
 				if ((orgCheck as any[]).length === 0) {
-					return Response.json(
-						{ error: "Organization not found" },
-						{ status: 400 },
-					);
+					return Response.json({ error: "Organization not found" }, { status: 400 });
 				}
 			}
 

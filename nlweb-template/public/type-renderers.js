@@ -62,11 +62,7 @@ export class RealEstateRenderer extends TypeRenderer {
 		if (!contentDiv) return element;
 
 		// Add real estate specific details
-		const detailsDiv = this.jsonRenderer.possiblyAddExplanation(
-			item,
-			contentDiv,
-			true,
-		);
+		const detailsDiv = this.jsonRenderer.possiblyAddExplanation(item, contentDiv, true);
 		if (!detailsDiv) return element;
 
 		detailsDiv.className = "item-real-estate-details";
@@ -91,9 +87,7 @@ export class RealEstateRenderer extends TypeRenderer {
 
 		const streetAddress = address.streetAddress || "";
 		const addressLocality = address.addressLocality || "";
-		detailsDiv.appendChild(
-			this.jsonRenderer.makeAsSpan(`${streetAddress}, ${addressLocality}`),
-		);
+		detailsDiv.appendChild(this.jsonRenderer.makeAsSpan(`${streetAddress}, ${addressLocality}`));
 		detailsDiv.appendChild(document.createElement("br"));
 
 		const bedroomsText = numBedrooms || "0";
@@ -107,9 +101,7 @@ export class RealEstateRenderer extends TypeRenderer {
 		detailsDiv.appendChild(document.createElement("br"));
 
 		if (priceValue) {
-			detailsDiv.appendChild(
-				this.jsonRenderer.makeAsSpan(`Listed at ${priceValue}`),
-			);
+			detailsDiv.appendChild(this.jsonRenderer.makeAsSpan(`Listed at ${priceValue}`));
 		}
 
 		return element;

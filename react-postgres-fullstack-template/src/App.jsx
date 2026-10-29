@@ -110,12 +110,7 @@ function App() {
 
 	return (
 		<div className="layout">
-			<Sidebar
-				genres={genres}
-				activeGenre={activeGenre}
-				onSelectGenre={handleSelectGenre}
-				counts
-			/>
+			<Sidebar genres={genres} activeGenre={activeGenre} onSelectGenre={handleSelectGenre} counts />
 
 			<main className="main-content">
 				{/* Breadcrumbs for main library page */}
@@ -123,9 +118,7 @@ function App() {
 					<Breadcrumbs
 						items={[
 							{ label: "All Books", value: null },
-							...(activeGenre
-								? [{ label: activeGenre, value: activeGenre }]
-								: []),
+							...(activeGenre ? [{ label: activeGenre, value: activeGenre }] : []),
 						]}
 						onNavigate={(value) => {
 							if (value === null) {
@@ -155,9 +148,7 @@ function App() {
 					) : bookDetail ? (
 						<BookDetail bookData={bookDetail} />
 					) : (
-						<div className="text-center py-20 text-gray-600">
-							Error loading book details
-						</div>
+						<div className="text-center py-20 text-gray-600">Error loading book details</div>
 					)
 				) : (
 					<BooksList onSelectBook={handleSelectBook} filter={activeGenre} />

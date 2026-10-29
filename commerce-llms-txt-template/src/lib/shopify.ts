@@ -64,10 +64,7 @@ function stripHtml(html: string): string {
  * This is intentionally imperfect — real merchant data is messy, and that's
  * the point of the demo.
  */
-function extractSpecs(
-	description: string,
-	product: ShopifyProduct,
-): Record<string, string> {
+function extractSpecs(description: string, product: ShopifyProduct): Record<string, string> {
 	const specs: Record<string, string> = {};
 
 	// Add variant options as specs
@@ -129,8 +126,7 @@ function mapShopifyProduct(product: ShopifyProduct): RawProduct {
 	const availableCount = product.variants.filter((v) => v.available).length;
 
 	// Derive a category from product_type or tags
-	const category =
-		product.product_type?.toLowerCase() || product.tags[0] || "uncategorized";
+	const category = product.product_type?.toLowerCase() || product.tags[0] || "uncategorized";
 
 	return {
 		slug: product.handle,
@@ -200,10 +196,7 @@ export async function fetchShopifyCatalog(
 	const MAX_PAGES = 20; // Safety limit: 20 pages × 250 = 5,000 products max
 
 	while (page <= MAX_PAGES) {
-		const response = await fetch(
-			`${baseUrl}/products.json?limit=250&page=${page}`,
-			{ headers },
-		);
+		const response = await fetch(`${baseUrl}/products.json?limit=250&page=${page}`, { headers });
 
 		if (!response.ok) {
 			throw new Error(
@@ -227,8 +220,6 @@ export async function fetchShopifyCatalog(
 		);
 	}
 
-	console.log(
-		`[Shopify] Fetched ${allProducts.length} products across ${page - 1} page(s)`,
-	);
+	console.log(`[Shopify] Fetched ${allProducts.length} products across ${page - 1} page(s)`);
 	return allProducts.map(mapShopifyProduct);
 }

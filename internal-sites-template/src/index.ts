@@ -117,10 +117,9 @@ app.get("/admin", async (c) => {
 	let dispatchHtml = "";
 
 	try {
-		const sites = (await FetchTable(
-			c.env.DB,
-			"sites",
-		)) as unknown as Parameters<typeof BuildSitesTable>[0];
+		const sites = (await FetchTable(c.env.DB, "sites")) as unknown as Parameters<
+			typeof BuildSitesTable
+		>[0];
 		sitesHtml = BuildSitesTable(sites, urlFn);
 	} catch (error) {
 		sitesHtml = `<p class="admin-error">Could not load sites: ${escapeHtml(errorMessage(error))}</p>`;
@@ -188,10 +187,7 @@ app.use("/api/*", async (c, next) => {
 
 	const origin = c.req.header("Origin");
 	if (origin !== undefined && origin !== new URL(c.req.url).origin) {
-		return c.json(
-			{ error: "Requests from other origins are not allowed" },
-			403,
-		);
+		return c.json({ error: "Requests from other origins are not allowed" }, 403);
 	}
 
 	return next();
@@ -215,15 +211,13 @@ app.post("/api/sites/deploy", async (c) => {
 
 		const existingSite = await GetSiteBySlug(c.env.DB, upload.slug);
 		const now = new Date().toISOString();
-		const site =
-			existingSite || buildSite(upload.name, upload.slug, identity.email, now);
+		const site = existingSite || buildSite(upload.name, upload.slug, identity.email, now);
 
 		// Prevent slug takeover
 		if (existingSite && existingSite.owner_email !== identity.email) {
 			return c.json(
 				{
-					error:
-						"This site name is already taken. Please choose a different one.",
+					error: "This site name is already taken. Please choose a different one.",
 				},
 				409,
 			);
@@ -236,11 +230,7 @@ app.post("/api/sites/deploy", async (c) => {
 
 		let deploy: DeployResult;
 		try {
-			deploy = await PutStaticSiteInDispatchNamespace(
-				c.env,
-				upload.slug,
-				upload.assets,
-			);
+			deploy = await PutStaticSiteInDispatchNamespace(c.env, upload.slug, upload.assets);
 		} catch (deploymentError) {
 			console.error("Cloudflare deployment failed", deploymentError);
 
@@ -248,10 +238,10 @@ app.post("/api/sites/deploy", async (c) => {
 				try {
 					await DeleteSite(c.env.DB, site.id);
 				} catch (cleanupError) {
-					console.error(
-						"Provisional site cleanup failed after Cloudflare deployment failure",
-						{ deploymentError, cleanupError },
-					);
+					console.error("Provisional site cleanup failed after Cloudflare deployment failure", {
+						deploymentError,
+						cleanupError,
+					});
 				}
 			}
 
@@ -294,8 +284,7 @@ app.post("/api/sites/deploy", async (c) => {
 		console.error("Deploy failed due to an internal error", error);
 		return c.json(
 			{
-				error:
-					"Could not deploy the site due to an internal error. Please try again.",
+				error: "Could not deploy the site due to an internal error. Please try again.",
 			},
 			500,
 		);
@@ -387,19 +376,13 @@ app.get("*", async (c) => {
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Dispatch a request to a deployed site Worker by slug. */
-async function dispatchToSite(
-	c: Context<{ Bindings: Env }>,
-	slug: string,
-): Promise<Response> {
+async function dispatchToSite(c: Context<{ Bindings: Env }>, slug: string): Promise<Response> {
 	try {
 		const worker = c.env.dispatcher.get(slug);
 		const response = await worker.fetch(requestForSite(c.req.raw, c.env, slug));
 		return await responseForSite(c.req.raw, c.env, slug, response);
 	} catch (error) {
-		if (
-			error instanceof Error &&
-			error.message.startsWith("Worker not found")
-		) {
+		if (error instanceof Error && error.message.startsWith("Worker not found")) {
 			return c.html(renderNotFound(siteDomain(c.env), deployPath(c.env)), 404);
 		}
 
@@ -408,12 +391,7 @@ async function dispatchToSite(
 	}
 }
 
-function buildSite(
-	name: string,
-	slug: string,
-	ownerEmail: string,
-	now: string,
-): Site {
+function buildSite(name: string, slug: string, ownerEmail: string, now: string): Site {
 	return {
 		id: `site-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
 		name,
@@ -546,11 +524,7 @@ function rewritePathBasedAssetUrls(html: string, slug: string): string {
 }
 
 /** Redirect /sites/slug to /sites/slug/ in path-based mode. */
-function shouldRedirectPathBasedRoot(
-	request: Request,
-	env: Env,
-	slug: string,
-): boolean {
+function shouldRedirectPathBasedRoot(request: Request, env: Env, slug: string): boolean {
 	if (!isTestingMode(request, env)) {
 		return false;
 	}

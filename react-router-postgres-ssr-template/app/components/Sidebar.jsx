@@ -10,38 +10,23 @@ function Sidebar({ genres = [], counts }) {
 			<div className="sidebar-title">Library</div>
 
 			<nav className="sidebar-nav">
-				<Link
-					to="/"
-					className={
-						activeGenre === null ? "sidebar-link-active" : "sidebar-link"
-					}
-				>
+				<Link to="/" className={activeGenre === null ? "sidebar-link-active" : "sidebar-link"}>
 					All Books
 				</Link>
 
 				<div className="sidebar-section">
 					<div className="sidebar-heading">Genres</div>
 					{genres.length === 0 ? (
-						<div className="px-3 py-2 text-sm text-gray-600">
-							Loading genres...
-						</div>
+						<div className="px-3 py-2 text-sm text-gray-600">Loading genres...</div>
 					) : (
 						genres.map((genre) => (
 							<Link
 								key={genre.name}
 								to={`/genre/${encodeURIComponent(genre.name)}`}
-								className={
-									activeGenre === genre.name
-										? "sidebar-link-active"
-										: "sidebar-link"
-								}
+								className={activeGenre === genre.name ? "sidebar-link-active" : "sidebar-link"}
 							>
 								{genre.name}
-								{counts && (
-									<span className="ml-2 text-xs text-gray-900">
-										({genre.count})
-									</span>
-								)}
+								{counts && <span className="ml-2 text-xs text-gray-900">({genre.count})</span>}
 							</Link>
 						))
 					)}

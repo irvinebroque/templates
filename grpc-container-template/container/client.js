@@ -5,8 +5,7 @@ const protoLoader = require("@grpc/proto-loader");
 const target = process.argv[2] || "127.0.0.1:8788";
 const messageCount = Number.parseInt(process.argv[3] || "4", 10);
 const messageIntervalMs = Number.parseInt(process.argv[4] || "200", 10);
-const protoPath =
-	process.env.PROTO_PATH || path.resolve(__dirname, "../proto/bytes.proto");
+const protoPath = process.env.PROTO_PATH || path.resolve(__dirname, "../proto/bytes.proto");
 
 if (!Number.isInteger(messageCount) || messageCount < 1) {
 	throw new Error("message count must be a positive integer");
@@ -33,12 +32,8 @@ function elapsed() {
 }
 
 call.on("data", (chunk) => {
-	const payload = Buffer.isBuffer(chunk.payload)
-		? chunk.payload
-		: Buffer.from(chunk.payload || "");
-	console.log(
-		`[${elapsed()}] server -> client: ${payload.toString().trimEnd()}`,
-	);
+	const payload = Buffer.isBuffer(chunk.payload) ? chunk.payload : Buffer.from(chunk.payload || "");
+	console.log(`[${elapsed()}] server -> client: ${payload.toString().trimEnd()}`);
 });
 
 call.on("end", () => {

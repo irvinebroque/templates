@@ -83,11 +83,7 @@ function stringArray(v: unknown, max: number): string[] {
  * On any model/parse failure, falls back to a deterministic enrichment built
  * from the raw text so the template never serves an empty surface.
  */
-export async function enrichResource(
-	ai: Ai,
-	model: string,
-	raw: RawResource,
-): Promise<Resource> {
+export async function enrichResource(ai: Ai, model: string, raw: RawResource): Promise<Resource> {
 	const trimmed = trimContent(raw.body);
 
 	try {
@@ -114,14 +110,11 @@ export async function enrichResource(
 			url: raw.url,
 			title,
 			summary:
-				(typeof parsed.summary === "string" && parsed.summary.trim()) ||
-				firstSentences(trimmed, 2),
+				(typeof parsed.summary === "string" && parsed.summary.trim()) || firstSentences(trimmed, 2),
 			keyPoints: stringArray(parsed.keyPoints, 6),
 			topics: stringArray(parsed.topics, 8).map((t) => t.toLowerCase()),
 			category: typeof parsed.category === "string" ? parsed.category : null,
-			content:
-				(typeof parsed.content === "string" && parsed.content.trim()) ||
-				trimmed,
+			content: (typeof parsed.content === "string" && parsed.content.trim()) || trimmed,
 			updatedAt: new Date().toISOString(),
 			model,
 		};
@@ -131,11 +124,7 @@ export async function enrichResource(
 }
 
 /** Enrich many resources, tolerating individual failures. */
-export async function enrichAll(
-	ai: Ai,
-	model: string,
-	raws: RawResource[],
-): Promise<Resource[]> {
+export async function enrichAll(ai: Ai, model: string, raws: RawResource[]): Promise<Resource[]> {
 	const out: Resource[] = [];
 	for (const raw of raws) {
 		out.push(await enrichResource(ai, model, raw));

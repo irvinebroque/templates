@@ -53,16 +53,7 @@ function runClient() {
 	return new Promise((resolve, reject) => {
 		const client = spawn(
 			"npm",
-			[
-				"--prefix",
-				"container",
-				"run",
-				"client",
-				"--",
-				`${GRPC_HOST}:${GRPC_PORT}`,
-				"2",
-				"25",
-			],
+			["--prefix", "container", "run", "client", "--", `${GRPC_HOST}:${GRPC_PORT}`, "2", "25"],
 			{
 				cwd: process.cwd(),
 				stdio: ["ignore", "pipe", "pipe"],
@@ -107,11 +98,9 @@ async function stopProcessTree(child) {
 	}
 
 	if (process.platform === "win32") {
-		const taskkill = spawn(
-			"taskkill",
-			["/pid", String(child.pid), "/T", "/F"],
-			{ stdio: "ignore" },
-		);
+		const taskkill = spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], {
+			stdio: "ignore",
+		});
 		await new Promise((resolve) => taskkill.once("exit", resolve));
 		return;
 	}

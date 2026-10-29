@@ -53,9 +53,7 @@ app.onError((err, c) => {
 function getMerchantConfig(env: Env) {
 	return {
 		name: env.MERCHANT_NAME || "My Store",
-		description:
-			env.MERCHANT_DESCRIPTION ||
-			"Product catalog powered by Commerce llms.txt",
+		description: env.MERCHANT_DESCRIPTION || "Product catalog powered by Commerce llms.txt",
 		currency: env.STORE_CURRENCY || "USD",
 		shippingPolicy: env.SHIPPING_POLICY || "",
 		returnPolicy: env.RETURN_POLICY || "",
@@ -78,9 +76,7 @@ async function getEnrichedCatalog(
 	const cacheTtlSeconds = config.cacheTtl;
 
 	// Try KV cache first
-	const cached = (await env.ENRICHMENT_CACHE.get(KV_CACHE_KEY, "json")) as
-		| EnrichedProduct[]
-		| null;
+	const cached = (await env.ENRICHMENT_CACHE.get(KV_CACHE_KEY, "json")) as EnrichedProduct[] | null;
 	if (cached) {
 		console.log(`[Cache] Serving ${cached.length} products from KV cache`);
 		return cached;
@@ -90,17 +86,12 @@ async function getEnrichedCatalog(
 	let catalog: RawProduct[];
 	if (env.SHOPIFY_STORE_DOMAIN) {
 		try {
-			catalog = await fetchShopifyCatalog(
-				env.SHOPIFY_STORE_DOMAIN,
-				env.SHOPIFY_STORE_PASSWORD,
-			);
+			catalog = await fetchShopifyCatalog(env.SHOPIFY_STORE_DOMAIN, env.SHOPIFY_STORE_PASSWORD);
 			console.log(
 				`[Catalog] Fetched ${catalog.length} products from Shopify (${env.SHOPIFY_STORE_DOMAIN})`,
 			);
 		} catch (err) {
-			console.log(
-				`[Catalog] Shopify fetch failed, using sample catalog: ${err}`,
-			);
+			console.log(`[Catalog] Shopify fetch failed, using sample catalog: ${err}`);
 			catalog = getCatalogWithLiveInventory();
 		}
 	} else {
@@ -112,37 +103,22 @@ async function getEnrichedCatalog(
 	let enriched: EnrichedProduct[];
 	if (env.AI) {
 		try {
-			enriched = await enrichCatalog(
-				catalog,
-				env.AI,
-				config.vertical,
-				env.AI_MODEL,
-			);
-			console.log(
-				`[Enrichment] AI enrichment complete for ${enriched.length} products`,
-			);
+			enriched = await enrichCatalog(catalog, env.AI, config.vertical, env.AI_MODEL);
+			console.log(`[Enrichment] AI enrichment complete for ${enriched.length} products`);
 		} catch (err) {
 			console.log(`[Enrichment] AI call failed, using fallback: ${err}`);
 			enriched = catalog.map(fallbackEnrichment);
 		}
 	} else {
-		console.log(
-			`[Enrichment] No AI binding available (local dev), using fallback enrichment`,
-		);
+		console.log(`[Enrichment] No AI binding available (local dev), using fallback enrichment`);
 		enriched = catalog.map(fallbackEnrichment);
 	}
 
 	// Write to KV. Uses waitUntil so the response isn't blocked by the KV write.
-	const kvWrite = env.ENRICHMENT_CACHE.put(
-		KV_CACHE_KEY,
-		JSON.stringify(enriched),
-		{
-			expirationTtl: cacheTtlSeconds,
-		},
-	).then(() => {
-		console.log(
-			`[Cache] Wrote ${enriched.length} products to KV cache (TTL: ${cacheTtlSeconds}s)`,
-		);
+	const kvWrite = env.ENRICHMENT_CACHE.put(KV_CACHE_KEY, JSON.stringify(enriched), {
+		expirationTtl: cacheTtlSeconds,
+	}).then(() => {
+		console.log(`[Cache] Wrote ${enriched.length} products to KV cache (TTL: ${cacheTtlSeconds}s)`);
 	});
 	if (ctx) {
 		ctx.waitUntil(kvWrite);
@@ -316,14 +292,12 @@ app.get("/api", (c) => {
 			? `shopify (${c.env.SHOPIFY_STORE_DOMAIN})`
 			: "sample catalog",
 		endpoints: {
-			"GET /llms.txt":
-				"Agent-optimized product catalog (llms.txt format, concise)",
+			"GET /llms.txt": "Agent-optimized product catalog (llms.txt format, concise)",
 			"GET /llms-full.txt":
 				"Agent-optimized product catalog (llms.txt format, full details with specs)",
 			"GET /api/products": "Complete product catalog as JSON",
 			"GET /api/products/:slug": "Single product detail as JSON",
-			"GET /api/raw-catalog":
-				"Raw merchant catalog (pre-enrichment) — the input to Workers AI",
+			"GET /api/raw-catalog": "Raw merchant catalog (pre-enrichment) — the input to Workers AI",
 		},
 		note: "AI agents: request /llms.txt for an optimized product catalog with real-time inventory and natural language descriptions.",
 	});
@@ -335,10 +309,7 @@ app.get("/api/raw-catalog", async (c) => {
 	let catalog: RawProduct[];
 	if (c.env.SHOPIFY_STORE_DOMAIN) {
 		try {
-			catalog = await fetchShopifyCatalog(
-				c.env.SHOPIFY_STORE_DOMAIN,
-				c.env.SHOPIFY_STORE_PASSWORD,
-			);
+			catalog = await fetchShopifyCatalog(c.env.SHOPIFY_STORE_DOMAIN, c.env.SHOPIFY_STORE_PASSWORD);
 		} catch {
 			catalog = getCatalogWithLiveInventory();
 		}

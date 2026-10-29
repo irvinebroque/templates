@@ -17,9 +17,7 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const sites = ((await env.AEO_KV.get("sites", "json")) as any[]) ?? [];
 	const url = new URL(request.url);
 	const siteParam = url.searchParams.get("site");
-	const site = siteParam
-		? sites.find((s: any) => s.domain === siteParam)
-		: sites[0];
+	const site = siteParam ? sites.find((s: any) => s.domain === siteParam) : sites[0];
 
 	const { MODELS } = await import("../../src/config");
 	let enabled: string[] = MODELS.map((m) => m.id);
@@ -71,8 +69,8 @@ export default function Models({ loaderData }: Route.ComponentProps) {
 				<div className="flex items-start gap-3 p-4 rounded-lg bg-blue-50 ring-1 ring-blue-100 text-[13px] text-blue-800">
 					<InfoIcon size={16} weight="fill" className="shrink-0 mt-0.5" />
 					<div>
-						<strong>Unified Billing.</strong> Third-party models (OpenAI,
-						Anthropic, Google) are charged via{" "}
+						<strong>Unified Billing.</strong> Third-party models (OpenAI, Anthropic, Google) are
+						charged via{" "}
 						<a
 							href="https://dash.cloudflare.com/?to=/:account/ai/ai-gateway"
 							target="_blank"
@@ -81,8 +79,8 @@ export default function Models({ loaderData }: Route.ComponentProps) {
 						>
 							AI Gateway Unified Billing
 						</a>
-						. Workers AI models (<code className="text-[11px]">@cf/</code>) use
-						standard Workers AI pricing. No API keys needed.
+						. Workers AI models (<code className="text-[11px]">@cf/</code>) use standard Workers AI
+						pricing. No API keys needed.
 					</div>
 				</div>
 
@@ -121,9 +119,7 @@ export default function Models({ loaderData }: Route.ComponentProps) {
 												{providerLabel(m.provider)}
 											</Badge>
 										</Td>
-										<Td className="font-mono text-[11px] text-neutral-500">
-											{m.id}
-										</Td>
+										<Td className="font-mono text-[11px] text-neutral-500">{m.id}</Td>
 									</Tr>
 								))}
 							</tbody>

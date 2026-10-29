@@ -192,9 +192,7 @@ Based on gathered information, generate the complete configuration.
 
 ```jsonc
 {
-	"routes": [
-		{ "pattern": "example.com/premium/*", "zone_name": "example.com" },
-	],
+	"routes": [{ "pattern": "example.com/premium/*", "zone_name": "example.com" }],
 	"vars": {
 		"PAY_TO": "0x000000000000000000000000000000000000dEaD",
 		"NETWORK": "base-sepolia",
@@ -215,9 +213,7 @@ Requires Bot Management for Enterprise to enable bot filtering.
 
 ```jsonc
 {
-	"routes": [
-		{ "pattern": "example.com/premium/*", "zone_name": "example.com" },
-	],
+	"routes": [{ "pattern": "example.com/premium/*", "zone_name": "example.com" }],
 	"vars": {
 		"PAY_TO": "0x000000000000000000000000000000000000dEaD",
 		"NETWORK": "base-sepolia",

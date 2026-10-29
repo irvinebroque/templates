@@ -36,9 +36,7 @@ export function getBuildStatus(event: CloudflareEvent): BuildStatus {
  */
 export function isProductionBranch(branch: string | undefined): boolean {
 	if (!branch) return true;
-	return ["main", "master", "production", "prod"].includes(
-		branch.toLowerCase(),
-	);
+	return ["main", "master", "production", "prod"].includes(branch.toLowerCase());
 }
 
 // =============================================================================
@@ -86,9 +84,7 @@ export function getDashboardUrl(event: CloudflareEvent): string | null {
 	const accountId = event.metadata?.accountId;
 	const buildUuid = event.payload?.buildUuid;
 	const workerName =
-		event.source?.workerName ||
-		event.payload?.buildTriggerMetadata?.repoName ||
-		"worker";
+		event.source?.workerName || event.payload?.buildTriggerMetadata?.repoName || "worker";
 
 	if (!accountId || !buildUuid) return null;
 

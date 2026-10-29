@@ -62,13 +62,14 @@ function lintTemplate(template: Template, fix: boolean): FileDiagnostic[] {
 
 	if (
 		!fs.existsSync(path.join(template.path, "wrangler.json")) &&
-		!fs.existsSync(path.join(template.path, "wrangler.jsonc"))
+		!fs.existsSync(path.join(template.path, "wrangler.jsonc")) &&
+		!fs.existsSync(path.join(template.path, "cloudflare.config.ts"))
 	) {
 		console.log(`Template ${template.name}`);
 		allProblems.push({
 			filePath: "General template",
 			problems: [
-				"Expected wrangler.json or wrangler.jsonc to exist. Use one of those instead of wrangler.toml!",
+				"Expected cloudflare.config.ts, wrangler.json, or wrangler.jsonc to exist.",
 			],
 		});
 	}

@@ -28,14 +28,8 @@ export class MapDisplay {
 		//console.log('  - data-google-maps-api-key:', document.body.getAttribute('data-google-maps-api-key'));
 		//console.log('  - Final apiKey:', apiKey);
 
-		if (
-			apiKey === "YOUR_API_KEY" ||
-			!apiKey ||
-			apiKey === "GOOGLE_MAPS_API_KEY"
-		) {
-			console.warn(
-				"Google Maps API key not configured, showing location list instead",
-			);
+		if (apiKey === "YOUR_API_KEY" || !apiKey || apiKey === "GOOGLE_MAPS_API_KEY") {
+			console.warn("Google Maps API key not configured, showing location list instead");
 			// Show location list instead of map
 			this.showLocationList(mapDiv, locations);
 			return;
@@ -178,12 +172,7 @@ export class MapDisplay {
 							}
 						}
 					} else {
-						console.error(
-							"Geocode failed for location:",
-							cleanAddress,
-							"Status:",
-							status,
-						);
+						console.error("Geocode failed for location:", cleanAddress, "Status:", status);
 						geocodedCount++;
 					}
 				});
@@ -257,8 +246,7 @@ export class MapDisplay {
 
 			const title = document.createElement("div");
 			title.textContent = location.title;
-			title.style.cssText =
-				"font-weight: 600; color: #333; margin-bottom: 5px;";
+			title.style.cssText = "font-weight: 600; color: #333; margin-bottom: 5px;";
 
 			const address = document.createElement("div");
 			// Clean up the address if needed
@@ -267,8 +255,7 @@ export class MapDisplay {
 				cleanAddress = cleanAddress.split(", {")[0];
 			}
 			address.textContent = cleanAddress;
-			address.style.cssText =
-				"color: #666; font-size: 0.9em; line-height: 1.4;";
+			address.style.cssText = "color: #666; font-size: 0.9em; line-height: 1.4;";
 
 			details.appendChild(title);
 			details.appendChild(address);
@@ -283,10 +270,8 @@ export class MapDisplay {
 
 		// Add a note about the map
 		const note = document.createElement("p");
-		note.textContent =
-			"Map view requires a Google Maps API key to be configured.";
-		note.style.cssText =
-			"margin: 15px 0 0 0; font-size: 0.85em; color: #888; font-style: italic;";
+		note.textContent = "Map view requires a Google Maps API key to be configured.";
+		note.style.cssText = "margin: 15px 0 0 0; font-size: 0.85em; color: #888; font-style: italic;";
 		listContainer.appendChild(note);
 
 		mapDiv.appendChild(listContainer);

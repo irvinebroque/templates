@@ -25,6 +25,7 @@ export type SeedRepo = {
 };
 
 export const SEED_REPO_FILES = [
+	"cloudflare.config.ts",
 	"wrangler.jsonc",
 	"wrangler.json",
 	"wrangler.toml",

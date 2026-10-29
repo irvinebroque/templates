@@ -61,16 +61,10 @@ import {
 	type VoiceMetricContext,
 	type VoiceTextStreamOutcome,
 } from "./voice/metrics";
-import {
-	guardVoiceOutput,
-	type OutputGuardrailState,
-} from "./voice/outputGuardrail";
+import { guardVoiceOutput, type OutputGuardrailState } from "./voice/outputGuardrail";
 import { RetryingTts } from "./voice/retryingTts";
 import { prepareTextForSpeech } from "./voice/speechPreparation";
-import {
-	buildVoiceGreeting,
-	buildVoiceSystemPrompt,
-} from "./voice/trustedAgent";
+import { buildVoiceGreeting, buildVoiceSystemPrompt } from "./voice/trustedAgent";
 import { createVoiceAIBinding } from "./voice/voiceAIBinding";
 
 const logger = new WorkersLogger();
@@ -118,9 +112,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 	tts = this.#buildTts();
 
 	async onStart(): Promise<void> {
-		logger
-			.withTags({ agentId: FIXED_VOICE_CONFIG.agentId })
-			.info("voice agent initialized");
+		logger.withTags({ agentId: FIXED_VOICE_CONFIG.agentId }).info("voice agent initialized");
 		const oldestTimestamp = this.#oldestConversationTimestamp();
 		if (oldestTimestamp !== null) {
 			await this.#ensureConversationCleanupSchedule(
@@ -138,9 +130,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 			return false;
 		}
 
-		const connectedIds = new Set(
-			[...this.getConnections()].map((candidate) => candidate.id),
-		);
+		const connectedIds = new Set([...this.getConnections()].map((candidate) => candidate.id));
 		for (const endedCallId of this.#endedCallIds) {
 			if (!connectedIds.has(endedCallId)) {
 				this.#endedCallIds.delete(endedCallId);
@@ -199,9 +189,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 		this.#teardownEphemeralSpeech(connection, true);
 		this.#outputGuardrails.delete(connection.id);
 		if (release.released) {
-			this.ctx.waitUntil(
-				Promise.resolve().then(() => this.#clearOwnedConversationHistory()),
-			);
+			this.ctx.waitUntil(Promise.resolve().then(() => this.#clearOwnedConversationHistory()));
 		}
 	}
 
@@ -223,10 +211,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 	onMessage(connection: Connection, message: WSMessage): void {
 		if (typeof message !== "string") return;
 		if (message.length > VOICE_CONFIG_MESSAGE_MAX_LENGTH) {
-			this.#rejectConfiguration(
-				connection,
-				"Configuration message is too large",
-			);
+			this.#rejectConfiguration(connection, "Configuration message is too large");
 			return;
 		}
 
@@ -241,10 +226,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 				return;
 			}
 			if (!isFixedVoiceConfigMessage(data)) {
-				this.#rejectConfiguration(
-					connection,
-					"Agent and pipeline selection are disabled",
-				);
+				this.#rejectConfiguration(connection, "Agent and pipeline selection are disabled");
 				return;
 			}
 
@@ -340,11 +322,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 		} else {
 			this.#abortApprovedSpeech(context.connection.id);
 			this.#invalidateApproval(context.connection.id);
-			metricContext = this.#beginVoiceFlow(
-				context.connection,
-				"text",
-				trimmed.length,
-			);
+			metricContext = this.#beginVoiceFlow(context.connection, "text", trimmed.length);
 		}
 
 		if (!approvedSpeechMatches) {
@@ -374,10 +352,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 			context.signal,
 		);
 		if (toolWait === "aborted" || context.signal.aborted) {
-			this.#logDocsToolsAborted(
-				metricContext,
-				elapsedMsSince(toolWaitStartedAt),
-			);
+			this.#logDocsToolsAborted(metricContext, elapsedMsSince(toolWaitStartedAt));
 			this.#teardownEphemeralSpeech(context.connection, true);
 			return "";
 		}
@@ -439,20 +414,11 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 			],
 			tools: toolRuntime.tools,
 			prepareStep: ({ stepNumber }) =>
-				stepNumber === toolRuntime.maxSteps - 1
-					? { toolChoice: "none" }
-					: undefined,
+				stepNumber === toolRuntime.maxSteps - 1 ? { toolChoice: "none" } : undefined,
 			stopWhen: stepCountIs(toolRuntime.maxSteps),
 			abortSignal: context.signal,
 			...VOICE_LLM_OPTIONS,
-			onStepFinish: ({
-				stepNumber,
-				finishReason,
-				usage,
-				text,
-				reasoningText,
-				toolCalls,
-			}) => {
+			onStepFinish: ({ stepNumber, finishReason, usage, text, reasoningText, toolCalls }) => {
 				const stepFinishedAt = performance.now();
 				logVoiceMetric(metricContext, {
 					event: "voice_agent_llm_step_completed",
@@ -466,9 +432,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 					toolCallCount: toolCalls.length,
 					maxOutputTokens: VOICE_LLM_OPTIONS.maxOutputTokens,
 					durationMs: Math.round(stepFinishedAt - stepStartedAt),
-					elapsedSinceFlowMs: Math.round(
-						stepFinishedAt - metricContext.startedAt,
-					),
+					elapsedSinceFlowMs: Math.round(stepFinishedAt - metricContext.startedAt),
 				});
 				stepStartedAt = stepFinishedAt;
 			},
@@ -484,12 +448,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 				FILLER_SPEECH_DELAY_MS,
 			);
 		const beginRecoverySpeech = () =>
-			this.#beginEphemeralSpeech(
-				context.connection,
-				metricContext,
-				"recovery",
-				0,
-			);
+			this.#beginEphemeralSpeech(context.connection, metricContext, "recovery", 0);
 		const finalizeTextStream = createVoiceTextStreamFinalizer(
 			metricContext,
 			llmModel,
@@ -569,11 +528,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 				completionOutcome = context.signal.aborted
 					? "aborted"
 					: (completionOutcome ??
-						(streamExhausted
-							? hasOutputText
-								? "output"
-								: "no_output"
-							: "error"));
+						(streamExhausted ? (hasOutputText ? "output" : "no_output") : "error"));
 				finalizeTextStream(completionOutcome, {
 					toolCallCount,
 					textChunkCount,
@@ -586,9 +541,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 			}
 
 			if (completionOutcome === "no_output") {
-				const error = new Error(
-					"Voice LLM stream completed without text output",
-				);
+				const error = new Error("Voice LLM stream completed without text output");
 				logger
 					.withTags({
 						model: llmModel,
@@ -605,10 +558,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 		})();
 	}
 
-	async afterTranscribe(
-		transcript: string,
-		connection: Connection,
-	): Promise<string | null> {
+	async afterTranscribe(transcript: string, connection: Connection): Promise<string | null> {
 		this.#abortInputGuardrail(connection.id);
 		const trimmed = transcript.trim();
 		if (trimmed.length === 0) {
@@ -621,21 +571,14 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 		const guardrailController = new AbortController();
 		this.#inputGuardrailControllers.set(connection.id, guardrailController);
 		const approvalEpoch = this.#invalidateApproval(connection.id);
-		const metricContext = this.#beginVoiceFlow(
-			connection,
-			"stt",
-			trimmed.length,
-		);
+		const metricContext = this.#beginVoiceFlow(connection, "stt", trimmed.length);
 		const checked = await this.#validatePrompt(
 			trimmed,
 			connection,
 			metricContext,
 			guardrailController.signal,
 		).finally(() => {
-			if (
-				this.#inputGuardrailControllers.get(connection.id) ===
-				guardrailController
-			) {
+			if (this.#inputGuardrailControllers.get(connection.id) === guardrailController) {
 				this.#inputGuardrailControllers.delete(connection.id);
 			}
 		});
@@ -659,10 +602,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 		return checked;
 	}
 
-	async beforeSynthesize(
-		text: string,
-		connection: Connection,
-	): Promise<string | null> {
+	async beforeSynthesize(text: string, connection: Connection): Promise<string | null> {
 		const activeGuardrail = this.#outputGuardrails.get(connection.id);
 		if (!activeGuardrail) return prepareTextForSpeech(text);
 
@@ -683,10 +623,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 			durationMs: elapsedMsSince(startedAt),
 		});
 
-		if (
-			(result.outcome === "blocked" || result.outcome === "error") &&
-			result.notify
-		) {
+		if ((result.outcome === "blocked" || result.outcome === "error") && result.notify) {
 			logger
 				.withTags({
 					connectionId: connection.id,
@@ -717,9 +654,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 		return audio;
 	}
 
-	async cleanupConversationHistory(
-		_payload: ConversationCleanupPayload,
-	): Promise<void> {
+	async cleanupConversationHistory(_payload: ConversationCleanupPayload): Promise<void> {
 		const startedAt = performance.now();
 		if (this.#hasConversationHistory()) {
 			const cutoffExclusive = Date.now() - CONVERSATION_RETENTION_MS + 1_000;
@@ -827,11 +762,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 					return;
 				}
 				if (!audio) {
-					this.#finishEphemeralSpeechMetric(
-						state,
-						"failed",
-						state.phase === "recovery",
-					);
+					this.#finishEphemeralSpeechMetric(state, "failed", state.phase === "recovery");
 					return;
 				}
 				if (shouldAnnounceEphemeralSpeakingStatus(state.phase)) {
@@ -847,21 +778,13 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 						status: "listening",
 					});
 				}
-				this.#finishEphemeralSpeechMetric(
-					state,
-					"succeeded",
-					state.phase === "recovery",
-				);
+				this.#finishEphemeralSpeechMetric(state, "succeeded", state.phase === "recovery");
 			} catch (error) {
 				if (state.controller.signal.aborted) {
 					this.#finishEphemeralSpeechMetric(state, "aborted", true);
 					return;
 				}
-				this.#finishEphemeralSpeechMetric(
-					state,
-					"failed",
-					state.phase === "recovery",
-				);
+				this.#finishEphemeralSpeechMetric(state, "failed", state.phase === "recovery");
 				logger
 					.withTags({
 						connectionId: connection.id,
@@ -884,11 +807,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 		if (!state) return;
 		clearTimeout(state.timer);
 		state.controller.abort();
-		this.#finishEphemeralSpeechMetric(
-			state,
-			"aborted",
-			flowStopped || state.phase === "recovery",
-		);
+		this.#finishEphemeralSpeechMetric(state, "aborted", flowStopped || state.phase === "recovery");
 		this.#ephemeralSpeech.delete(connection.id);
 	}
 
@@ -1029,11 +948,8 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 		);
 	}
 
-	async #reconcileConversationCleanupSchedule(
-		deadlineMs: number,
-	): Promise<void> {
-		const scheduledDeadlineMs =
-			normalizeConversationCleanupScheduleTime(deadlineMs);
+	async #reconcileConversationCleanupSchedule(deadlineMs: number): Promise<void> {
+		const scheduledDeadlineMs = normalizeConversationCleanupScheduleTime(deadlineMs);
 		const schedules = (await this.listSchedules()).filter(
 			(schedule) => schedule.callback === "cleanupConversationHistory",
 		);
@@ -1055,9 +971,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 			);
 		}
 
-		const obsolete = schedules.filter(
-			(schedule) => schedule.id !== matching?.id,
-		);
+		const obsolete = schedules.filter((schedule) => schedule.id !== matching?.id);
 		const cancellations = await Promise.allSettled(
 			obsolete.map((schedule) => this.cancelSchedule(schedule.id)),
 		);
@@ -1067,9 +981,7 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 		if (failedCancellationCount > 0) {
 			logger
 				.withTags({ failedCancellationCount })
-				.warn(
-					"obsolete voice conversation cleanup schedules could not be cancelled",
-				);
+				.warn("obsolete voice conversation cleanup schedules could not be cancelled");
 		}
 	}
 
@@ -1079,18 +991,12 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 				(schedule) => schedule.callback === "cleanupConversationHistory",
 			);
 			if (this.#activeCallId !== null) return;
-			await Promise.all(
-				schedules.map((schedule) => this.cancelSchedule(schedule.id)),
-			);
+			await Promise.all(schedules.map((schedule) => this.cancelSchedule(schedule.id)));
 		});
 	}
 
-	#queueRetentionScheduleOperation(
-		operation: () => Promise<void>,
-	): Promise<void> {
-		const queued = this.#retentionScheduleQueue
-			.catch(() => undefined)
-			.then(operation);
+	#queueRetentionScheduleOperation(operation: () => Promise<void>): Promise<void> {
+		const queued = this.#retentionScheduleQueue.catch(() => undefined).then(operation);
 		this.#retentionScheduleQueue = queued.catch(() => undefined);
 		return queued;
 	}
@@ -1171,23 +1077,15 @@ export class VoiceAgent extends VoiceAgentBase<Env> {
 					stack: error instanceof Error ? error.stack : undefined,
 					serverId: server.id,
 				})
-				.error(
-					"failed to reset voice docs tool server after connection failure",
-				);
+				.error("failed to reset voice docs tool server after connection failure");
 		} finally {
-			if (
-				expectedConnection === undefined ||
-				this.#docsToolConnection === expectedConnection
-			) {
+			if (expectedConnection === undefined || this.#docsToolConnection === expectedConnection) {
 				this.#docsToolConnection = null;
 			}
 		}
 	}
 
-	#logDocsToolsAborted(
-		metricContext: VoiceMetricContext,
-		durationMs = 0,
-	): void {
+	#logDocsToolsAborted(metricContext: VoiceMetricContext, durationMs = 0): void {
 		logVoiceMetric(metricContext, {
 			event: "voice_agent_docs_tools_ready",
 			...voiceToolsLifecycle("aborted", DOCS_TOOL_COUNT, 0),

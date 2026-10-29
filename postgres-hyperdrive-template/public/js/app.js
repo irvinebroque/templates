@@ -94,21 +94,15 @@ function handleEditUser(user) {
 }
 
 function handleDeleteUser(user) {
-	showDeleteConfirmation(
-		`Are you sure you want to delete the user "${user.username}"?`,
-		() => {
-			deleteUser(user.id);
-		},
-	);
+	showDeleteConfirmation(`Are you sure you want to delete the user "${user.username}"?`, () => {
+		deleteUser(user.id);
+	});
 }
 
 function handleDeleteOrg(org) {
-	showDeleteConfirmation(
-		`Are you sure you want to delete the organization "${org.name}"?`,
-		() => {
-			deleteOrganization(org.id);
-		},
-	);
+	showDeleteConfirmation(`Are you sure you want to delete the organization "${org.name}"?`, () => {
+		deleteOrganization(org.id);
+	});
 }
 
 // Show delete confirmation modal
@@ -187,18 +181,16 @@ function prepareAddOrgForm() {
 
 function setupEventListeners() {
 	// Initialize button
-	document
-		.getElementById("initializeTablesBtn")
-		.addEventListener("click", async () => {
-			try {
-				await initializeTables();
-				document.getElementById("initializeView").classList.add("hidden");
-				document.getElementById("dashboardView").classList.remove("hidden");
-				await loadData();
-			} catch (error) {
-				toastHandler.show("Error initializing tables", "danger");
-			}
-		});
+	document.getElementById("initializeTablesBtn").addEventListener("click", async () => {
+		try {
+			await initializeTables();
+			document.getElementById("initializeView").classList.add("hidden");
+			document.getElementById("dashboardView").classList.remove("hidden");
+			await loadData();
+		} catch (error) {
+			toastHandler.show("Error initializing tables", "danger");
+		}
+	});
 
 	// Tab switching
 	document.getElementById("usersTabBtn").addEventListener("click", () => {
@@ -226,12 +218,8 @@ function setupEventListeners() {
 	});
 
 	// Add buttons
-	document
-		.getElementById("addUserBtn")
-		.addEventListener("click", prepareAddUserForm);
-	document
-		.getElementById("addOrgBtn")
-		.addEventListener("click", prepareAddOrgForm);
+	document.getElementById("addUserBtn").addEventListener("click", prepareAddUserForm);
+	document.getElementById("addOrgBtn").addEventListener("click", prepareAddOrgForm);
 
 	// Save buttons
 	document.getElementById("saveUserBtn").addEventListener("click", async () => {
@@ -239,8 +227,7 @@ function setupEventListeners() {
 		const orgId = document.getElementById("userOrg").value;
 
 		if (!username) {
-			document.getElementById("usernameError").textContent =
-				"Username is required";
+			document.getElementById("usernameError").textContent = "Username is required";
 			return;
 		}
 
@@ -266,8 +253,7 @@ function setupEventListeners() {
 		const name = document.getElementById("orgName").value.trim();
 
 		if (!name) {
-			document.getElementById("orgNameError").textContent =
-				"Organization name is required";
+			document.getElementById("orgNameError").textContent = "Organization name is required";
 			return;
 		}
 
@@ -304,14 +290,12 @@ function setupEventListeners() {
 	});
 
 	// Add cancel button functionality
-	document
-		.querySelectorAll("button.btn.secondary[data-dismiss]")
-		.forEach((button) => {
-			button.addEventListener("click", function () {
-				const target = this.getAttribute("data-dismiss");
-				modalHandlers.hide(target);
-			});
+	document.querySelectorAll("button.btn.secondary[data-dismiss]").forEach((button) => {
+		button.addEventListener("click", function () {
+			const target = this.getAttribute("data-dismiss");
+			modalHandlers.hide(target);
 		});
+	});
 
 	// Handle Enter key press in modal forms
 	document.getElementById("userForm").addEventListener("keydown", (e) => {

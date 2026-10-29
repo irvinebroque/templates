@@ -1,13 +1,6 @@
-import { describe, expect, it } from "vitest";
-import {
-	FIXED_VOICE_CONFIG,
-	isFixedVoiceConfigMessage,
-} from "../src/voice/config";
-import {
-	buildVoiceGreeting,
-	buildVoiceSystemPrompt,
-	DOCS_AGENT,
-} from "../src/voice/trustedAgent";
+import { describe, expect, it } from "vite-plus/test";
+import { FIXED_VOICE_CONFIG, isFixedVoiceConfigMessage } from "../src/voice/config";
+import { buildVoiceGreeting, buildVoiceSystemPrompt, DOCS_AGENT } from "../src/voice/trustedAgent";
 
 function fixedMessage(overrides: Record<string, unknown> = {}) {
 	return {
@@ -35,14 +28,10 @@ describe("fixed voice configuration", () => {
 
 	it("accepts only the exact fixed protocol configuration", () => {
 		expect(isFixedVoiceConfigMessage(fixedMessage())).toBe(true);
-		expect(
-			isFixedVoiceConfigMessage(
-				fixedMessage({ llmModel: "@cf/zai-org/glm-4.7-flash" }),
-			),
-		).toBe(false);
-		expect(
-			isFixedVoiceConfigMessage(fixedMessage({ agentId: "another-agent" })),
-		).toBe(false);
+		expect(isFixedVoiceConfigMessage(fixedMessage({ llmModel: "@cf/zai-org/glm-4.7-flash" }))).toBe(
+			false,
+		);
+		expect(isFixedVoiceConfigMessage(fixedMessage({ agentId: "another-agent" }))).toBe(false);
 	});
 
 	it("does not trust browser identity or instruction fields", () => {

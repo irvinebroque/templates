@@ -21,10 +21,7 @@ export type OutputGuardrailResult =
 
 function isAbortError(error: unknown): boolean {
 	return (
-		typeof error === "object" &&
-		error !== null &&
-		"name" in error &&
-		error.name === "AbortError"
+		typeof error === "object" && error !== null && "name" in error && error.name === "AbortError"
 	);
 }
 
@@ -66,20 +63,11 @@ export async function guardVoiceOutput(
 		const result = await check(text, signal);
 		if (signal.aborted) return { outcome: "aborted", text: null };
 		if (result.safe) return { outcome: "allowed", text };
-		return suppressWithFallback(
-			state,
-			"blocked",
-			result.message,
-			result.categories,
-		);
+		return suppressWithFallback(state, "blocked", result.message, result.categories);
 	} catch (error) {
 		if (signal.aborted || isAbortError(error)) {
 			return { outcome: "aborted", text: null };
 		}
-		return suppressWithFallback(
-			state,
-			"error",
-			"Safety check unavailable. Please try again.",
-		);
+		return suppressWithFallback(state, "error", "Safety check unavailable. Please try again.");
 	}
 }

@@ -15,9 +15,7 @@ export function PageHeader({
 	return (
 		<div className="max-w-[1400px] mx-auto w-full px-6 lg:px-10 pt-8 lg:pt-10">
 			<h1 className="text-[22px] font-bold text-neutral-950 mb-0.5">{title}</h1>
-			{subtitle && (
-				<p className="text-[13px] text-neutral-500 mb-4">{subtitle}</p>
-			)}
+			{subtitle && <p className="text-[13px] text-neutral-500 mb-4">{subtitle}</p>}
 			{actions && <div className="flex items-center gap-2 mb-6">{actions}</div>}
 			{children}
 		</div>

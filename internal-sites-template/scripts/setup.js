@@ -80,10 +80,7 @@ function ensureDispatchNamespace(namespaceName, executeWrangler = runWrangler) {
 		log(green, `  Dispatch namespace '${namespaceName}' created.`);
 	} catch (error) {
 		const output = commandOutput(error);
-		if (
-			output.includes("already exist") ||
-			output.includes("A namespace with this name")
-		) {
+		if (output.includes("already exist") || output.includes("A namespace with this name")) {
 			log(green, `  Dispatch namespace '${namespaceName}' already exists.`);
 			return;
 		}
@@ -106,15 +103,9 @@ function updateWranglerConfig(accountId) {
 	}
 
 	const content = fs.readFileSync(configPath, "utf-8");
-	const updated = content.replace(
-		/"ACCOUNT_ID"\s*:\s*"[^"]*"/,
-		`"ACCOUNT_ID": "${accountId}"`,
-	);
+	const updated = content.replace(/"ACCOUNT_ID"\s*:\s*"[^"]*"/, `"ACCOUNT_ID": "${accountId}"`);
 
-	if (
-		updated === content &&
-		!content.includes(`"ACCOUNT_ID": "${accountId}"`)
-	) {
+	if (updated === content && !content.includes(`"ACCOUNT_ID": "${accountId}"`)) {
 		throw new Error("Could not find ACCOUNT_ID in wrangler.jsonc vars.");
 	}
 

@@ -20,10 +20,7 @@ import type { ProtectedRouteConfig } from "../auth";
  * @param config - Protected route configuration
  * @returns true if request should bypass payment, false if payment required
  */
-export function hasBotManagementException(
-	request: Request,
-	config: ProtectedRouteConfig
-): boolean {
+export function hasBotManagementException(request: Request, config: ProtectedRouteConfig): boolean {
 	// No threshold configured = no Bot Management filtering (all traffic must pay)
 	if (config.bot_score_threshold === undefined) {
 		return false;
@@ -38,7 +35,7 @@ export function hasBotManagementException(
 	if (!botManagement) {
 		console.warn(
 			"[x402-proxy] Bot Management Filtering configured but cf.botManagement not available. " +
-				"Requires Bot Management for Enterprise. Falling back to payment requirement."
+				"Requires Bot Management for Enterprise. Falling back to payment requirement.",
 		);
 		return false;
 	}
@@ -49,7 +46,7 @@ export function hasBotManagementException(
 	if (botScore === undefined || botScore === null) {
 		console.warn(
 			"[x402-proxy] Bot Management data available but score is missing. " +
-				"Falling back to payment requirement."
+				"Falling back to payment requirement.",
 		);
 		return false;
 	}
@@ -63,9 +60,7 @@ export function hasBotManagementException(
 
 	// Check 2: Is this an excepted bot? (detection ID in exception list)
 	if (config.except_detection_ids && config.except_detection_ids.length > 0) {
-		const isExcepted = detectionIds.some((id) =>
-			config.except_detection_ids!.includes(id)
-		);
+		const isExcepted = detectionIds.some((id) => config.except_detection_ids!.includes(id));
 		if (isExcepted) {
 			return true; // Excepted bot - bypass payment
 		}

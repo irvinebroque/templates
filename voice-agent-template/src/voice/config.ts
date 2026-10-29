@@ -16,11 +16,7 @@ export const VOICE_LLM_OPTIONS = {
 	maxOutputTokens: 10_000,
 } as const;
 
-export const VOICE_STT_KEYTERMS = [
-	"Cloudflare",
-	"Workers",
-	"Durable Objects",
-] as const;
+export const VOICE_STT_KEYTERMS = ["Cloudflare", "Workers", "Durable Objects"] as const;
 
 export const MAX_PROMPT_LENGTH = 20_000;
 export const VOICE_CONFIG_MESSAGE_MAX_LENGTH = 4_096;
@@ -38,9 +34,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function isFixedVoiceConfigMessage(
-	value: unknown,
-): value is FixedVoiceConfigMessage {
+export function isFixedVoiceConfigMessage(value: unknown): value is FixedVoiceConfigMessage {
 	return (
 		isRecord(value) &&
 		value.type === "voice_config" &&

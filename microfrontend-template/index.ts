@@ -30,14 +30,7 @@ import { env } from "cloudflare:workers";
  * These defaults are always included. Additional custom prefixes can be added
  * via the ASSET_PREFIXES environment variable (JSON array of strings).
  */
-const DEFAULT_ASSET_PREFIXES = [
-	"/assets/",
-	"/static/",
-	"/build/",
-	"/_astro/",
-	"/_next",
-	"/fonts/",
-];
+const DEFAULT_ASSET_PREFIXES = ["/assets/", "/static/", "/build/", "/_astro/", "/_next", "/fonts/"];
 
 /**
  * Builds the complete list of asset prefixes by merging defaults with custom prefixes from environment.
@@ -52,10 +45,7 @@ function buildAssetPrefixes(envObj: typeof env = env): string[] {
 	const defaults = [...DEFAULT_ASSET_PREFIXES];
 
 	// Read custom prefixes from environment variable (optional)
-	if (
-		"ASSET_PREFIXES" in envObj &&
-		typeof (envObj as any).ASSET_PREFIXES === "string"
-	) {
+	if ("ASSET_PREFIXES" in envObj && typeof (envObj as any).ASSET_PREFIXES === "string") {
 		try {
 			const custom = JSON.parse((envObj as any).ASSET_PREFIXES);
 			if (Array.isArray(custom)) {
@@ -233,8 +223,7 @@ function segmentToRegex(segmentExpr: string): string {
 		if (ch === ":") {
 			// Parse parameter name (alphanumeric + underscore).
 			const nameMatch = segmentExpr.slice(i).match(/^:([A-Za-z0-9_]+)/);
-			if (!nameMatch)
-				throw new Error(`Invalid param in segment: "${segmentExpr}"`);
+			if (!nameMatch) throw new Error(`Invalid param in segment: "${segmentExpr}"`);
 			const name = nameMatch[1];
 			i += 1 + name.length;
 
@@ -257,8 +246,7 @@ function segmentToRegex(segmentExpr: string): string {
 						if (depth === 0) break; // Found matching closing paren
 					}
 				}
-				if (j >= segmentExpr.length)
-					throw new Error(`Unclosed (...) in segment: "${segmentExpr}"`);
+				if (j >= segmentExpr.length) throw new Error(`Unclosed (...) in segment: "${segmentExpr}"`);
 
 				// Extract the pattern content and unescape any backslash-escaped literals.
 				const inner = segmentExpr.slice(i + 1, j);
@@ -332,10 +320,7 @@ function compilePathExpr(exprRaw: string): {
 
 	// Static mount detection: no params, no parens, no escapes
 	const isStaticMount =
-		!expr.includes(":") &&
-		!expr.includes("(") &&
-		!expr.includes(")") &&
-		!expr.includes("\\");
+		!expr.includes(":") && !expr.includes("(") && !expr.includes(")") && !expr.includes("\\");
 
 	if (isStaticMount) {
 		const mount = expr;
@@ -610,10 +595,7 @@ class PreloadScriptInjector {
 
 	constructor(mountActual: string) {
 		// Special handling for root mount to avoid "//__mf-preload.js"
-		this.scriptPath =
-			mountActual === "/"
-				? "/__mf-preload.js"
-				: `${mountActual}/__mf-preload.js`;
+		this.scriptPath = mountActual === "/" ? "/__mf-preload.js" : `${mountActual}/__mf-preload.js`;
 	}
 
 	element(el: Element) {
@@ -656,11 +638,7 @@ function cloneHeadersForTransform(original: Headers): Headers {
  * @param requestUrl - Original request URL for resolving relative URLs
  * @returns Rewritten Location header value
  */
-function rewriteLocation(
-	location: string,
-	mount: string,
-	requestUrl: URL,
-): string {
+function rewriteLocation(location: string, mount: string, requestUrl: URL): string {
 	mount = normalizePath(mount);
 	try {
 		const url = new URL(location, requestUrl.origin);
@@ -691,9 +669,7 @@ function rewriteLocation(
 function rewriteSetCookie(headers: Headers, mount: string) {
 	mount = normalizePath(mount);
 
-	const getSetCookie = (headers as any).getSetCookie as
-		| undefined
-		| (() => string[]);
+	const getSetCookie = (headers as any).getSetCookie as undefined | (() => string[]);
 	if (!getSetCookie) return;
 
 	const cookies = getSetCookie.call(headers);
@@ -704,10 +680,7 @@ function rewriteSetCookie(headers: Headers, mount: string) {
 		if (/;\s*Path=\//i.test(cookie)) {
 			// If mount is "/", keep Path=/ (root)
 			const newPath = mount === "/" ? "/" : `${mount}/`;
-			headers.append(
-				"Set-Cookie",
-				cookie.replace(/;\s*Path=\//i, `; Path=${newPath}`),
-			);
+			headers.append("Set-Cookie", cookie.replace(/;\s*Path=\//i, `; Path=${newPath}`));
 		} else {
 			headers.append("Set-Cookie", cookie);
 		}
@@ -777,9 +750,7 @@ function isChromiumBrowser(userAgent: string): boolean {
 	const isFirefox = ua.includes("firefox");
 	const isSafari = ua.includes("safari") && !ua.includes("chrome");
 
-	return (
-		(hasChrome || hasEdge || hasOpera || hasBrave) && !isFirefox && !isSafari
-	);
+	return (hasChrome || hasEdge || hasOpera || hasBrave) && !isFirefox && !isSafari;
 }
 
 /**
@@ -851,35 +822,25 @@ async function handleMountedApp(
 		if (forwardUrl.pathname === mountActual) {
 			forwardUrl.pathname = "/";
 		} else if (forwardUrl.pathname.startsWith(mountActual + "/")) {
-			forwardUrl.pathname =
-				forwardUrl.pathname.slice(mountActual.length) || "/";
+			forwardUrl.pathname = forwardUrl.pathname.slice(mountActual.length) || "/";
 		}
 	}
 
 	// Serve preload script from the router itself (not from upstream service).
 	// This script is used as a fallback for browsers that don't support Speculation Rules API.
 	// Must be checked BEFORE forwarding to upstream to intercept the request.
-	if (
-		options?.preloadStaticMounts?.length &&
-		forwardUrl.pathname === "/__mf-preload.js"
-	) {
+	if (options?.preloadStaticMounts?.length && forwardUrl.pathname === "/__mf-preload.js") {
 		return getPreloadScriptResponse(options.preloadStaticMounts);
 	}
 
-	const upstreamResp = await upstream.fetch(
-		new Request(forwardUrl.toString(), request),
-	);
+	const upstreamResp = await upstream.fetch(new Request(forwardUrl.toString(), request));
 	const headers = new Headers(upstreamResp.headers);
 	const contentType = headers.get("content-type") || "";
 
 	// Redirects: rewrite Location + cookies and return
 	if (upstreamResp.status >= 300 && upstreamResp.status < 400) {
 		const loc = headers.get("location");
-		if (loc)
-			headers.set(
-				"location",
-				rewriteLocation(loc, mountActual, new URL(request.url)),
-			);
+		if (loc) headers.set("location", rewriteLocation(loc, mountActual, new URL(request.url)));
 		rewriteSetCookie(headers, mountActual);
 
 		return new Response(null, { status: upstreamResp.status, headers });
@@ -902,8 +863,7 @@ async function handleMountedApp(
 			new AllAttributesRewriter(mountActual, assetPrefixes),
 		);
 		// Optionally inject view transition CSS into <head>.
-		if (options?.smoothTransitions)
-			rewriter.on("head", new SmoothTransitionsInjector());
+		if (options?.smoothTransitions) rewriter.on("head", new SmoothTransitionsInjector());
 
 		// Conditionally inject preload mechanism based on browser support:
 		// - Chromium browsers: Use Speculation Rules API (more efficient)
@@ -911,10 +871,7 @@ async function handleMountedApp(
 		if (options?.preloadStaticMounts?.length) {
 			if (isChromium) {
 				// Inject speculation rules for Chromium browsers (Chrome, Edge, etc.)
-				rewriter.on(
-					"head",
-					new SpeculationRulesInjector(options.preloadStaticMounts),
-				);
+				rewriter.on("head", new SpeculationRulesInjector(options.preloadStaticMounts));
 			} else {
 				// Inject fallback script for non-Chromium browsers (Firefox, Safari)
 				rewriter.on("body", new PreloadScriptInjector(mountActual));
@@ -1026,9 +983,7 @@ function buildRoutes(envObj: typeof env = env): {
 
 		const binding = (envObj as any)[r.binding];
 		if (!binding || typeof binding.fetch !== "function") {
-			throw new Error(
-				`Binding "${r.binding}" not found or is not a valid service binding.`,
-			);
+			throw new Error(`Binding "${r.binding}" not found or is not a valid service binding.`);
 		}
 
 		const expr = normalizePath(r.path);
@@ -1048,8 +1003,7 @@ function buildRoutes(envObj: typeof env = env): {
 	// Sort routes deterministically by specificity (for consistent ordering in logs/debugging).
 	// Runtime matching still uses score-based selection (longest mount prefix wins).
 	compiled.sort((a, b) => {
-		if (b.baseSpecificity !== a.baseSpecificity)
-			return b.baseSpecificity - a.baseSpecificity;
+		if (b.baseSpecificity !== a.baseSpecificity) return b.baseSpecificity - a.baseSpecificity;
 		return b.expr.length - a.expr.length;
 	});
 
@@ -1104,10 +1058,7 @@ export default {
 
 			// Scoring: longest mount prefix is most important (multiplier 1M),
 			// then specificity (multiplier 1K), then expression length.
-			const score =
-				mountActual.length * 1000000 +
-				route.baseSpecificity * 1000 +
-				route.expr.length;
+			const score = mountActual.length * 1000000 + route.baseSpecificity * 1000 + route.expr.length;
 
 			if (!best || score > best.score) {
 				best = { route, mountActual, score };
@@ -1135,26 +1086,14 @@ export default {
 		// Only static mounts can be preloaded because we need concrete paths.
 		const preloadStaticMounts = routes
 			.filter(
-				(r) =>
-					r.preload &&
-					r.isStaticMount &&
-					r.staticMount &&
-					r.staticMount !== best!.mountActual,
+				(r) => r.preload && r.isStaticMount && r.staticMount && r.staticMount !== best!.mountActual,
 			)
 			.map((r) => r.staticMount!) // safe due to filter
 			.map(normalizePath);
 
-		return handleMountedApp(
-			request,
-			best.route.binding,
-			best.mountActual,
-			assetPrefixes,
-			{
-				smoothTransitions,
-				preloadStaticMounts: preloadStaticMounts.length
-					? preloadStaticMounts
-					: undefined,
-			},
-		);
+		return handleMountedApp(request, best.route.binding, best.mountActual, assetPrefixes, {
+			smoothTransitions,
+			preloadStaticMounts: preloadStaticMounts.length ? preloadStaticMounts : undefined,
+		});
 	},
 };

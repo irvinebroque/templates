@@ -1,7 +1,7 @@
 import { describe, test, expect, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
-import { getTemplates, readJson, writeJson } from "../src/util";
+import { getPublishedTemplates, readJson, writeJson } from "../src/util";
 
 describe("util", () => {
 	const testDir = path.join(__dirname, "test-templates");
@@ -29,21 +29,21 @@ describe("util", () => {
 		fs.rmSync(testDir, { recursive: true, force: true });
 	});
 
-	describe("getTemplates", () => {
+	describe("getPublishedTemplates", () => {
 		test("should return only dash templates when scanning directory", () => {
-			const templates = getTemplates(testDir);
+			const templates = getPublishedTemplates(testDir);
 			expect(templates).toHaveLength(1);
 			expect(templates[0].name).toBe("dash-template");
 			expect(templates[0].path).toBe(dashTemplate);
 		});
 
 		test("should return empty array for non-dash template directory", () => {
-			const templates = getTemplates(nonDashTemplate);
+			const templates = getPublishedTemplates(nonDashTemplate);
 			expect(templates).toHaveLength(0);
 		});
 
 		test("should return single template for dash template directory", () => {
-			const templates = getTemplates(dashTemplate);
+			const templates = getPublishedTemplates(dashTemplate);
 			expect(templates).toHaveLength(1);
 			expect(templates[0].name).toBe("dash-template");
 			expect(templates[0].path).toBe(dashTemplate);
@@ -52,7 +52,7 @@ describe("util", () => {
 		test("should handle missing package.json", () => {
 			const missingPkgTemplate = path.join(testDir, "missing-pkg-template");
 			fs.mkdirSync(missingPkgTemplate, { recursive: true });
-			const templates = getTemplates(testDir);
+			const templates = getPublishedTemplates(testDir);
 			expect(templates).toHaveLength(1); // Only the original dash template
 		});
 
@@ -63,7 +63,7 @@ describe("util", () => {
 				path.join(invalidPkgTemplate, "package.json"),
 				"invalid json",
 			);
-			const templates = getTemplates(testDir);
+			const templates = getPublishedTemplates(testDir);
 			expect(templates).toHaveLength(1); // Only the original dash template
 		});
 	});

@@ -1,25 +1,16 @@
 export const FILLER_SPEECH_DELAY_MS = 500;
 
-export function shouldAnnounceEphemeralSpeakingStatus(
-	phase: "filler" | "recovery",
-): boolean {
+export function shouldAnnounceEphemeralSpeakingStatus(phase: "filler" | "recovery"): boolean {
 	return phase === "recovery";
 }
 
-const FILLER_PHRASES = [
-	"One moment.",
-	"Let me check on that.",
-	"Give me a second.",
-] as const;
+const FILLER_PHRASES = ["One moment.", "Let me check on that.", "Give me a second."] as const;
 
 const RECOVERY_PHRASES = [
 	"Sorry, I couldn't come up with an answer. Could you try asking that another way?",
 ] as const;
 
-export function shouldBeginFillerSpeech(
-	streamPartType: string,
-	alreadyStarted: boolean,
-): boolean {
+export function shouldBeginFillerSpeech(streamPartType: string, alreadyStarted: boolean): boolean {
 	return streamPartType === "tool-call" && !alreadyStarted;
 }
 

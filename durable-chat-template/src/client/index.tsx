@@ -1,13 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { usePartySocket } from "partysocket/react";
 import React, { useState } from "react";
-import {
-	BrowserRouter,
-	Routes,
-	Route,
-	Navigate,
-	useParams,
-} from "react-router";
+import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router";
 import { nanoid } from "nanoid";
 
 import { names, type ChatMessage, type Message } from "../shared";
@@ -82,9 +76,7 @@ function App() {
 				className="row"
 				onSubmit={(e) => {
 					e.preventDefault();
-					const content = e.currentTarget.elements.namedItem(
-						"content",
-					) as HTMLInputElement;
+					const content = e.currentTarget.elements.namedItem("content") as HTMLInputElement;
 					const chatMessage: ChatMessage = {
 						id: nanoid(8),
 						content: content.value,

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import worker, { GrpcContainer } from "../src/index";
 
 function createSocket(chunks: Uint8Array[] = [], keepOpen = false) {
@@ -78,9 +78,7 @@ describe("gRPC Container Worker", () => {
 
 		expect(response.status).toBe(200);
 		expect(response.headers.get("content-type")).toContain("text/plain");
-		expect(await response.text()).toBe(
-			"gRPC Container accepts connections over inbound TCP.\n",
-		);
+		expect(await response.text()).toBe("gRPC Container accepts connections over inbound TCP.\n");
 	});
 
 	it("exposes a Durable Object connect handler", () => {
@@ -164,9 +162,7 @@ describe("gRPC Container Worker", () => {
 			opened: Promise.reject(new Error("upstream unavailable")),
 		}));
 
-		await expect(worker.connect(incoming.socket, env)).rejects.toThrow(
-			"upstream unavailable",
-		);
+		await expect(worker.connect(incoming.socket, env)).rejects.toThrow("upstream unavailable");
 		expect(incoming.socket.close).toHaveBeenCalledOnce();
 		expect(upstream.socket.close).toHaveBeenCalledOnce();
 	});
@@ -178,9 +174,7 @@ describe("gRPC Container Worker", () => {
 			throw new Error("connect failed");
 		});
 
-		await expect(worker.connect(incoming.socket, env)).rejects.toThrow(
-			"connect failed",
-		);
+		await expect(worker.connect(incoming.socket, env)).rejects.toThrow("connect failed");
 		expect(incoming.socket.close).toHaveBeenCalledOnce();
 	});
 });
@@ -196,10 +190,7 @@ describe("gRPC Container lifecycle", () => {
 		);
 		const upstream = createSocket();
 		const nextUpstream = createSocket();
-		const { durableObject, container } = createContainer(
-			upstream.socket,
-			false,
-		);
+		const { durableObject, container } = createContainer(upstream.socket, false);
 		container.getTcpPort.mockReturnValue({
 			connect: vi
 				.fn()
@@ -240,10 +231,7 @@ describe("gRPC Container lifecycle", () => {
 	it("restarts a stopped Container on the same Durable Object", async () => {
 		vi.spyOn(scheduler, "wait").mockResolvedValue(undefined);
 		const upstream = createSocket();
-		const { durableObject, container } = createContainer(
-			upstream.socket,
-			false,
-		);
+		const { durableObject, container } = createContainer(upstream.socket, false);
 
 		await durableObject.connect(createSocket().socket);
 		container.running = false;

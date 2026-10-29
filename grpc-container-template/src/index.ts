@@ -22,10 +22,7 @@ function log(event: string, details: Record<string, unknown> = {}): void {
 
 async function bridgeSockets(left: Socket, right: Socket): Promise<void> {
 	try {
-		await Promise.all([
-			left.readable.pipeTo(right.writable),
-			right.readable.pipeTo(left.writable),
-		]);
+		await Promise.all([left.readable.pipeTo(right.writable), right.readable.pipeTo(left.writable)]);
 	} catch (error) {
 		log("socket_pipe_closed", {
 			reason: error instanceof Error ? error.message : String(error),
@@ -112,15 +109,12 @@ export class GrpcContainer extends DurableObject<Env> {
 
 const worker = {
 	async fetch(): Promise<Response> {
-		return new Response(
-			"gRPC Container accepts connections over inbound TCP.\n",
-			{
-				headers: {
-					"content-type": "text/plain; charset=utf-8",
-					"cache-control": "no-store",
-				},
+		return new Response("gRPC Container accepts connections over inbound TCP.\n", {
+			headers: {
+				"content-type": "text/plain; charset=utf-8",
+				"cache-control": "no-store",
 			},
-		);
+		});
 	},
 
 	async connect(socket, env): Promise<void> {
@@ -129,10 +123,7 @@ const worker = {
 
 		try {
 			const container = env.GRPC_CONTAINER.getByName(CONTAINER_INSTANCE);
-			durableObjectSocket = container.connect(
-				`grpc-container:${GRPC_PORT}`,
-				SOCKET_OPTIONS,
-			);
+			durableObjectSocket = container.connect(`grpc-container:${GRPC_PORT}`, SOCKET_OPTIONS);
 			await durableObjectSocket.opened;
 			await bridgeSockets(socket, durableObjectSocket);
 		} finally {

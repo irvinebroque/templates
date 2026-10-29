@@ -55,8 +55,7 @@ export const CATALOG: RawProduct[] = [
 			liner: "EPS foam, anti-bacterial fabric",
 			seasons_of_use: "2-3 (adjustable fit)",
 		},
-		description:
-			"ASTM/CE certified toddler ski helmet, 48-52cm, dial-fit adjustment, 350g.",
+		description: "ASTM/CE certified toddler ski helmet, 48-52cm, dial-fit adjustment, 350g.",
 		imageUrl: undefined,
 		lastUpdated: new Date().toISOString(),
 	},
@@ -78,8 +77,7 @@ export const CATALOG: RawProduct[] = [
 			entry: "Wide-opening rear entry",
 			sole: "GripWalk compatible",
 		},
-		description:
-			"Single-buckle toddler ski boot, Mondo 15.5-19.5, polyolefin shell, flex 20.",
+		description: "Single-buckle toddler ski boot, Mondo 15.5-19.5, polyolefin shell, flex 20.",
 		imageUrl: undefined,
 		lastUpdated: new Date().toISOString(),
 	},
@@ -123,8 +121,7 @@ export const CATALOG: RawProduct[] = [
 			anti_fog: "Double-lens with anti-fog coating",
 			ventilation: "Perimeter venting",
 		},
-		description:
-			"Toddler ski goggles, cylindrical S1 lens, UV400, TPU frame, helmet-compatible.",
+		description: "Toddler ski goggles, cylindrical S1 lens, UV400, TPU frame, helmet-compatible.",
 		imageUrl: undefined,
 		lastUpdated: new Date().toISOString(),
 	},
@@ -144,8 +141,7 @@ export const CATALOG: RawProduct[] = [
 			closure: "Quick-release buckle, adjustable chest and waist",
 			ages: "18 months - 5 years",
 		},
-		description:
-			"Padded ski training harness with rear handle and detachable leash, up to 25kg.",
+		description: "Padded ski training harness with rear handle and detachable leash, up to 25kg.",
 		imageUrl: undefined,
 		lastUpdated: new Date().toISOString(),
 	},

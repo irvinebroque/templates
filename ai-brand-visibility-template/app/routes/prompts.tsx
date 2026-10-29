@@ -25,15 +25,9 @@ export async function loader({ context, request }: Route.LoaderArgs) {
 	const sites = ((await env.AEO_KV.get("sites", "json")) as any[]) ?? [];
 	const url = new URL(request.url);
 	const siteParam = url.searchParams.get("site");
-	const site = siteParam
-		? sites.find((s: any) => s.domain === siteParam)
-		: sites[0];
+	const site = siteParam ? sites.find((s: any) => s.domain === siteParam) : sites[0];
 	if (!site) return { site: null, prompts: [] };
-	const prompts =
-		((await env.AEO_KV.get(
-			`site:${site.domain}:prompts`,
-			"json",
-		)) as Prompt[]) ?? [];
+	const prompts = ((await env.AEO_KV.get(`site:${site.domain}:prompts`, "json")) as Prompt[]) ?? [];
 	return { site, prompts };
 }
 
@@ -42,9 +36,7 @@ export default function Prompts({ loaderData }: Route.ComponentProps) {
 	const revalidator = useRevalidator();
 	const [input, setInput] = useState("");
 	const [generating, setGenerating] = useState(false);
-	const [suggestions, setSuggestions] = useState<
-		{ text: string; tag: string }[]
-	>([]);
+	const [suggestions, setSuggestions] = useState<{ text: string; tag: string }[]>([]);
 	const [addedSet, setAddedSet] = useState<Set<string>>(new Set());
 
 	const domain = site?.domain ?? "";
@@ -88,9 +80,9 @@ export default function Prompts({ loaderData }: Route.ComponentProps) {
 	const generate = useCallback(async () => {
 		setGenerating(true);
 		try {
-			const d = (await fetch(
-				`/api/setup?domain=${encodeURIComponent(domain)}`,
-			).then((r) => r.json())) as SetupResponse;
+			const d = (await fetch(`/api/setup?domain=${encodeURIComponent(domain)}`).then((r) =>
+				r.json(),
+			)) as SetupResponse;
 			setSuggestions(d.prompts ?? []);
 			setAddedSet(new Set());
 		} catch (e) {
@@ -130,11 +122,7 @@ export default function Prompts({ loaderData }: Route.ComponentProps) {
 					<Card>
 						<CardHeader>
 							<span>Suggested prompts</span>
-							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() => setSuggestions([])}
-							>
+							<Button variant="ghost" size="sm" onClick={() => setSuggestions([])}>
 								Dismiss
 							</Button>
 						</CardHeader>
@@ -183,11 +171,7 @@ export default function Prompts({ loaderData }: Route.ComponentProps) {
 										onChange={(e) => togglePrompt(p.text, e.target.checked)}
 										className="w-4 h-4 accent-brand cursor-pointer shrink-0"
 									/>
-									<span
-										className={`flex-1 ${
-											p.active ? "text-neutral-900" : "text-neutral-400"
-										}`}
-									>
+									<span className={`flex-1 ${p.active ? "text-neutral-900" : "text-neutral-400"}`}>
 										{p.text}
 									</span>
 									<button
@@ -201,8 +185,7 @@ export default function Prompts({ loaderData }: Route.ComponentProps) {
 							))
 						) : (
 							<div className="py-12 text-center text-neutral-500 text-[13px]">
-								No prompts yet. Use the Generate suggestions button above, or
-								type one below.
+								No prompts yet. Use the Generate suggestions button above, or type one below.
 							</div>
 						)}
 						<form

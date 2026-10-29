@@ -1,9 +1,7 @@
-import { vi } from "vitest";
+import { vi } from "vite-plus/test";
 
 type ReplyBody = BodyInit | Record<string, unknown> | null | undefined;
-type ReplyHandler = (options: {
-	body: Uint8Array;
-}) => ReplyBody | Promise<ReplyBody>;
+type ReplyHandler = (options: { body: Uint8Array }) => ReplyBody | Promise<ReplyBody>;
 
 interface PendingInterceptor {
 	method: string;
@@ -22,15 +20,11 @@ export const fetchMock = {
 			vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
 				const request = new Request(input, init);
 				const index = pendingInterceptors.findIndex(
-					(interceptor) =>
-						interceptor.url === request.url &&
-						interceptor.method === request.method,
+					(interceptor) => interceptor.url === request.url && interceptor.method === request.method,
 				);
 
 				if (index === -1) {
-					throw new Error(
-						`Unexpected outbound request: ${request.method} ${request.url}`,
-					);
+					throw new Error(`Unexpected outbound request: ${request.method} ${request.url}`);
 				}
 
 				const [interceptor] = pendingInterceptors.splice(index, 1);

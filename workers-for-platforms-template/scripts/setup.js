@@ -49,18 +49,9 @@ class SetupManager {
 
 	async setup() {
 		console.log("");
-		logBold(
-			"cyan",
-			"╔══════════════════════════════════════════════════════════════╗",
-		);
-		logBold(
-			"cyan",
-			"║     Workers for Platforms Template - Automated Setup         ║",
-		);
-		logBold(
-			"cyan",
-			"╚══════════════════════════════════════════════════════════════╝",
-		);
+		logBold("cyan", "╔══════════════════════════════════════════════════════════════╗");
+		logBold("cyan", "║     Workers for Platforms Template - Automated Setup         ║");
+		logBold("cyan", "╚══════════════════════════════════════════════════════════════╝");
 		console.log("");
 
 		try {
@@ -86,10 +77,7 @@ class SetupManager {
 			log("red", `\n❌ Setup failed: ${error.message}`);
 			log("yellow", "\n💡 Troubleshooting:");
 			log("yellow", "   1. Verify your Cloudflare API credentials");
-			log(
-				"yellow",
-				"   2. Ensure Workers for Platforms is enabled on your account",
-			);
+			log("yellow", "   2. Ensure Workers for Platforms is enabled on your account");
 			log("yellow", "   3. Check API token has required permissions");
 			process.exit(1);
 		} finally {
@@ -161,9 +149,7 @@ class SetupManager {
 			this.existingConfig.ACCOUNT_ID,
 		);
 		if (!this.config.accountId) {
-			throw new Error(
-				"Account ID is required. Find it at dash.cloudflare.com in the URL.",
-			);
+			throw new Error("Account ID is required. Find it at dash.cloudflare.com in the URL.");
 		}
 
 		// API Token or Key
@@ -203,10 +189,7 @@ class SetupManager {
 
 		// Custom Domain Configuration
 		log("blue", "\n🌐 Custom Domain Configuration");
-		log(
-			"yellow",
-			"   A custom domain enables branded URLs (e.g., site.platform.com)",
-		);
+		log("yellow", "   A custom domain enables branded URLs (e.g., site.platform.com)");
 		log("yellow", "   Without it, sites will use workers.dev subdomains\n");
 
 		this.config.customDomain = await this.promptWithDefault(
@@ -235,10 +218,7 @@ class SetupManager {
 			);
 
 			if (this.config.fallbackOrigin) {
-				log(
-					"yellow",
-					`\n💡 Customers will CNAME their domains to: ${this.config.fallbackOrigin}`,
-				);
+				log("yellow", `\n💡 Customers will CNAME their domains to: ${this.config.fallbackOrigin}`);
 			}
 		}
 
@@ -265,12 +245,9 @@ class SetupManager {
 		log("blue", "🔐 Validating Cloudflare credentials...");
 
 		try {
-			const response = await fetch(
-				"https://api.cloudflare.com/client/v4/user/tokens/verify",
-				{
-					headers: this.getAuthHeaders(),
-				},
-			);
+			const response = await fetch("https://api.cloudflare.com/client/v4/user/tokens/verify", {
+				headers: this.getAuthHeaders(),
+			});
 
 			const data = await response.json();
 
@@ -324,10 +301,7 @@ class SetupManager {
 				}
 			}
 
-			log(
-				"yellow",
-				`⚠️  Could not auto-detect zone for ${this.config.customDomain}`,
-			);
+			log("yellow", `⚠️  Could not auto-detect zone for ${this.config.customDomain}`);
 		} catch (error) {
 			log("yellow", `⚠️  Zone detection failed: ${error.message}`);
 		}
@@ -357,14 +331,8 @@ class SetupManager {
 
 			const data = await response.json();
 
-			if (
-				response.status === 403 ||
-				(data.errors && data.errors.some((e) => e.code === 10121))
-			) {
-				log(
-					"yellow",
-					"⚠️  Workers for Platforms is not enabled on this account",
-				);
+			if (response.status === 403 || (data.errors && data.errors.some((e) => e.code === 10121))) {
+				log("yellow", "⚠️  Workers for Platforms is not enabled on this account");
 				log(
 					"yellow",
 					"   Purchase at: https://dash.cloudflare.com/?to=/:account/workers-for-platforms",
@@ -383,10 +351,7 @@ class SetupManager {
 				this.config.wfpAvailable = false;
 			}
 		} catch (error) {
-			log(
-				"yellow",
-				`⚠️  Could not check Workers for Platforms: ${error.message}`,
-			);
+			log("yellow", `⚠️  Could not check Workers for Platforms: ${error.message}`);
 			this.config.wfpAvailable = false;
 		}
 	}
@@ -405,9 +370,7 @@ class SetupManager {
 		log("blue", `📦 Ensuring dispatch namespace '${namespaceName}' exists...`);
 
 		// Check if already exists
-		const existing = this.config.existingNamespaces?.find(
-			(ns) => ns.name === namespaceName,
-		);
+		const existing = this.config.existingNamespaces?.find((ns) => ns.name === namespaceName);
 		if (existing) {
 			log("green", `✅ Dispatch namespace '${namespaceName}' already exists`);
 			this.config.dispatchNamespaceId = existing.id;
@@ -430,21 +393,13 @@ class SetupManager {
 			if (response.ok && data.success) {
 				log("green", `✅ Created dispatch namespace '${namespaceName}'`);
 				this.config.dispatchNamespaceId = data.result.id;
-			} else if (
-				data.errors?.some((e) => e.message?.includes("already exists"))
-			) {
+			} else if (data.errors?.some((e) => e.message?.includes("already exists"))) {
 				log("green", `✅ Dispatch namespace '${namespaceName}' already exists`);
 			} else {
-				log(
-					"yellow",
-					`⚠️  Could not create dispatch namespace: ${data.errors?.[0]?.message}`,
-				);
+				log("yellow", `⚠️  Could not create dispatch namespace: ${data.errors?.[0]?.message}`);
 			}
 		} catch (error) {
-			log(
-				"yellow",
-				`⚠️  Could not create dispatch namespace: ${error.message}`,
-			);
+			log("yellow", `⚠️  Could not create dispatch namespace: ${error.message}`);
 		}
 	}
 
@@ -469,42 +424,37 @@ class SetupManager {
 			// Create a new permanent token (works with both API Token and Global API Key)
 			log("blue", "🔐 Creating specialized dispatch namespace token...");
 
-			const tokenResponse = await fetch(
-				"https://api.cloudflare.com/client/v4/user/tokens",
-				{
-					method: "POST",
-					headers: this.getAuthHeaders(),
-					body: JSON.stringify({
-						name: `Workers Platform Template Token - ${new Date().toISOString().split("T")[0]}`,
-						policies: [
-							{
-								effect: "allow",
-								resources: {
-									[`com.cloudflare.api.account.${this.config.accountId}`]: "*",
-								},
-								permission_groups: [
-									{
-										id: "c1fde68c7bcc44588cbb6ddbc16d6480",
-										name: "Account Settings Read",
-									},
-									{
-										id: "1a71c399035b4950a1bd1466bbe4f420",
-										name: "Workers Scripts Write",
-									},
-									{
-										id: "e086da7e2179491d91ee5f35b3ca210a",
-										name: "Workers Scripts Read",
-									},
-								],
+			const tokenResponse = await fetch("https://api.cloudflare.com/client/v4/user/tokens", {
+				method: "POST",
+				headers: this.getAuthHeaders(),
+				body: JSON.stringify({
+					name: `Workers Platform Template Token - ${new Date().toISOString().split("T")[0]}`,
+					policies: [
+						{
+							effect: "allow",
+							resources: {
+								[`com.cloudflare.api.account.${this.config.accountId}`]: "*",
 							},
-						],
-						condition: {},
-						expires_on: new Date(
-							Date.now() + 365 * 24 * 60 * 60 * 1000,
-						).toISOString(),
-					}),
-				},
-			);
+							permission_groups: [
+								{
+									id: "c1fde68c7bcc44588cbb6ddbc16d6480",
+									name: "Account Settings Read",
+								},
+								{
+									id: "1a71c399035b4950a1bd1466bbe4f420",
+									name: "Workers Scripts Write",
+								},
+								{
+									id: "e086da7e2179491d91ee5f35b3ca210a",
+									name: "Workers Scripts Read",
+								},
+							],
+						},
+					],
+					condition: {},
+					expires_on: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+				}),
+			});
 
 			const tokenData = await tokenResponse.json();
 
@@ -514,21 +464,12 @@ class SetupManager {
 				this.config.dispatchToken = tokenData.result.value;
 				this.config.createdToken = true;
 			} else {
-				log(
-					"yellow",
-					`⚠️  Could not create token: ${tokenData.errors?.[0]?.message}`,
-				);
+				log("yellow", `⚠️  Could not create token: ${tokenData.errors?.[0]?.message}`);
 				if (this.config.authMethod === "token") {
-					log(
-						"yellow",
-						"   Using existing token - may need manual permission setup",
-					);
+					log("yellow", "   Using existing token - may need manual permission setup");
 					this.config.dispatchToken = this.config.apiToken;
 				} else {
-					log(
-						"red",
-						"❌ Cannot create API token - Global API Key cannot be used at runtime",
-					);
+					log("red", "❌ Cannot create API token - Global API Key cannot be used at runtime");
 					log("yellow", "   Please use an API Token instead of Global API Key");
 				}
 			}
@@ -624,16 +565,9 @@ CUSTOM_DOMAIN="${this.config.customDomain}"
 		}
 
 		// Add routes if custom domain is configured
-		if (
-			this.config.customDomain &&
-			this.config.customDomain !== "" &&
-			this.config.zoneId
-		) {
+		if (this.config.customDomain && this.config.customDomain !== "" && this.config.zoneId) {
 			// Remove any existing routes section
-			content = content.replace(
-				/\n# Routes for custom domain\nroutes = \[[\s\S]*?\]\n/g,
-				"",
-			);
+			content = content.replace(/\n# Routes for custom domain\nroutes = \[[\s\S]*?\]\n/g, "");
 
 			// Add new routes section before [vars] or at the end
 			const routesSection = `
@@ -661,18 +595,9 @@ routes = [
 
 	displayFinalReport() {
 		console.log("");
-		logBold(
-			"green",
-			"╔══════════════════════════════════════════════════════════════╗",
-		);
-		logBold(
-			"green",
-			"║                    Setup Complete!                           ║",
-		);
-		logBold(
-			"green",
-			"╚══════════════════════════════════════════════════════════════╝",
-		);
+		logBold("green", "╔══════════════════════════════════════════════════════════════╗");
+		logBold("green", "║                    Setup Complete!                           ║");
+		logBold("green", "╚══════════════════════════════════════════════════════════════╝");
 		console.log("");
 
 		log("blue", "📦 Resources:");
@@ -680,10 +605,7 @@ routes = [
 			log("green", "   ✅ Workers for Platforms: Available");
 			log("green", "   ✅ Dispatch Namespace: Ready");
 		} else {
-			log(
-				"yellow",
-				"   ⚠️  Workers for Platforms: Not available (requires paid plan)",
-			);
+			log("yellow", "   ⚠️  Workers for Platforms: Not available (requires paid plan)");
 		}
 
 		if (this.config.createdToken) {
@@ -717,50 +639,26 @@ routes = [
 		if (this.config.customDomain && this.config.customDomain !== "") {
 			console.log("");
 			log("yellow", "📝 DNS Setup Required:");
-			log(
-				"yellow",
-				`   Add these DNS records for ${this.config.customDomain}:`,
-			);
+			log("yellow", `   Add these DNS records for ${this.config.customDomain}:`);
 			console.log("");
-			log(
-				"cyan",
-				"   ┌───────┬──────────┬─────────────┬────────────────────────────┐",
-			);
-			log(
-				"cyan",
-				"   │ Type  │ Name     │ Content     │ Result                     │",
-			);
-			log(
-				"cyan",
-				"   ├───────┼──────────┼─────────────┼────────────────────────────┤",
-			);
-			log(
-				"cyan",
-				`   │ A     │ @        │ 192.0.2.1   │ ${this.config.customDomain.padEnd(26)} │`,
-			);
+			log("cyan", "   ┌───────┬──────────┬─────────────┬────────────────────────────┐");
+			log("cyan", "   │ Type  │ Name     │ Content     │ Result                     │");
+			log("cyan", "   ├───────┼──────────┼─────────────┼────────────────────────────┤");
+			log("cyan", `   │ A     │ @        │ 192.0.2.1   │ ${this.config.customDomain.padEnd(26)} │`);
 			log(
 				"cyan",
 				`   │ A     │ *        │ 192.0.2.1   │ *.${this.config.customDomain.padEnd(23)} │`,
 			);
 			if (this.config.fallbackOrigin) {
-				const fbName = this.config.fallbackOrigin.replace(
-					`.${this.config.customDomain}`,
-					"",
-				);
+				const fbName = this.config.fallbackOrigin.replace(`.${this.config.customDomain}`, "");
 				log(
 					"cyan",
 					`   │ A     │ ${fbName.padEnd(8)} │ 192.0.2.1   │ ${this.config.fallbackOrigin.padEnd(26)} │`,
 				);
 			}
-			log(
-				"cyan",
-				"   └───────┴──────────┴─────────────┴────────────────────────���───┘",
-			);
+			log("cyan", "   └───────┴──────────┴─────────────┴────────────────────────���───┘");
 			console.log("");
-			log(
-				"yellow",
-				"   Note: 192.0.2.1 is a dummy IP - Cloudflare proxy handles routing.",
-			);
+			log("yellow", "   Note: 192.0.2.1 is a dummy IP - Cloudflare proxy handles routing.");
 		}
 
 		console.log("");

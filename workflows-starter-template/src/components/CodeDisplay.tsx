@@ -38,9 +38,7 @@ const WORKFLOW_CODE = `export class MyWorkflow extends WorkflowEntrypoint<Env> {
 function highlightSyntax(line: string): JSX.Element {
 	// Comments take precedence
 	if (line.trim().startsWith("//")) {
-		return (
-			<span className="text-neutral-500 dark:text-neutral-400">{line}</span>
-		);
+		return <span className="text-neutral-500 dark:text-neutral-400">{line}</span>;
 	}
 
 	// Split by tokens and wrap with appropriate colors
@@ -54,11 +52,7 @@ function highlightSyntax(line: string): JSX.Element {
 				if (!token) return null;
 
 				// Keywords
-				if (
-					/^(export|class|extends|async|await|const|return|new|Promise)$/.test(
-						token,
-					)
-				) {
+				if (/^(export|class|extends|async|await|const|return|new|Promise)$/.test(token)) {
 					return (
 						<span key={i} className="text-[#0054a6] dark:text-[#61afef]">
 							{token}
@@ -135,15 +129,11 @@ export function CodeDisplay({
 						{lines.map((line, idx) => {
 							const lineNum = idx + 1;
 							const isHighlighted =
-								highlightRange &&
-								lineNum >= highlightRange[0] &&
-								lineNum <= highlightRange[1];
+								highlightRange && lineNum >= highlightRange[0] && lineNum <= highlightRange[1];
 
 							// Determine if this is first or last highlighted line for rounded corners
-							const isFirstHighlighted =
-								isHighlighted && lineNum === highlightRange![0];
-							const isLastHighlighted =
-								isHighlighted && lineNum === highlightRange![1];
+							const isFirstHighlighted = isHighlighted && lineNum === highlightRange![0];
+							const isLastHighlighted = isHighlighted && lineNum === highlightRange![1];
 
 							return (
 								<div
@@ -162,11 +152,7 @@ export function CodeDisplay({
 											: ""
 									}`}
 								>
-									<span
-										className={`whitespace-pre ${
-											isHighlighted ? "font-medium" : ""
-										}`}
-									>
+									<span className={`whitespace-pre ${isHighlighted ? "font-medium" : ""}`}>
 										{highlightSyntax(line || " ")}
 									</span>
 								</div>

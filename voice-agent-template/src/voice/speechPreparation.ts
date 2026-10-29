@@ -1,5 +1,4 @@
-const ACRONYM_PATTERN =
-	/(?<![\p{L}\p{N}_])(DDoS|\p{Lu}{2,})(s)?(?![\p{L}\p{N}_])/gu;
+const ACRONYM_PATTERN = /(?<![\p{L}\p{N}_])(DDoS|\p{Lu}{2,})(s)?(?![\p{L}\p{N}_])/gu;
 const WRITTEN_PAUSE_PATTERN = /\s*(?:--+|\u2014|;)\s*/g;
 const ELLIPSIS_SPACING_PATTERN = /\s*\.{3}\s*/g;
 const REPEATED_ELLIPSES_PATTERN = /(?:\.\.\.\s*){2,}/g;
@@ -16,9 +15,7 @@ export function prepareTextForSpeech(text: string): string {
 			ACRONYM_PATTERN,
 			(_match: string, acronym: string, plural: string | undefined): string => {
 				const spokenLetters =
-					acronym === "AI"
-						? "A.I"
-						: Array.from(acronym.toUpperCase()).join(" ");
+					acronym === "AI" ? "A.I" : Array.from(acronym.toUpperCase()).join(" ");
 				return plural ? `${spokenLetters}'s` : spokenLetters;
 			},
 		)

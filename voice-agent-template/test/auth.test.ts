@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 import { authorizeVoiceAgentRequest } from "../src/auth";
 
 const URL = "https://example.com/agents/voice-agent/test";
@@ -26,21 +26,17 @@ describe("voice agent authentication", () => {
 	});
 
 	it("rejects a malformed authorization header", async () => {
-		const response = await authorizeVoiceAgentRequest(
-			request(`Token ${TOKEN}`),
-			{
-				VOICE_AGENT_TOKEN: TOKEN,
-			},
-		);
+		const response = await authorizeVoiceAgentRequest(request(`Token ${TOKEN}`), {
+			VOICE_AGENT_TOKEN: TOKEN,
+		});
 		expect(response?.status).toBe(401);
 	});
 
 	it("rejects an incorrect bearer token without returning either token", async () => {
 		const supplied = "incorrect-token";
-		const response = await authorizeVoiceAgentRequest(
-			request(`Bearer ${supplied}`),
-			{ VOICE_AGENT_TOKEN: TOKEN },
-		);
+		const response = await authorizeVoiceAgentRequest(request(`Bearer ${supplied}`), {
+			VOICE_AGENT_TOKEN: TOKEN,
+		});
 		const body = await response?.text();
 
 		expect(response?.status).toBe(401);
@@ -49,10 +45,9 @@ describe("voice agent authentication", () => {
 	});
 
 	it("accepts the configured bearer token", async () => {
-		const response = await authorizeVoiceAgentRequest(
-			request(`Bearer ${TOKEN}`),
-			{ VOICE_AGENT_TOKEN: TOKEN },
-		);
+		const response = await authorizeVoiceAgentRequest(request(`Bearer ${TOKEN}`), {
+			VOICE_AGENT_TOKEN: TOKEN,
+		});
 		expect(response).toBeUndefined();
 	});
 });

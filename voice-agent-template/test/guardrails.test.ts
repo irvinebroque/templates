@@ -1,9 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import { checkPrompt } from "../src/voice/checkPrompt";
-import {
-	BLOCKED_OUTPUT_FALLBACK,
-	guardVoiceOutput,
-} from "../src/voice/outputGuardrail";
+import { BLOCKED_OUTPUT_FALLBACK, guardVoiceOutput } from "../src/voice/outputGuardrail";
 
 type GuardrailAI = Parameters<typeof checkPrompt>[0];
 
@@ -21,9 +18,7 @@ describe("input guardrail", () => {
 	});
 
 	it("maps unsafe categories to a stable user-safe result", async () => {
-		await expect(
-			checkPrompt(aiResponse("unsafe\nS1,S10"), "blocked"),
-		).resolves.toEqual({
+		await expect(checkPrompt(aiResponse("unsafe\nS1,S10"), "blocked")).resolves.toEqual({
 			safe: false,
 			message: "Blocked for: violent crimes, hate speech.",
 			categories: ["S1", "S10"],
@@ -44,20 +39,18 @@ describe("input guardrail", () => {
 	});
 
 	it("fails closed on malformed or failed responses", async () => {
-		await expect(
-			checkPrompt(aiResponse('{"unexpected":true}'), "hello"),
-		).rejects.toThrow("Invalid response");
-		await expect(
-			checkPrompt(aiResponse("error", 503), "hello"),
-		).rejects.toThrow("HTTP 503");
+		await expect(checkPrompt(aiResponse('{"unexpected":true}'), "hello")).rejects.toThrow(
+			"Invalid response",
+		);
+		await expect(checkPrompt(aiResponse("error", 503), "hello")).rejects.toThrow("HTTP 503");
 	});
 
 	it("propagates caller cancellation", async () => {
 		const controller = new AbortController();
 		controller.abort();
-		await expect(
-			checkPrompt(aiResponse("safe"), "hello", controller.signal),
-		).rejects.toMatchObject({ name: "AbortError" });
+		await expect(checkPrompt(aiResponse("safe"), "hello", controller.signal)).rejects.toMatchObject(
+			{ name: "AbortError" },
+		);
 	});
 });
 

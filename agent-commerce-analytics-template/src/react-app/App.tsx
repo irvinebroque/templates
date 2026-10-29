@@ -145,8 +145,7 @@ function App() {
 				const json = (await res.json()) as Summary;
 				if (!cancelled) setSummary(json);
 			} catch (err) {
-				if (!cancelled)
-					setError(err instanceof Error ? err.message : "Unknown error");
+				if (!cancelled) setError(err instanceof Error ? err.message : "Unknown error");
 			} finally {
 				if (!cancelled) setLoading(false);
 			}
@@ -162,9 +161,7 @@ function App() {
 			<header className="topbar">
 				<div className="brand">
 					<span className="brand-title">Agent Commerce Analytics</span>
-					<span className="merchant-name">
-						{summary?.merchantName ?? "Loading…"}
-					</span>
+					<span className="merchant-name">{summary?.merchantName ?? "Loading…"}</span>
 				</div>
 				<div className="badges">
 					<span className="badge workers">Workers</span>
@@ -192,8 +189,8 @@ function App() {
 
 			<footer className="footer">
 				Data persisted in <code>EVENT_STORE</code> (KV). Post events to{" "}
-				<code>/api/events/from-headers</code> from your Managed Ruleset or
-				origin Worker to feed this dashboard with real traffic.
+				<code>/api/events/from-headers</code> from your Managed Ruleset or origin Worker to feed
+				this dashboard with real traffic.
 			</footer>
 		</div>
 	);
@@ -204,9 +201,7 @@ function App() {
 // ---------------------------------------------------------------------------
 
 function Dashboard({ summary }: { summary: Summary }) {
-	const purchasingAgents = summary.agentBreakdown.filter(
-		(a) => a.successfulCheckouts > 0,
-	).length;
+	const purchasingAgents = summary.agentBreakdown.filter((a) => a.successfulCheckouts > 0).length;
 
 	return (
 		<div>
@@ -244,9 +239,7 @@ function Dashboard({ summary }: { summary: Summary }) {
 				<section className="section">
 					<div className="section-header">
 						<h2>Insights</h2>
-						<span className="sub">
-							Auto-generated headlines computed from events
-						</span>
+						<span className="sub">Auto-generated headlines computed from events</span>
 					</div>
 					<div className="insight-list">
 						{summary.insights.map((ins, i) => (
@@ -263,9 +256,7 @@ function Dashboard({ summary }: { summary: Summary }) {
 			<section className="section">
 				<div className="section-header">
 					<h2>Discovery funnel</h2>
-					<span className="sub">
-						llms.txt reads → product views → checkout outcomes
-					</span>
+					<span className="sub">llms.txt reads → product views → checkout outcomes</span>
 				</div>
 				<Funnel funnel={summary.funnel} />
 			</section>
@@ -284,9 +275,7 @@ function Dashboard({ summary }: { summary: Summary }) {
 				<section className="section">
 					<div className="section-header">
 						<h2>Agent journeys</h2>
-						<span className="sub">
-							Session-reconstructed timelines with return-visit detection
-						</span>
+						<span className="sub">Session-reconstructed timelines with return-visit detection</span>
 					</div>
 					{summary.agentJourneys.map((j) => (
 						<JourneyCard key={j.agentId} journey={j} />
@@ -299,9 +288,7 @@ function Dashboard({ summary }: { summary: Summary }) {
 				<section className="section">
 					<div className="section-header">
 						<h2>Product performance</h2>
-						<span className="sub">
-							Views, conversions, and revenue per product
-						</span>
+						<span className="sub">Views, conversions, and revenue per product</span>
 					</div>
 					<ProductTable products={summary.topProducts} />
 				</section>
@@ -311,9 +298,7 @@ function Dashboard({ summary }: { summary: Summary }) {
 			<section className="section">
 				<div className="section-header">
 					<h2>What this unlocks</h2>
-					<span className="sub">
-						Generic zone analytics vs. commerce-aware analytics
-					</span>
+					<span className="sub">Generic zone analytics vs. commerce-aware analytics</span>
 				</div>
 				<BeforeAfter summary={summary} purchasingAgents={purchasingAgents} />
 			</section>
@@ -438,9 +423,7 @@ function AgentTable({ agents }: { agents: AgentProfile[] }) {
 							<td>{a.agentName ?? a.agentId}</td>
 							<td>{a.network ?? "—"}</td>
 							<td>
-								<span
-									className={`status-pill ${a.verified ? "verified" : "unverified"}`}
-								>
+								<span className={`status-pill ${a.verified ? "verified" : "unverified"}`}>
 									{a.verified ? "Verified" : "Unverified"}
 								</span>
 							</td>
@@ -457,9 +440,7 @@ function AgentTable({ agents }: { agents: AgentProfile[] }) {
 							</td>
 							<td className="numeric">
 								{a.estimatedRevenue > 0 ? (
-									<span className="revenue-value">
-										{formatCurrency(a.estimatedRevenue)}
-									</span>
+									<span className="revenue-value">{formatCurrency(a.estimatedRevenue)}</span>
 								) : (
 									"—"
 								)}
@@ -477,21 +458,15 @@ function JourneyCard({ journey }: { journey: AgentJourney }) {
 		<div className="journey-card">
 			<div className="journey-header">
 				<div>
-					<div className="journey-name">
-						{journey.agentName ?? journey.agentId}
-					</div>
+					<div className="journey-name">{journey.agentName ?? journey.agentId}</div>
 					<div className="journey-summary">{journey.journeySummary}</div>
 				</div>
 				<div className="journey-meta">
-					<span
-						className={`status-pill ${journey.verified ? "verified" : "unverified"}`}
-					>
+					<span className={`status-pill ${journey.verified ? "verified" : "unverified"}`}>
 						{journey.verified ? (journey.network ?? "verified") : "unverified"}
 					</span>
 					{journey.estimatedSpend > 0 && (
-						<span className="spend">
-							{formatCurrency(journey.estimatedSpend)}
-						</span>
+						<span className="spend">{formatCurrency(journey.estimatedSpend)}</span>
 					)}
 					{journey.isReturnVisitor && <span>Return visitor</span>}
 				</div>
@@ -538,9 +513,7 @@ function ProductTable({ products }: { products: ProductAnalytics[] }) {
 							<td className="numeric">{formatPercent(p.conversionRate)}</td>
 							<td className="numeric">
 								{p.estimatedRevenue > 0 ? (
-									<span className="revenue-value">
-										{formatCurrency(p.estimatedRevenue)}
-									</span>
+									<span className="revenue-value">{formatCurrency(p.estimatedRevenue)}</span>
 								) : (
 									"—"
 								)}
@@ -571,14 +544,10 @@ function BeforeAfter({
 		`${summary.funnel.discoveryReads} hits on /llms.txt`,
 	];
 	if (topProduct) {
-		beforeLines.push(
-			`/api/products/${topProduct.slug} hit ${topProduct.detailViews}×`,
-		);
+		beforeLines.push(`/api/products/${topProduct.slug} hit ${topProduct.detailViews}×`);
 	}
 	if (summary.security.blockedCheckouts > 0) {
-		beforeLines.push(
-			`${summary.security.blockedCheckouts} × 403 on /api/checkout`,
-		);
+		beforeLines.push(`${summary.security.blockedCheckouts} × 403 on /api/checkout`);
 	}
 
 	// "After" column = what the commerce-aware layer infers from the same events.
@@ -647,12 +616,9 @@ function formatMinutesAgo(m: number): string {
 	return rem === 0 ? `${h}h ago` : `${h}h${String(rem).padStart(2, "0")}m`;
 }
 
-function stepKind(
-	step: JourneyStep,
-): "discover" | "view" | "buy" | "blocked" | "" {
+function stepKind(step: JourneyStep): "discover" | "view" | "buy" | "blocked" | "" {
 	if (step.statusCode === 403) return "blocked";
-	if (step.action === "llms_txt_concise" || step.action === "llms_txt_full")
-		return "discover";
+	if (step.action === "llms_txt_concise" || step.action === "llms_txt_full") return "discover";
 	if (step.action === "product_detail") return "view";
 	if (step.action === "checkout_attempt") return "buy";
 	return "";

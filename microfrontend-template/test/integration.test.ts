@@ -1,5 +1,5 @@
 import { SELF } from "cloudflare:test";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 
 describe("Microfrontend Router", () => {
 	describe("routing", () => {
@@ -70,10 +70,9 @@ describe("Microfrontend Router", () => {
 
 	describe("redirect handling", () => {
 		it("rewrites redirect Location headers", async () => {
-			const response = await SELF.fetch(
-				"https://example.com/app2/redirect-test",
-				{ redirect: "manual" },
-			);
+			const response = await SELF.fetch("https://example.com/app2/redirect-test", {
+				redirect: "manual",
+			});
 
 			expect(response.status).toBe(302);
 			const location = response.headers.get("Location");
@@ -97,14 +96,10 @@ describe("Microfrontend Router", () => {
 		it("serves preload script at /__mf-preload.js when other routes have preload enabled", async () => {
 			// The preload script is only served when there are OTHER routes with preload: true
 			// Since /app1 has preload: true, visiting /app2 should serve /app1 in the preload script
-			const response = await SELF.fetch(
-				"https://example.com/app2/__mf-preload.js",
-			);
+			const response = await SELF.fetch("https://example.com/app2/__mf-preload.js");
 
 			expect(response.status).toBe(200);
-			expect(response.headers.get("Content-Type")).toContain(
-				"application/javascript",
-			);
+			expect(response.headers.get("Content-Type")).toContain("application/javascript");
 
 			const script = await response.text();
 			expect(script).toContain("fetch");

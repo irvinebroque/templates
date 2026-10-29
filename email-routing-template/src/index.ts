@@ -8,9 +8,7 @@ function allowedSenders(value: string): Set<string> {
 }
 
 function needsConfiguration(values: string[]): boolean {
-	return values.some(
-		(value) => !value.trim() || /\b[a-z0-9.-]+\.example\b/i.test(value),
-	);
+	return values.some((value) => !value.trim() || /\b[a-z0-9.-]+\.example\b/i.test(value));
 }
 
 async function renderSetupPage(request: Request, env: Env): Promise<Response> {
@@ -20,11 +18,7 @@ async function renderSetupPage(request: Request, env: Env): Promise<Response> {
 	}
 
 	const sendersConfigured = allowedSenders(env.ALLOWED_SENDERS).size > 0;
-	const showWarning = needsConfiguration([
-		env.ROUTE_ADDRESS,
-		env.FORWARD_TO,
-		env.ALLOWED_SENDERS,
-	]);
+	const showWarning = needsConfiguration([env.ROUTE_ADDRESS, env.FORWARD_TO, env.ALLOWED_SENDERS]);
 
 	return new HTMLRewriter()
 		.on("#route-address", {
@@ -39,9 +33,7 @@ async function renderSetupPage(request: Request, env: Env): Promise<Response> {
 		})
 		.on("#allowed-senders-state", {
 			element(element) {
-				element.setInnerContent(
-					sendersConfigured ? "Configured" : "Not configured",
-				);
+				element.setInnerContent(sendersConfigured ? "Configured" : "Not configured");
 			},
 		})
 		.on("#configuration-warning", {
@@ -54,10 +46,7 @@ async function renderSetupPage(request: Request, env: Env): Promise<Response> {
 		.transform(response);
 }
 
-export async function handleEmail(
-	message: ForwardableEmailMessage,
-	env: Env,
-): Promise<void> {
+export async function handleEmail(message: ForwardableEmailMessage, env: Env): Promise<void> {
 	const destination = env.FORWARD_TO.trim();
 	const senders = allowedSenders(env.ALLOWED_SENDERS);
 

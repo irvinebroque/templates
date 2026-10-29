@@ -38,22 +38,18 @@ async function deploySnippetToNamespace(
 	const moduleFileName = `${scriptName}.mjs`;
 
 	// Upload worker to namespace
-	await cf.workersForPlatforms.dispatch.namespaces.scripts.update(
-		namespaceName,
-		scriptName,
-		{
-			account_id: env.CLOUDFLARE_ACCOUNT_ID,
-			metadata: {
-				main_module: moduleFileName,
-				bindings,
-			},
-			files: [
-				new File([code], moduleFileName, {
-					type: "application/javascript+module",
-				}),
-			],
+	await cf.workersForPlatforms.dispatch.namespaces.scripts.update(namespaceName, scriptName, {
+		account_id: env.CLOUDFLARE_ACCOUNT_ID,
+		metadata: {
+			main_module: moduleFileName,
+			bindings,
 		},
-	);
+		files: [
+			new File([code], moduleFileName, {
+				type: "application/javascript+module",
+			}),
+		],
+	});
 
 	return { namespace: namespaceName, script: scriptName };
 }
@@ -310,25 +306,19 @@ export default {
 		// Handle deploy endpoint
 		if (pathSegments[0] === "deploy" && request.method === "POST") {
 			if (isReadOnly) {
-				return new Response(
-					JSON.stringify({ error: "Read-only mode enabled" }),
-					{
-						status: 403,
-						headers: { "Content-Type": "application/json" },
-					},
-				);
+				return new Response(JSON.stringify({ error: "Read-only mode enabled" }), {
+					status: 403,
+					headers: { "Content-Type": "application/json" },
+				});
 			}
 			try {
 				const { scriptName, code } = await request.json();
 
 				if (!scriptName || !code) {
-					return new Response(
-						JSON.stringify({ error: "Missing scriptName or code" }),
-						{
-							status: 400,
-							headers: { "Content-Type": "application/json" },
-						},
-					);
+					return new Response(JSON.stringify({ error: "Missing scriptName or code" }), {
+						status: 400,
+						headers: { "Content-Type": "application/json" },
+					});
 				}
 
 				const result = await deploySnippetToNamespace(

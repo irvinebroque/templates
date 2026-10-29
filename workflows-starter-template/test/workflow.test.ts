@@ -1,14 +1,11 @@
 import { env, introspectWorkflowInstance } from "cloudflare:test";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vite-plus/test";
 
 describe("MyWorkflow", () => {
 	it("completes and returns expected step result", async () => {
 		const instanceId = `test-${Date.now()}`;
 
-		await using instance = await introspectWorkflowInstance(
-			env.MY_WORKFLOW,
-			instanceId,
-		);
+		await using instance = await introspectWorkflowInstance(env.MY_WORKFLOW, instanceId);
 
 		await instance.modify(async (m) => {
 			await m.disableSleeps();
@@ -31,10 +28,7 @@ describe("MyWorkflow", () => {
 	it("errors when approval event times out", async () => {
 		const instanceId = `test-${Date.now()}`;
 
-		await using instance = await introspectWorkflowInstance(
-			env.MY_WORKFLOW,
-			instanceId,
-		);
+		await using instance = await introspectWorkflowInstance(env.MY_WORKFLOW, instanceId);
 
 		await instance.modify(async (m) => {
 			await m.disableSleeps();

@@ -25,8 +25,7 @@ export default {
 			return statusPage();
 		}
 
-		const authorize = (agentRequest: Request) =>
-			authorizeVoiceAgentRequest(agentRequest, env);
+		const authorize = (agentRequest: Request) => authorizeVoiceAgentRequest(agentRequest, env);
 		const agentResponse = await routeAgentRequest(request, env, {
 			onBeforeConnect: authorize,
 			onBeforeRequest: authorize,

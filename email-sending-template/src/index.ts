@@ -6,10 +6,7 @@ function isPlaceholderAddress(value: string): boolean {
 
 // Hash both values to a fixed size, then compare in constant time so neither
 // the token contents nor its length leak through response timing.
-async function verifyToken(
-	provided: string,
-	expected: string,
-): Promise<boolean> {
+async function verifyToken(provided: string, expected: string): Promise<boolean> {
 	const encoder = new TextEncoder();
 	const [providedHash, expectedHash] = await Promise.all([
 		crypto.subtle.digest("SHA-256", encoder.encode(provided)),

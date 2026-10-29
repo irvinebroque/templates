@@ -13,10 +13,7 @@ export class NLWebMcp extends McpAgent<Env> {
 			{
 				query: z.string(),
 				// sites: z.array(z.string()).optional(),
-				generate_mode: z
-					.enum(["list", "summarize", "generate", "none"])
-					.optional()
-					.default("list"),
+				generate_mode: z.enum(["list", "summarize", "generate", "none"]).optional().default("list"),
 			},
 			async ({ query, generate_mode }) => {
 				if (!this.props.ragId || typeof this.props.ragId !== "string") {

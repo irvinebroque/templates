@@ -26,10 +26,7 @@ function emptyState(message: string): string {
 // ── Curated renderers ────────────────────────────────────────────────────────
 
 /** Render the Sites table with site name linked to the live URL. */
-export function BuildSitesTable(
-	sites: Site[],
-	siteUrl: (slug: string) => string,
-): string {
+export function BuildSitesTable(sites: Site[], siteUrl: (slug: string) => string): string {
 	if (!sites.length) {
 		return emptyState("No sites deployed yet.");
 	}

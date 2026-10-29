@@ -70,9 +70,7 @@ function parseSignatureInput(
 	const rest = value.slice(eq + 1);
 	const compMatch = rest.match(/\(([^)]*)\)/);
 	if (!compMatch) return null;
-	const components = (compMatch[1].match(/"([^"]+)"/g) ?? []).map((c) =>
-		c.replace(/"/g, ""),
-	);
+	const components = (compMatch[1].match(/"([^"]+)"/g) ?? []).map((c) => c.replace(/"/g, ""));
 	const keyidMatch = rest.match(/keyid="([^"]+)"/);
 	return { label, components, keyid: keyidMatch?.[1] };
 }
@@ -151,11 +149,7 @@ export async function verifyAgentIdentity(
 
 		const paramsMatch = sigInput.match(/=(\(.*)$/);
 		const signatureParams = paramsMatch ? paramsMatch[1] : "()";
-		const base = buildSignatureBase(
-			request,
-			parsed.components,
-			signatureParams,
-		);
+		const base = buildSignatureBase(request, parsed.components, signatureParams);
 
 		const cryptoKey = await crypto.subtle.importKey(
 			"raw",
@@ -190,8 +184,7 @@ export async function verifyAgentIdentity(
 export function directoryDocument(keys: AgentKey[]) {
 	return {
 		purpose: "web-bot-auth",
-		description:
-			"Public keys this site trusts for Web Bot Auth (RFC 9421, Ed25519).",
+		description: "Public keys this site trusts for Web Bot Auth (RFC 9421, Ed25519).",
 		keys: keys.map((k) => ({
 			keyid: k.keyid,
 			kty: "OKP",

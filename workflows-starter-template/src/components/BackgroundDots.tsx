@@ -4,9 +4,7 @@ import { useState } from "react";
  * BackgroundDots component - creates an SVG pattern of dots for the diagram background
  */
 export function BackgroundDots({ size = 12 }: { size?: number }) {
-	const [id] = useState(
-		() => `bg-dots-${Math.random().toString(36).substr(2, 9)}`,
-	);
+	const [id] = useState(() => `bg-dots-${Math.random().toString(36).substr(2, 9)}`);
 
 	return (
 		<svg width="100%" height="100%">

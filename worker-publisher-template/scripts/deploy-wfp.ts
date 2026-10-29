@@ -39,22 +39,18 @@ export async function deploySnippetToNamespace(opts: {
 	const moduleFileName = `${scriptName}.mjs`;
 
 	// 2) Upload as a module worker into the namespace
-	await cf.workersForPlatforms.dispatch.namespaces.scripts.update(
-		namespaceName,
-		scriptName,
-		{
-			account_id: accountID,
-			metadata: {
-				main_module: moduleFileName,
-				bindings,
-			},
-			files: [
-				await toFile(Buffer.from(code), moduleFileName, {
-					type: "application/javascript+module",
-				}),
-			],
+	await cf.workersForPlatforms.dispatch.namespaces.scripts.update(namespaceName, scriptName, {
+		account_id: accountID,
+		metadata: {
+			main_module: moduleFileName,
+			bindings,
 		},
-	);
+		files: [
+			await toFile(Buffer.from(code), moduleFileName, {
+				type: "application/javascript+module",
+			}),
+		],
+	});
 
 	return {
 		namespace: namespaceName,
@@ -80,9 +76,7 @@ if (require.main === module) {
 	})
 		.then((res) => {
 			console.log("Deployed:", res);
-			console.log(
-				"Call it from your dynamic dispatch worker with namespace binding.",
-			);
+			console.log("Call it from your dynamic dispatch worker with namespace binding.");
 		})
 		.catch((err) => {
 			console.error("Deploy failed:", err);

@@ -1,5 +1,5 @@
 import type { TTSProvider } from "@cloudflare/voice";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 import {
 	CONVERSATION_RETENTION_MS,
 	claimCall,
@@ -29,9 +29,7 @@ describe("voice lifecycle helpers", () => {
 
 	it("keeps cleanup at or before the one-hour deadline", () => {
 		const timestamp = 1_000;
-		expect(conversationCleanupDeadline(timestamp)).toBe(
-			timestamp + CONVERSATION_RETENTION_MS,
-		);
+		expect(conversationCleanupDeadline(timestamp)).toBe(timestamp + CONVERSATION_RETENTION_MS);
 		expect(nextConversationCleanupDeadline(timestamp, 2_000)).toBe(
 			timestamp + CONVERSATION_RETENTION_MS,
 		);
@@ -42,14 +40,9 @@ describe("voice lifecycle helpers", () => {
 describe("retrying TTS", () => {
 	it("retries empty audio once", async () => {
 		const audio = new ArrayBuffer(4);
-		const synthesize = vi
-			.fn()
-			.mockResolvedValueOnce(null)
-			.mockResolvedValueOnce(audio);
+		const synthesize = vi.fn().mockResolvedValueOnce(null).mockResolvedValueOnce(audio);
 		const provider = { synthesize } satisfies TTSProvider;
-		await expect(new RetryingTts(provider).synthesize("hello")).resolves.toBe(
-			audio,
-		);
+		await expect(new RetryingTts(provider).synthesize("hello")).resolves.toBe(audio);
 		expect(synthesize).toHaveBeenCalledTimes(2);
 	});
 
@@ -58,17 +51,15 @@ describe("retrying TTS", () => {
 			throw new DOMException("Aborted", "AbortError");
 		});
 		const provider = { synthesize } satisfies TTSProvider;
-		await expect(
-			new RetryingTts(provider).synthesize("hello"),
-		).rejects.toMatchObject({ name: "AbortError" });
+		await expect(new RetryingTts(provider).synthesize("hello")).rejects.toMatchObject({
+			name: "AbortError",
+		});
 		expect(synthesize).toHaveBeenCalledTimes(1);
 	});
 });
 
 describe("speech preparation", () => {
 	it("normalizes pauses, quotes, and initialisms for Aura", () => {
-		expect(prepareTextForSpeech('"AI" -- DDoS; APIs')).toBe(
-			"A.I... D D O S... A P I's",
-		);
+		expect(prepareTextForSpeech('"AI" -- DDoS; APIs')).toBe("A.I... D D O S... A P I's");
 	});
 });

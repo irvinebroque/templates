@@ -26,9 +26,7 @@ export function renderShell(
 	const title = options.title || "Internal Sites";
 	const deployPath = options.deployPath || "/deploy";
 
-	const eyebrow = options.eyebrow
-		? `<p class="eyebrow">${escapeHtml(options.eyebrow)}</p>`
-		: "";
+	const eyebrow = options.eyebrow ? `<p class="eyebrow">${escapeHtml(options.eyebrow)}</p>` : "";
 	const heading = options.heading
 		? `<h1 class="display-tight page-title${options.eyebrow ? " has-eyebrow" : ""}">${escapeHtml(options.heading)}</h1>`
 		: "";
@@ -67,10 +65,7 @@ export function renderShell(
 </html>`;
 }
 
-export function renderDeployPage(options: {
-	siteDomain: string;
-	deployPath: string;
-}): string {
+export function renderDeployPage(options: { siteDomain: string; deployPath: string }): string {
 	return renderShell(
 		`
     <p class="lede">Drop a site. Get a URL.</p>

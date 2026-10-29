@@ -35,11 +35,7 @@ export class RecipeRenderer {
 		if (!contentDiv || !item.schema_object) return element;
 
 		// Add recipe specific details
-		const detailsDiv = this.jsonRenderer.possiblyAddExplanation(
-			item,
-			contentDiv,
-			true,
-		);
+		const detailsDiv = this.jsonRenderer.possiblyAddExplanation(item, contentDiv, true);
 		if (!detailsDiv) return element;
 
 		detailsDiv.className = "item-recipe-details";
@@ -98,9 +94,7 @@ export class RecipeRenderer {
 
 			// Safe data handling for review count
 			const reviewArrayCount =
-				schema.review && Array.isArray(schema.review)
-					? schema.review.length
-					: 0;
+				schema.review && Array.isArray(schema.review) ? schema.review.length : 0;
 			let ratingObjectCount = 0;
 
 			if (schema.aggregateRating.ratingCount !== undefined) {
@@ -164,10 +158,7 @@ export class RecipeRenderer {
 		if (!schema || typeof schema !== "object") return "";
 
 		// Check for different time properties in order of preference
-		if (
-			typeof schema.prepTime === "string" &&
-			typeof schema.cookTime === "string"
-		) {
+		if (typeof schema.prepTime === "string" && typeof schema.cookTime === "string") {
 			return `Prep: ${this.formatDuration(schema.prepTime)}, Cook: ${this.formatDuration(schema.cookTime)}`;
 		} else if (typeof schema.prepTime === "string") {
 			return `Preparation time: ${this.formatDuration(schema.prepTime)}`;
@@ -194,9 +185,7 @@ export class RecipeRenderer {
 		const halfStar = clampedRating % 1 >= 0.5;
 		const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
-		return (
-			"★".repeat(fullStars) + (halfStar ? "½" : "") + "☆".repeat(emptyStars)
-		);
+		return "★".repeat(fullStars) + (halfStar ? "½" : "") + "☆".repeat(emptyStars);
 	}
 
 	/**
@@ -209,9 +198,7 @@ export class RecipeRenderer {
 		if (!duration || typeof duration !== "string") return "Not specified";
 
 		// Basic parsing of ISO 8601 duration
-		const matches = duration.match(
-			/P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/i,
-		);
+		const matches = duration.match(/P(?:(\d+)D)?T?(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/i);
 		if (!matches) return duration; // Return original if can't parse
 
 		const days = matches[1] ? parseInt(matches[1], 10) : 0;

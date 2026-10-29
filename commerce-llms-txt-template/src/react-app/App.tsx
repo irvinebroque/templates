@@ -47,9 +47,7 @@ interface EnrichedCatalogResponse {
 
 function App() {
 	const [raw, setRaw] = useState<RawCatalogResponse | null>(null);
-	const [enriched, setEnriched] = useState<EnrichedCatalogResponse | null>(
-		null,
-	);
+	const [enriched, setEnriched] = useState<EnrichedCatalogResponse | null>(null);
 	const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
@@ -66,13 +64,10 @@ function App() {
 					fetch("/api/products"),
 				]);
 				if (!rawRes.ok || !enrichedRes.ok) {
-					throw new Error(
-						`API error (raw=${rawRes.status}, enriched=${enrichedRes.status})`,
-					);
+					throw new Error(`API error (raw=${rawRes.status}, enriched=${enrichedRes.status})`);
 				}
 				const rawJson = (await rawRes.json()) as RawCatalogResponse;
-				const enrichedJson =
-					(await enrichedRes.json()) as EnrichedCatalogResponse;
+				const enrichedJson = (await enrichedRes.json()) as EnrichedCatalogResponse;
 				if (cancelled) return;
 				setRaw(rawJson);
 				setEnriched(enrichedJson);
@@ -95,9 +90,7 @@ function App() {
 	}, []);
 
 	const rawProduct = raw?.products.find((p) => p.slug === selectedSlug);
-	const enrichedProduct = enriched?.products.find(
-		(p) => p.slug === selectedSlug,
-	);
+	const enrichedProduct = enriched?.products.find((p) => p.slug === selectedSlug);
 
 	return (
 		<div className="page">
@@ -113,9 +106,9 @@ function App() {
 						Raw merchant catalog in. Agent-ready <code>/llms.txt</code> out.
 					</p>
 					<p className="sub">
-						Workers AI turns thin product data into descriptions that AI
-						shopping agents can actually reason with. Pick a product below to
-						see the transformation live against this Worker's own endpoints.
+						Workers AI turns thin product data into descriptions that AI shopping agents can
+						actually reason with. Pick a product below to see the transformation live against this
+						Worker's own endpoints.
 					</p>
 					<div className="endpoints">
 						<a href="/llms.txt" target="_blank" rel="noreferrer">
@@ -135,14 +128,8 @@ function App() {
 			</header>
 
 			<main className="main">
-				{loading && (
-					<div className="status">Loading catalog from this Worker…</div>
-				)}
-				{error && (
-					<div className="status status-error">
-						Couldn't load catalog: {error}
-					</div>
-				)}
+				{loading && <div className="status">Loading catalog from this Worker…</div>}
+				{error && <div className="status status-error">Couldn't load catalog: {error}</div>}
 
 				{raw && enriched && (
 					<>
@@ -186,9 +173,7 @@ function App() {
 							<section className="split">
 								<article className="panel panel-raw">
 									<header className="panel-header">
-										<span className="panel-label">
-											Input · Raw merchant data
-										</span>
+										<span className="panel-label">Input · Raw merchant data</span>
 										<h2>{rawProduct.name}</h2>
 									</header>
 									<dl className="kv">
@@ -204,14 +189,10 @@ function App() {
 										</dd>
 										<dt>Stock</dt>
 										<dd>
-											{rawProduct.inStock
-												? `${rawProduct.stockCount} in stock`
-												: "out of stock"}
+											{rawProduct.inStock ? `${rawProduct.stockCount} in stock` : "out of stock"}
 										</dd>
 										<dt>Description</dt>
-										<dd className="desc">
-											{rawProduct.description || <em>(none)</em>}
-										</dd>
+										<dd className="desc">{rawProduct.description || <em>(none)</em>}</dd>
 										<dt>Specs</dt>
 										<dd>
 											<ul className="specs">
@@ -278,27 +259,15 @@ function App() {
 			<footer className="footer">
 				<p>
 					Built on{" "}
-					<a
-						href="https://developers.cloudflare.com/workers/"
-						target="_blank"
-						rel="noreferrer"
-					>
+					<a href="https://developers.cloudflare.com/workers/" target="_blank" rel="noreferrer">
 						Cloudflare Workers
 					</a>
 					{" · "}
-					<a
-						href="https://developers.cloudflare.com/workers-ai/"
-						target="_blank"
-						rel="noreferrer"
-					>
+					<a href="https://developers.cloudflare.com/workers-ai/" target="_blank" rel="noreferrer">
 						Workers AI
 					</a>
 					{" · "}
-					<a
-						href="https://developers.cloudflare.com/kv/"
-						target="_blank"
-						rel="noreferrer"
-					>
+					<a href="https://developers.cloudflare.com/kv/" target="_blank" rel="noreferrer">
 						KV
 					</a>
 				</p>

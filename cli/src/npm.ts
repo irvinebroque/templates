@@ -40,15 +40,17 @@ export async function generateNpmLockfiles({
 			await fs.move("./node_modules", "./._node_modules");
 		}
 
-		await $({
-			verbose: true,
-			stdio: "inherit",
-		})`npm install --no-audit --progress=false --package-lock-only`;
-
-		if (hasNodeModules) {
-			// npm may create a new node_modules directory, remove it before restoring the original
-			await fs.rm("./node_modules", { recursive: true, force: true });
-			await fs.move("./._node_modules", "./node_modules");
+		try {
+			await $({
+				verbose: true,
+				stdio: "inherit",
+			})`npm install --no-audit --ignore-scripts --progress=false --package-lock-only`;
+		} finally {
+			if (hasNodeModules) {
+				// Restore the workspace even when dependency resolution fails.
+				await fs.rm("./node_modules", { recursive: true, force: true });
+				await fs.move("./._node_modules", "./node_modules");
+			}
 		}
 	}
 

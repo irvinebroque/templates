@@ -21,11 +21,7 @@ export default {
 	/**
 	 * Main request handler for the Worker
 	 */
-	async fetch(
-		request: Request,
-		env: Env,
-		ctx: ExecutionContext,
-	): Promise<Response> {
+	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
 
 		// Handle static assets (frontend)
@@ -52,10 +48,7 @@ export default {
 /**
  * Handles chat API requests
  */
-async function handleChatRequest(
-	request: Request,
-	env: Env,
-): Promise<Response> {
+async function handleChatRequest(request: Request, env: Env): Promise<Response> {
 	try {
 		// Parse JSON request body
 		const { messages = [] } = (await request.json()) as {
@@ -91,12 +84,9 @@ async function handleChatRequest(
 		});
 	} catch (error) {
 		console.error("Error processing chat request:", error);
-		return new Response(
-			JSON.stringify({ error: "Failed to process request" }),
-			{
-				status: 500,
-				headers: { "content-type": "application/json" },
-			},
-		);
+		return new Response(JSON.stringify({ error: "Failed to process request" }), {
+			status: 500,
+			headers: { "content-type": "application/json" },
+		});
 	}
 }

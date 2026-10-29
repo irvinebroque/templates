@@ -7,9 +7,7 @@ export function NoSiteSelected() {
 				<div className="mx-auto w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center mb-4">
 					<Globe size={20} className="text-neutral-400" />
 				</div>
-				<h2 className="text-lg font-semibold text-neutral-900 mb-1">
-					No site selected
-				</h2>
+				<h2 className="text-lg font-semibold text-neutral-900 mb-1">No site selected</h2>
 				<p className="text-sm text-neutral-500 mb-5">
 					Add a site to start testing AI visibility across models.
 				</p>

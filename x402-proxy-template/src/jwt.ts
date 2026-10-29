@@ -59,13 +59,10 @@ function arrayBufferToString(buffer: BufferSource): string {
  */
 async function importSecretKey(secret: string): Promise<CryptoKey> {
 	const keyData = stringToArrayBuffer(secret);
-	return await crypto.subtle.importKey(
-		"raw",
-		keyData,
-		{ name: "HMAC", hash: "SHA-256" },
-		false,
-		["sign", "verify"]
-	);
+	return await crypto.subtle.importKey("raw", keyData, { name: "HMAC", hash: "SHA-256" }, false, [
+		"sign",
+		"verify",
+	]);
 }
 
 /**
@@ -76,7 +73,7 @@ async function importSecretKey(secret: string): Promise<CryptoKey> {
  */
 export async function generateJWT(
 	secret: string,
-	expiresInSeconds: number = 3600
+	expiresInSeconds: number = 3600,
 ): Promise<string> {
 	const now = Math.floor(Date.now() / 1000);
 
@@ -94,21 +91,13 @@ export async function generateJWT(
 	};
 
 	// Encode header and payload
-	const encodedHeader = base64UrlEncode(
-		stringToArrayBuffer(JSON.stringify(header))
-	);
-	const encodedPayload = base64UrlEncode(
-		stringToArrayBuffer(JSON.stringify(payload))
-	);
+	const encodedHeader = base64UrlEncode(stringToArrayBuffer(JSON.stringify(header)));
+	const encodedPayload = base64UrlEncode(stringToArrayBuffer(JSON.stringify(payload)));
 
 	// Create signature
 	const dataToSign = `${encodedHeader}.${encodedPayload}`;
 	const key = await importSecretKey(secret);
-	const signatureBuffer = await crypto.subtle.sign(
-		"HMAC",
-		key,
-		stringToArrayBuffer(dataToSign)
-	);
+	const signatureBuffer = await crypto.subtle.sign("HMAC", key, stringToArrayBuffer(dataToSign));
 	const encodedSignature = base64UrlEncode(signatureBuffer);
 
 	// Return complete JWT
@@ -121,10 +110,7 @@ export async function generateJWT(
  * @param secret - The secret key for verification
  * @returns Decoded payload if valid, null otherwise
  */
-export async function verifyJWT(
-	token: string,
-	secret: string
-): Promise<JWTPayload | null> {
+export async function verifyJWT(token: string, secret: string): Promise<JWTPayload | null> {
 	try {
 		// Split token into parts
 		const parts = token.split(".");
@@ -143,7 +129,7 @@ export async function verifyJWT(
 			"HMAC",
 			key,
 			signatureBuffer,
-			stringToArrayBuffer(dataToVerify)
+			stringToArrayBuffer(dataToVerify),
 		);
 
 		if (!isValid) {

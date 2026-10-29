@@ -1,6 +1,6 @@
-import { cloudflareTest } from "@cloudflare/vitest-pool-workers";
+import { cloudflareTest } from "@cloudflare/vitest-plugin";
 
-import { defineConfig } from "vitest/config";
+import { defineConfig } from "vite-plus";
 
 // Stub Worker A - Returns HTML with asset references for testing URL rewriting
 const workerAScript = /* javascript */ `
@@ -78,16 +78,12 @@ export default defineConfig({
 				workers: [
 					{
 						name: "worker-a",
-						modules: [
-							{ type: "ESModule", path: "index.js", contents: workerAScript },
-						],
+						modules: [{ type: "ESModule", path: "index.js", contents: workerAScript }],
 						compatibilityDate: "2024-01-01",
 					},
 					{
 						name: "worker-b",
-						modules: [
-							{ type: "ESModule", path: "index.js", contents: workerBScript },
-						],
+						modules: [{ type: "ESModule", path: "index.js", contents: workerBScript }],
 						compatibilityDate: "2024-01-01",
 					},
 				],

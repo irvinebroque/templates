@@ -76,18 +76,12 @@ function truncateToolResult(result: unknown): unknown {
 }
 
 function abortReason(signal: AbortSignal): unknown {
-	return (
-		signal.reason ??
-		new DOMException("The tool execution was aborted.", "AbortError")
-	);
+	return signal.reason ?? new DOMException("The tool execution was aborted.", "AbortError");
 }
 
 function isAbortException(error: unknown): boolean {
 	return (
-		typeof error === "object" &&
-		error !== null &&
-		"name" in error &&
-		error.name === "AbortError"
+		typeof error === "object" && error !== null && "name" in error && error.name === "AbortError"
 	);
 }
 
@@ -107,9 +101,7 @@ async function executeCloudflareDocsAttempt(
 	const deadline = new Promise<never>((_, reject) => {
 		timeout = setTimeout(() => {
 			timedOut = true;
-			attemptController.abort(
-				new DOMException("Cloudflare Docs timed out.", "TimeoutError"),
-			);
+			attemptController.abort(new DOMException("Cloudflare Docs timed out.", "TimeoutError"));
 			reject(CLOUDFLARE_DOCS_TIMEOUT);
 		}, CLOUDFLARE_DOCS_ATTEMPT_TIMEOUT_MS);
 	});
@@ -153,11 +145,7 @@ function limitDocsResult(
 	return {
 		...tool,
 		execute: async (input, options) => {
-			for (
-				let attempt = 0;
-				attempt < CLOUDFLARE_DOCS_MAX_ATTEMPTS;
-				attempt += 1
-			) {
+			for (let attempt = 0; attempt < CLOUDFLARE_DOCS_MAX_ATTEMPTS; attempt += 1) {
 				const startedAt = performance.now();
 				try {
 					const result = truncateToolResult(
@@ -171,17 +159,11 @@ function limitDocsResult(
 					});
 					return result;
 				} catch (error) {
-					const aborted =
-						options.abortSignal?.aborted || isAbortException(error);
-					const terminal =
-						aborted || attempt === CLOUDFLARE_DOCS_MAX_ATTEMPTS - 1;
+					const aborted = options.abortSignal?.aborted || isAbortException(error);
+					const terminal = aborted || attempt === CLOUDFLARE_DOCS_MAX_ATTEMPTS - 1;
 					onAttempt?.({
 						attempt: attempt + 1,
-						outcome: aborted
-							? "aborted"
-							: error === CLOUDFLARE_DOCS_TIMEOUT
-								? "timeout"
-								: "error",
+						outcome: aborted ? "aborted" : error === CLOUDFLARE_DOCS_TIMEOUT ? "timeout" : "error",
 						terminal,
 						durationMs: Math.round(performance.now() - startedAt),
 					});

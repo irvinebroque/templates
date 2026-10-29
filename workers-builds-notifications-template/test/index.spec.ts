@@ -1,5 +1,5 @@
 import { env, createMessageBatch } from "cloudflare:test";
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vite-plus/test";
 import worker, { type CloudflareEvent } from "../src/index";
 import { extractBuildError } from "../src/helpers";
 
@@ -40,9 +40,7 @@ describe("Helper Functions", () => {
 // TEST HELPERS
 // =============================================================================
 
-function createMockEvent(
-	overrides: Partial<CloudflareEvent> = {},
-): CloudflareEvent {
+function createMockEvent(overrides: Partial<CloudflareEvent> = {}): CloudflareEvent {
 	return {
 		type: "cf.workersBuilds.worker.build.succeeded",
 		source: {
@@ -79,9 +77,7 @@ function createMockEvent(
 	};
 }
 
-function createQueueMessage(
-	event: CloudflareEvent,
-): ServiceBindingQueueMessage<CloudflareEvent> {
+function createQueueMessage(event: CloudflareEvent): ServiceBindingQueueMessage<CloudflareEvent> {
 	return {
 		id: crypto.randomUUID(),
 		timestamp: new Date(),
@@ -109,13 +105,8 @@ describe("Workers Builds Notifications", () => {
 		vi.restoreAllMocks();
 	});
 
-	function mockFetch(
-		handler: (url: string, init?: RequestInit) => Response | Promise<Response>,
-	) {
-		globalThis.fetch = async (
-			input: RequestInfo | URL,
-			init?: RequestInit,
-		): Promise<Response> => {
+	function mockFetch(handler: (url: string, init?: RequestInit) => Response | Promise<Response>) {
+		globalThis.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
 			const url = input.toString();
 			fetchCalls.push({ url, init });
 
@@ -139,9 +130,7 @@ describe("Workers Builds Notifications", () => {
 					return new Response(JSON.stringify({ result: {} }));
 				}
 				if (url.includes("/subdomain")) {
-					return new Response(
-						JSON.stringify({ result: { subdomain: "my-account" } }),
-					);
+					return new Response(JSON.stringify({ result: { subdomain: "my-account" } }));
 				}
 				if (url.includes("hooks.slack.com")) {
 					return new Response("ok");
@@ -295,9 +284,7 @@ describe("Workers Builds Notifications", () => {
 			expect(payload.blocks[0].text.text).toContain("Build Failed");
 
 			// Should have error in code block
-			const errorBlock = payload.blocks.find((b: any) =>
-				b.text?.text?.includes("```"),
-			);
+			const errorBlock = payload.blocks.find((b: any) => b.text?.text?.includes("```"));
 			expect(errorBlock).toBeDefined();
 			expect(errorBlock.text.text).toContain("ERROR");
 		});
@@ -340,9 +327,7 @@ describe("Workers Builds Notifications", () => {
 
 			await worker.queue(batch, env);
 
-			const errorBlock = slackPayloads[0].blocks.find((b: any) =>
-				b.text?.text?.includes("```"),
-			);
+			const errorBlock = slackPayloads[0].blocks.find((b: any) => b.text?.text?.includes("```"));
 			expect(errorBlock.text.text).toContain("First error");
 		});
 
@@ -498,9 +483,7 @@ describe("Workers Builds Notifications", () => {
 					return new Response(JSON.stringify({ result: {} }));
 				}
 				if (url.includes("/subdomain")) {
-					return new Response(
-						JSON.stringify({ result: { subdomain: "test" } }),
-					);
+					return new Response(JSON.stringify({ result: { subdomain: "test" } }));
 				}
 				if (url.includes("hooks.slack.com")) {
 					return new Response("ok");
@@ -528,9 +511,7 @@ describe("Workers Builds Notifications", () => {
 
 			// Only the succeeded event should trigger a notification
 			expect(slackPayloads).toHaveLength(1);
-			expect(slackPayloads[0].blocks[0].text.text).toContain(
-				"Production Deploy",
-			);
+			expect(slackPayloads[0].blocks[0].text.text).toContain("Production Deploy");
 		});
 	});
 
@@ -545,9 +526,7 @@ describe("Workers Builds Notifications", () => {
 					return new Response(JSON.stringify({ result: {} }));
 				}
 				if (url.includes("/subdomain")) {
-					return new Response(
-						JSON.stringify({ result: { subdomain: "test" } }),
-					);
+					return new Response(JSON.stringify({ result: { subdomain: "test" } }));
 				}
 				if (url.includes("hooks.slack.com")) {
 					return new Response("ok");
@@ -599,9 +578,7 @@ describe("Workers Builds Notifications", () => {
 
 			// Should still send notification without API token
 			expect(slackPayloads).toHaveLength(1);
-			expect(slackPayloads[0].blocks[0].text.text).toContain(
-				"Production Deploy",
-			);
+			expect(slackPayloads[0].blocks[0].text.text).toContain("Production Deploy");
 		});
 	});
 });

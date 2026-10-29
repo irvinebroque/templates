@@ -6,11 +6,7 @@ interface Env {
 }
 
 export default {
-	async fetch(
-		request: Request,
-		env: Env,
-		ctx: ExecutionContext,
-	): Promise<Response> {
+	async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
 		const url = new URL(request.url);
 
 		// Handle API requests
@@ -118,9 +114,7 @@ async function handleApiRequest(
 
 		// API endpoint for Organizations GET operation
 		if (url.pathname === "/api/organizations" && request.method === "GET") {
-			const result = await client.query(
-				`SELECT * FROM organizations ORDER BY id`,
-			);
+			const result = await client.query(`SELECT * FROM organizations ORDER BY id`);
 			return Response.json(result.rows);
 		}
 
@@ -129,10 +123,7 @@ async function handleApiRequest(
 			const body: any = await request.json();
 
 			if (!body.name || typeof body.name !== "string") {
-				return Response.json(
-					{ error: "Organization name is required" },
-					{ status: 400 },
-				);
+				return Response.json({ error: "Organization name is required" }, { status: 400 });
 			}
 
 			const result = await client.query(
@@ -148,10 +139,7 @@ async function handleApiRequest(
 		}
 
 		// API endpoint for Organizations DELETE operation
-		if (
-			url.pathname.startsWith("/api/organizations/") &&
-			request.method === "DELETE"
-		) {
+		if (url.pathname.startsWith("/api/organizations/") && request.method === "DELETE") {
 			const orgId = Number(url.pathname.split("/").pop());
 
 			// First check if there are any users associated with this organization
@@ -207,10 +195,7 @@ async function handleApiRequest(
 			const body: any = await request.json();
 
 			if (!body.username || typeof body.username !== "string") {
-				return Response.json(
-					{ error: "Username is required" },
-					{ status: 400 },
-				);
+				return Response.json({ error: "Username is required" }, { status: 400 });
 			}
 
 			// Organization ID is optional (can be null)
@@ -218,16 +203,10 @@ async function handleApiRequest(
 
 			// If organization_id is provided, verify it exists
 			if (orgId !== null) {
-				const orgCheck = await client.query(
-					`SELECT id FROM organizations WHERE id = $1`,
-					[orgId],
-				);
+				const orgCheck = await client.query(`SELECT id FROM organizations WHERE id = $1`, [orgId]);
 
 				if (orgCheck.rows.length === 0) {
-					return Response.json(
-						{ error: "Organization not found" },
-						{ status: 400 },
-					);
+					return Response.json({ error: "Organization not found" }, { status: 400 });
 				}
 			}
 
@@ -251,10 +230,7 @@ async function handleApiRequest(
 			const body: any = await request.json();
 
 			if (!body.username || typeof body.username !== "string") {
-				return Response.json(
-					{ error: "Username is required" },
-					{ status: 400 },
-				);
+				return Response.json({ error: "Username is required" }, { status: 400 });
 			}
 
 			// Organization ID is optional (can be null)
@@ -267,16 +243,10 @@ async function handleApiRequest(
 
 			// If organization_id is provided, verify it exists
 			if (orgId !== undefined && orgId !== null) {
-				const orgCheck = await client.query(
-					`SELECT id FROM organizations WHERE id = $1`,
-					[orgId],
-				);
+				const orgCheck = await client.query(`SELECT id FROM organizations WHERE id = $1`, [orgId]);
 
 				if (orgCheck.rows.length === 0) {
-					return Response.json(
-						{ error: "Organization not found" },
-						{ status: 400 },
-					);
+					return Response.json({ error: "Organization not found" }, { status: 400 });
 				}
 			}
 

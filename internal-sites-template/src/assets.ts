@@ -53,20 +53,14 @@ export interface ParsedUpload {
  *   - `paths` (JSON string[]) - relative paths for each file
  *   - `files` (File[]) - the actual file data
  */
-export async function parseStaticSiteUpload(
-	request: Request,
-): Promise<ParsedUpload> {
+export async function parseStaticSiteUpload(request: Request): Promise<ParsedUpload> {
 	const formData = await request.formData();
 	const name = getRequiredField(formData, "name");
 	const slug = normalizeSlug(getRequiredField(formData, "slug"));
-	const paths = JSON.parse(
-		formData.get("paths")?.toString() || "[]",
-	) as string[];
-	const fileParts = (formData.getAll("files") as unknown as File[]).filter(
-		(value) => {
-			return value && typeof value === "object" && "arrayBuffer" in value;
-		},
-	);
+	const paths = JSON.parse(formData.get("paths")?.toString() || "[]") as string[];
+	const fileParts = (formData.getAll("files") as unknown as File[]).filter((value) => {
+		return value && typeof value === "object" && "arrayBuffer" in value;
+	});
 
 	if (!slug) {
 		throw new Error("Site slug is required");
@@ -82,9 +76,7 @@ export async function parseStaticSiteUpload(
 			? fileParts[0]
 			: null;
 
-	const assets = zipFile
-		? await assetsFromZip(zipFile)
-		: await assetsFromFiles(fileParts, paths);
+	const assets = zipFile ? await assetsFromZip(zipFile) : await assetsFromFiles(fileParts, paths);
 
 	validateAssets(assets);
 
@@ -113,10 +105,7 @@ function getRequiredField(formData: FormData, field: string): string {
 	return value;
 }
 
-async function assetsFromFiles(
-	files: File[],
-	paths: string[],
-): Promise<UploadedAsset[]> {
+async function assetsFromFiles(files: File[], paths: string[]): Promise<UploadedAsset[]> {
 	const assets = await Promise.all(
 		files.map(async (file, index) => {
 			const path = paths[index] || file.name;
@@ -164,15 +153,10 @@ function normalizeRelativePath(path: string): string {
  * in a single directory (e.g. "my-site/index.html" -> "index.html").
  */
 function stripCommonTopLevelFolder(assets: UploadedAsset[]): UploadedAsset[] {
-	const firstSegments = assets
-		.map((asset) => asset.path.split("/")[0])
-		.filter(Boolean);
+	const firstSegments = assets.map((asset) => asset.path.split("/")[0]).filter(Boolean);
 	const commonTopLevel = firstSegments[0];
 
-	if (
-		!commonTopLevel ||
-		!firstSegments.every((segment) => segment === commonTopLevel)
-	) {
+	if (!commonTopLevel || !firstSegments.every((segment) => segment === commonTopLevel)) {
 		return assets;
 	}
 
@@ -182,9 +166,7 @@ function stripCommonTopLevelFolder(assets: UploadedAsset[]): UploadedAsset[] {
 	}));
 
 	// Only strip if the result still has an index.html
-	return stripped.some((asset) => asset.path === "index.html")
-		? stripped
-		: assets;
+	return stripped.some((asset) => asset.path === "index.html") ? stripped : assets;
 }
 
 function validateAssets(assets: UploadedAsset[]): void {

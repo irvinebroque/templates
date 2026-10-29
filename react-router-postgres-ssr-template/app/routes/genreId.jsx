@@ -14,9 +14,7 @@ export async function loader({ params, request, context }) {
 		const booksService = context?.cloudflare?.env?.BOOKS_SERVICE;
 
 		if (!booksService) {
-			console.warn(
-				"[Genre Loader] BOOKS_SERVICE binding not available, returning empty array",
-			);
+			console.warn("[Genre Loader] BOOKS_SERVICE binding not available, returning empty array");
 			return { books: [], source: "fallback" };
 		}
 
@@ -56,9 +54,7 @@ export default function GenrePage() {
 
 			<div className="page-header">
 				<h1>{activeGenre} Books</h1>
-				<p className="text-gray-900">
-					Explore our collection of {activeGenre.toLowerCase()} books
-				</p>
+				<p className="text-gray-900">Explore our collection of {activeGenre.toLowerCase()} books</p>
 			</div>
 
 			<BooksList books={data.books} />

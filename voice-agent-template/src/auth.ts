@@ -4,11 +4,7 @@ interface VoiceAgentAuthEnv {
 	VOICE_AGENT_TOKEN?: string;
 }
 
-function jsonError(
-	error: string,
-	status: number,
-	authenticate = false,
-): Response {
+function jsonError(error: string, status: number, authenticate = false): Response {
 	const headers = new Headers({
 		"cache-control": "no-store",
 		"content-type": "application/json; charset=utf-8",
@@ -28,9 +24,7 @@ function readBearerToken(request: Request): string | null {
 }
 
 async function sha256(value: string): Promise<Uint8Array> {
-	return new Uint8Array(
-		await crypto.subtle.digest("SHA-256", textEncoder.encode(value)),
-	);
+	return new Uint8Array(await crypto.subtle.digest("SHA-256", textEncoder.encode(value)));
 }
 
 function equalBytes(left: Uint8Array, right: Uint8Array): boolean {
@@ -42,14 +36,8 @@ function equalBytes(left: Uint8Array, right: Uint8Array): boolean {
 	return difference === 0;
 }
 
-async function tokensMatch(
-	supplied: string,
-	configured: string,
-): Promise<boolean> {
-	const [suppliedHash, configuredHash] = await Promise.all([
-		sha256(supplied),
-		sha256(configured),
-	]);
+async function tokensMatch(supplied: string, configured: string): Promise<boolean> {
+	const [suppliedHash, configuredHash] = await Promise.all([sha256(supplied), sha256(configured)]);
 	return equalBytes(suppliedHash, configuredHash);
 }
 

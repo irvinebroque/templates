@@ -58,9 +58,7 @@ async function main() {
 
 	const paymentInfo: X402Response = await initialResponse.json();
 	console.log("✅ Received 402 Payment Required");
-	console.log(
-		`   Payment needed: ${paymentInfo.accepts[0]?.maxAmountRequired}`
-	);
+	console.log(`   Payment needed: ${paymentInfo.accepts[0]?.maxAmountRequired}`);
 	console.log(`   Description: ${paymentInfo.accepts[0]?.description}\n`);
 
 	// Step 2: Set up wallet and create payment
@@ -79,7 +77,7 @@ async function main() {
 	const paymentHeader = await createPaymentHeader(
 		account,
 		paymentInfo.x402Version,
-		requirement as Parameters<typeof createPaymentHeader>[2]
+		requirement as Parameters<typeof createPaymentHeader>[2],
 	);
 
 	console.log("✅ Payment signed");

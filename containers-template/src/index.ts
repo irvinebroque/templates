@@ -14,9 +14,7 @@ export class MyContainer extends DurableObject<Env> {
 		const container = ctx.container;
 		if (container?.running) {
 			// Restore the timeout and exit monitoring after a DO restart.
-			void ctx.blockConcurrencyWhile(() =>
-				container.setInactivityTimeout(INACTIVITY_TIMEOUT_MS),
-			);
+			void ctx.blockConcurrencyWhile(() => container.setInactivityTimeout(INACTIVITY_TIMEOUT_MS));
 			this.observeExit();
 		}
 	}
@@ -95,30 +93,21 @@ app.get("/", (c) =>
 );
 
 app.get("/container/:id", (c) =>
-	c.env.MY_CONTAINER.getByName(`/container/${c.req.param("id")}`).fetch(
-		c.req.raw,
-	),
+	c.env.MY_CONTAINER.getByName(`/container/${c.req.param("id")}`).fetch(c.req.raw),
 );
 
-app.get("/error", (c) =>
-	c.env.MY_CONTAINER.getByName("error-test").fetch(c.req.raw),
-);
+app.get("/error", (c) => c.env.MY_CONTAINER.getByName("error-test").fetch(c.req.raw));
 
 app.get("/lb", (c) => {
 	const index = Math.floor(Math.random() * POOL_SIZE);
 	return c.env.MY_CONTAINER.getByName(`pool-${index}`).fetch(c.req.raw);
 });
 
-app.get("/singleton", (c) =>
-	c.env.MY_CONTAINER.getByName("singleton").fetch(c.req.raw),
-);
+app.get("/singleton", (c) => c.env.MY_CONTAINER.getByName("singleton").fetch(c.req.raw));
 
 app.onError((error, c) => {
 	console.error("Container request failed:", error);
-	return c.text(
-		"Container request failed. Check the Worker logs and retry.",
-		502,
-	);
+	return c.text("Container request failed. Check the Worker logs and retry.", 502);
 });
 
 export default app;

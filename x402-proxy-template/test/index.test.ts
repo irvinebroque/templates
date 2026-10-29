@@ -36,7 +36,7 @@ describe("x402 protected route matching", () => {
 
 		const response = await app.fetch(
 			requestWithRawUrl("https://example.com/./premium/secret"),
-			env
+			env,
 		);
 
 		assert.equal(response.status, 400);
@@ -48,7 +48,7 @@ describe("x402 protected route matching", () => {
 
 		const response = await app.fetch(
 			requestWithRawUrl("https://example.com/free/../premium/secret"),
-			env
+			env,
 		);
 
 		assert.equal(response.status, 400);
@@ -60,7 +60,7 @@ describe("x402 protected route matching", () => {
 
 		const response = await app.fetch(
 			requestWithRawUrl("https://example.com/%2e/premium/secret"),
-			env
+			env,
 		);
 
 		assert.equal(response.status, 400);
@@ -70,10 +70,7 @@ describe("x402 protected route matching", () => {
 	it("rejects repeated slashes instead of relying on origin normalization", async () => {
 		const { env, getOriginFetchCalls } = createEnv();
 
-		const response = await app.fetch(
-			requestWithRawUrl("https://example.com//premium/secret"),
-			env
-		);
+		const response = await app.fetch(requestWithRawUrl("https://example.com//premium/secret"), env);
 
 		assert.equal(response.status, 400);
 		assert.equal(getOriginFetchCalls(), 0);
@@ -82,10 +79,7 @@ describe("x402 protected route matching", () => {
 	it("continues to protect canonical wildcard paths", async () => {
 		const { env, getOriginFetchCalls } = createEnv();
 
-		const response = await app.fetch(
-			requestWithRawUrl("https://example.com/premium/secret"),
-			env
-		);
+		const response = await app.fetch(requestWithRawUrl("https://example.com/premium/secret"), env);
 
 		assert.equal(response.status, 500);
 		assert.equal(getOriginFetchCalls(), 0);
@@ -94,10 +88,7 @@ describe("x402 protected route matching", () => {
 	it("protects the wildcard prefix itself", async () => {
 		const { env, getOriginFetchCalls } = createEnv();
 
-		const response = await app.fetch(
-			requestWithRawUrl("https://example.com/premium"),
-			env
-		);
+		const response = await app.fetch(requestWithRawUrl("https://example.com/premium"), env);
 
 		assert.equal(response.status, 500);
 		assert.equal(getOriginFetchCalls(), 0);
@@ -108,7 +99,7 @@ describe("x402 protected route matching", () => {
 
 		const response = await app.fetch(
 			requestWithRawUrl("https://example.com/%70remium/secret"),
-			env
+			env,
 		);
 
 		assert.equal(response.status, 500);
@@ -118,10 +109,7 @@ describe("x402 protected route matching", () => {
 	it("does not protect paths that merely share a wildcard prefix", async () => {
 		const { env, getOriginFetchCalls } = createEnv();
 
-		const response = await app.fetch(
-			requestWithRawUrl("https://example.com/premiumXYZ"),
-			env
-		);
+		const response = await app.fetch(requestWithRawUrl("https://example.com/premiumXYZ"), env);
 
 		assert.equal(response.status, 200);
 		assert.equal(await response.text(), "origin content");

@@ -1,18 +1,8 @@
 import type { ReactNode, TdHTMLAttributes, ThHTMLAttributes } from "react";
 
 /** Kumo-style data table matching stratus ResponsiveTableWrapper */
-export function Table({
-	children,
-	className = "",
-}: {
-	children: ReactNode;
-	className?: string;
-}) {
-	return (
-		<table className={`w-full border-collapse text-[13px] ${className}`}>
-			{children}
-		</table>
-	);
+export function Table({ children, className = "" }: { children: ReactNode; className?: string }) {
+	return <table className={`w-full border-collapse text-[13px] ${className}`}>{children}</table>;
 }
 
 export function Thead({ children }: { children: ReactNode }) {
@@ -49,16 +39,8 @@ export function Td({
 	);
 }
 
-export function Tr({
-	children,
-	className = "",
-}: {
-	children: ReactNode;
-	className?: string;
-}) {
+export function Tr({ children, className = "" }: { children: ReactNode; className?: string }) {
 	return (
-		<tr className={`hover:bg-surface-secondary transition-colors ${className}`}>
-			{children}
-		</tr>
+		<tr className={`hover:bg-surface-secondary transition-colors ${className}`}>{children}</tr>
 	);
 }

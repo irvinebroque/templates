@@ -29,18 +29,9 @@ import {
 	renderRobotsTxt,
 	renderWebsiteJsonLd,
 } from "../enrichment/surfaces";
-import {
-	clearCache,
-	getResources,
-	siteConfig,
-	upsertResource,
-} from "../lib/store";
+import { clearCache, getResources, siteConfig, upsertResource } from "../lib/store";
 import type { Env, RawResource } from "../lib/types";
-import {
-	directoryDocument,
-	SAMPLE_AGENT_KEYS,
-	verifyAgentIdentity,
-} from "../lib/web-bot-auth";
+import { directoryDocument, SAMPLE_AGENT_KEYS, verifyAgentIdentity } from "../lib/web-bot-auth";
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -78,8 +69,7 @@ function isAuthorized(c: {
 /** Apply the Content-Signal header declaring agent usage intent. */
 function contentSignal(c: { env: Env }): Record<string, string> {
 	return {
-		"Content-Signal":
-			c.env.CONTENT_SIGNAL || "ai-input=yes, search=yes, ai-train=no",
+		"Content-Signal": c.env.CONTENT_SIGNAL || "ai-input=yes, search=yes, ai-train=no",
 	};
 }
 
@@ -231,10 +221,7 @@ app.post("/api/resources", async (c) => {
 
 	const rawBody = String(body.body);
 	if (new TextEncoder().encode(rawBody).length > MAX_BODY_BYTES) {
-		return c.json(
-			{ error: `Body too large (max ${MAX_BODY_BYTES} bytes).` },
-			400,
-		);
+		return c.json({ error: `Body too large (max ${MAX_BODY_BYTES} bytes).` }, 400);
 	}
 
 	let url = `${originOf(c.req.url)}/${slug}`;
@@ -262,10 +249,7 @@ app.post("/api/resources", async (c) => {
 		return c.json(enriched, 201);
 	} catch (err) {
 		if ((err as Error).message === "RESOURCE_LIMIT") {
-			return c.json(
-				{ error: `Resource limit reached (max ${MAX_RESOURCES}).` },
-				409,
-			);
+			return c.json({ error: `Resource limit reached (max ${MAX_RESOURCES}).` }, 409);
 		}
 		throw err;
 	}

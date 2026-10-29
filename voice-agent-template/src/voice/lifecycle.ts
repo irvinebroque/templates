@@ -5,16 +5,10 @@ export interface CallClaim {
 	replacedCallId: string | null;
 }
 
-export function claimCall(
-	currentCallId: string | null,
-	connectionId: string,
-): CallClaim {
+export function claimCall(currentCallId: string | null, connectionId: string): CallClaim {
 	return {
 		activeCallId: connectionId,
-		replacedCallId:
-			currentCallId !== null && currentCallId !== connectionId
-				? currentCallId
-				: null,
+		replacedCallId: currentCallId !== null && currentCallId !== connectionId ? currentCallId : null,
 	};
 }
 
@@ -39,8 +33,6 @@ export function nextConversationCleanupDeadline(
 		: Math.max(now, conversationCleanupDeadline(oldestTimestamp));
 }
 
-export function normalizeConversationCleanupScheduleTime(
-	deadlineMs: number,
-): number {
+export function normalizeConversationCleanupScheduleTime(deadlineMs: number): number {
 	return Math.floor(deadlineMs / 1_000) * 1_000;
 }

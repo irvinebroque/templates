@@ -3,8 +3,7 @@ const grpc = require("@grpc/grpc-js");
 const protoLoader = require("@grpc/proto-loader");
 
 const port = Number.parseInt(process.env.GRPC_PORT || "50051", 10);
-const protoPath =
-	process.env.PROTO_PATH || path.resolve(__dirname, "../proto/bytes.proto");
+const protoPath = process.env.PROTO_PATH || path.resolve(__dirname, "../proto/bytes.proto");
 
 const definition = protoLoader.loadSync(protoPath, {
 	keepCase: true,
@@ -29,10 +28,7 @@ function chat(call) {
 			: Buffer.from(chunk.payload || "");
 
 		call.write({
-			payload: Buffer.concat([
-				Buffer.from(`container echo ${messageCount}: `),
-				payload,
-			]),
+			payload: Buffer.concat([Buffer.from(`container echo ${messageCount}: `), payload]),
 		});
 	});
 
@@ -55,24 +51,20 @@ function chat(call) {
 
 const server = new grpc.Server();
 server.addService(proto.ByteStream.service, { Chat: chat });
-server.bindAsync(
-	`0.0.0.0:${port}`,
-	grpc.ServerCredentials.createInsecure(),
-	(error, boundPort) => {
-		if (error) {
-			console.error(error);
-			process.exitCode = 1;
-			return;
-		}
+server.bindAsync(`0.0.0.0:${port}`, grpc.ServerCredentials.createInsecure(), (error, boundPort) => {
+	if (error) {
+		console.error(error);
+		process.exitCode = 1;
+		return;
+	}
 
-		console.log(
-			JSON.stringify({
-				event: "grpc_server_listening",
-				port: boundPort,
-			}),
-		);
-	},
-);
+	console.log(
+		JSON.stringify({
+			event: "grpc_server_listening",
+			port: boundPort,
+		}),
+	);
+});
 
 function shutdown(signal) {
 	console.log(JSON.stringify({ event: "grpc_server_stopping", signal }));

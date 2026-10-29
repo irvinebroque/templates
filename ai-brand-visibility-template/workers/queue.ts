@@ -19,10 +19,7 @@ type Citation = {
 	response: string;
 };
 
-export async function queueConsumer(
-	batch: MessageBatch<QueueJob>,
-	env: Env,
-): Promise<void> {
+export async function queueConsumer(batch: MessageBatch<QueueJob>, env: Env): Promise<void> {
 	for (const msg of batch.messages) {
 		const job = msg.body;
 		try {
@@ -63,8 +60,7 @@ async function executeJob(env: Env, job: QueueJob): Promise<Citation> {
 		};
 	} catch (err) {
 		const errMsg = err instanceof Error ? err.message : String(err);
-		const isBillingError =
-			/billing|credit|payment|insufficient|quota|budget/i.test(errMsg);
+		const isBillingError = /billing|credit|payment|insufficient|quota|budget/i.test(errMsg);
 		const response = isBillingError
 			? "Unified Billing credits required. Load credits at dash.cloudflare.com → AI Gateway → Billing."
 			: `Error: ${errMsg}`;

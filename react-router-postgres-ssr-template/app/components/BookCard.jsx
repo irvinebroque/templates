@@ -14,9 +14,7 @@ function BookCard({ book, onClick }) {
 				<p className="text-gray-900 text-sm overflow-hidden line-clamp-3 mb-4">
 					{book.description}
 				</p>
-				<button className="btn-primary w-full text-sm font-bold">
-					Learn more
-				</button>
+				<button className="btn-primary w-full text-sm font-bold">Learn more</button>
 			</div>
 		</div>
 	);
