@@ -27,15 +27,18 @@ jobs:
   check:
     needs: templates
     runs-on: ubuntu-latest
+    env:
+      NPM_CONFIG_ENGINE_STRICT: "true"
     strategy:
       fail-fast: false
       matrix:
+        node: ["22.19.0", "24.22.0"]
         template: ${{ fromJSON(needs.templates.outputs.names) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "24.22.0"
+          node-version: ${{ matrix.node }}
       - name: Copy the standalone project
         env:
           TEMPLATE: ${{ matrix.template }}
