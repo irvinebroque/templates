@@ -3,7 +3,7 @@ import { createConnection } from "node:net";
 import process from "node:process";
 
 const GRPC_HOST = "127.0.0.1";
-const GRPC_PORT = 8788;
+const GRPC_PORT = Number(process.env.GRPC_TEST_PORT || 8788);
 const CLIENT_TIMEOUT_MS = 120_000;
 const SERVER_TIMEOUT_MS = 60_000;
 
@@ -59,7 +59,7 @@ function runClient() {
 				"run",
 				"client",
 				"--",
-				`${GRPC_HOST}:${GRPC_PORT}`,
+				`${process.env.GRPC_TLS === "1" ? "localhost" : GRPC_HOST}:${GRPC_PORT}`,
 				"2",
 				"25",
 			],
@@ -135,11 +135,22 @@ if (await canConnect(GRPC_HOST, GRPC_PORT)) {
 	throw new Error(`Port ${GRPC_HOST}:${GRPC_PORT} is already in use`);
 }
 
-const wrangler = spawn("npm", ["run", "dev"], {
-	cwd: process.cwd(),
-	detached: process.platform !== "win32",
-	stdio: ["ignore", "pipe", "pipe"],
-});
+const wrangler = spawn(
+	"npm",
+	[
+		"run",
+		"dev",
+		"--",
+		...(process.env.GRPC_TEST_CONFIG
+			? ["--config", process.env.GRPC_TEST_CONFIG]
+			: []),
+	],
+	{
+		cwd: process.cwd(),
+		detached: process.platform !== "win32",
+		stdio: ["ignore", "pipe", "pipe"],
+	},
+);
 
 wrangler.stdout.on("data", (chunk) => process.stdout.write(chunk));
 wrangler.stderr.on("data", (chunk) => process.stderr.write(chunk));

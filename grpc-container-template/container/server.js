@@ -53,26 +53,41 @@ function chat(call) {
 	});
 }
 
+// PEM values come from Worker secrets, never from the image.
+const cert = process.env.GRPC_TLS_CERT;
+const key = process.env.GRPC_TLS_KEY;
+if (Boolean(cert) !== Boolean(key)) {
+	throw new Error("Set both GRPC_TLS_CERT and GRPC_TLS_KEY");
+}
+const credentials = cert
+	? grpc.ServerCredentials.createSsl(
+			null,
+			[
+				{
+					private_key: Buffer.from(key),
+					cert_chain: Buffer.from(cert),
+				},
+			],
+			false,
+		)
+	: grpc.ServerCredentials.createInsecure();
+
 const server = new grpc.Server();
 server.addService(proto.ByteStream.service, { Chat: chat });
-server.bindAsync(
-	`0.0.0.0:${port}`,
-	grpc.ServerCredentials.createInsecure(),
-	(error, boundPort) => {
-		if (error) {
-			console.error(error);
-			process.exitCode = 1;
-			return;
-		}
+server.bindAsync(`0.0.0.0:${port}`, credentials, (error, boundPort) => {
+	if (error) {
+		console.error(error);
+		process.exitCode = 1;
+		return;
+	}
 
-		console.log(
-			JSON.stringify({
-				event: "grpc_server_listening",
-				port: boundPort,
-			}),
-		);
-	},
-);
+	console.log(
+		JSON.stringify({
+			event: "grpc_server_listening",
+			port: boundPort,
+		}),
+	);
+});
 
 function shutdown(signal) {
 	console.log(JSON.stringify({ event: "grpc_server_stopping", signal }));

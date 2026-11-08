@@ -1,3 +1,4 @@
+const fs = require("node:fs");
 const path = require("node:path");
 const grpc = require("@grpc/grpc-js");
 const protoLoader = require("@grpc/proto-loader");
@@ -24,8 +25,16 @@ const definition = protoLoader.loadSync(protoPath, {
 	oneofs: true,
 });
 const proto = grpc.loadPackageDefinition(definition).cloudflare.grpcdemo;
-const client = new proto.ByteStream(target, grpc.credentials.createInsecure());
-const call = client.Chat();
+const credentials =
+	process.env.GRPC_TLS === "1"
+		? grpc.credentials.createSsl(
+				process.env.GRPC_CA_FILE
+					? fs.readFileSync(process.env.GRPC_CA_FILE)
+					: undefined,
+			)
+		: grpc.credentials.createInsecure();
+const client = new proto.ByteStream(target, credentials);
+const call = client.Chat({ deadline: Date.now() + 120_000 });
 const startedAt = Date.now();
 
 function elapsed() {
@@ -47,6 +56,7 @@ call.on("end", () => {
 });
 
 call.on("error", (error) => {
+	clearInterval(timer);
 	if (error.code !== grpc.status.CANCELLED) {
 		console.error("stream error", error);
 		process.exitCode = 1;

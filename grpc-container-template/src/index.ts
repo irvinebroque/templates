@@ -33,7 +33,9 @@ async function bridgeSockets(left: Socket, right: Socket): Promise<void> {
 	}
 }
 
-export class GrpcContainer extends DurableObject<Env> {
+type GrpcEnv = Env & { GRPC_TLS_CERT?: string; GRPC_TLS_KEY?: string };
+
+export class GrpcContainer extends DurableObject<GrpcEnv> {
 	private starting: Promise<void> | undefined;
 
 	private async openGrpcSocket(): Promise<Socket> {
@@ -45,7 +47,15 @@ export class GrpcContainer extends DurableObject<Env> {
 		if (!container.running && !this.starting) {
 			container.start({
 				enableInternet: false,
-				env: { GRPC_PORT: String(GRPC_PORT) },
+				env: {
+					GRPC_PORT: String(GRPC_PORT),
+					...(this.env.GRPC_TLS_CERT
+						? { GRPC_TLS_CERT: this.env.GRPC_TLS_CERT }
+						: {}),
+					...(this.env.GRPC_TLS_KEY
+						? { GRPC_TLS_KEY: this.env.GRPC_TLS_KEY }
+						: {}),
+				},
 			});
 			this.starting = scheduler.wait(CONTAINER_STARTUP_GRACE_MS).finally(() => {
 				this.starting = undefined;

@@ -92,6 +92,7 @@ Run the complete local tunnel smoke test:
 
 ```sh
 npm run test:e2e
+npm run test:tls
 ```
 
 The end-to-end test starts Wrangler, connects the included gRPC client to port
@@ -106,17 +107,55 @@ Deploy the Worker and Container:
 npm run deploy
 ```
 
-Inbound TCP is available for Workers attached to a Cloudflare zone on a Pro or
-Business plan. The public hostname and port for the raw TCP listener depend on
-the inbound TCP configuration for your zone. The Worker's normal HTTP URL
-returns only a plain-text status response for live-demo and health checks; it
-does not serve a browser UI.
+Use a Pro or Business zone and configure Spectrum for TCP passthrough. TLS
+terminates in the Container, including HTTP/2 ALPN (`h2`); Spectrum Enterprise
+TLS termination is not required. Workers Paid and the zone plan are separate.
 
-## Caveats
+### Configure TLS before exposing a public endpoint
 
-The included client uses an unencrypted connection for local testing. Use a
-TLS-enabled endpoint and configure the client with TLS credentials before
-sending traffic over an untrusted network.
+Obtain a certificate and private key for your gRPC hostname from a CA trusted
+by your clients. Use the full certificate chain in PEM format. Keep the key out
+of the repository and Docker image. For a reproducible test, create a short-lived
+self-signed certificate and explicitly trust it in the test client:
+
+```sh
+mkdir -p certs
+openssl req -x509 -newkey rsa:2048 -nodes -days 2 \
+  -keyout certs/key.pem -out certs/cert.pem \
+  -subj "/CN=grpc.example.com" -addext "subjectAltName=DNS:grpc.example.com"
+```
+
+Replace `grpc.example.com` with your hostname. Create the secret upload file
+without printing the key:
+
+```sh
+node --input-type=module -e 'import fs from "node:fs"; fs.writeFileSync("secrets.json", JSON.stringify({GRPC_TLS_CERT: {type: "secret_text", text: fs.readFileSync("certs/cert.pem", "utf8")}, GRPC_TLS_KEY: {type: "secret_text", text: fs.readFileSync("certs/key.pem", "utf8")}}), {mode: 0o600})'
+cf workers secrets bulk --worker grpc-container-template --file secrets.json
+```
+
+Upload both secrets before creating the Spectrum application. Restart an existing
+Container after rotating secrets so it receives the new certificate. Without
+these secrets the server uses plaintext for local development only.
+
+Create a Spectrum application in the same account as the Worker. Use the
+Worker's immutable tag as `origin_worker_id`:
+
+```sh
+cf spectrum apps create --zone example.com --body '{"dns":{"type":"CNAME","name":"grpc.example.com"},"protocol":"tcp/50051","traffic_type":"worker","origin_worker_id":"<WORKER_TAG>"}'
+```
+
+Omit `tls` on Pro/Business. Spectrum forwards the encrypted connection unchanged;
+the Worker and Durable Object also forward bytes without terminating TLS.
+Wait for the Container rollout to complete before testing:
+
+```sh
+GRPC_TLS=1 GRPC_CA_FILE=certs/cert.pem node container/client.js grpc.example.com:50051
+```
+
+For a publicly trusted certificate, omit `GRPC_CA_FILE` to use system trust.
+Do not disable certificate or hostname verification. The plaintext client remains
+available for local development. The Worker's HTTP URL is only a status response,
+not the gRPC endpoint.
 
 ## Project Structure
 

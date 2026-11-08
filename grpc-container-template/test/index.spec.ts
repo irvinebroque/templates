@@ -57,6 +57,7 @@ function createContainer(socket: Socket, running = true) {
 	};
 	const durableObject: GrpcContainer = Object.create(GrpcContainer.prototype);
 	Object.defineProperty(durableObject, "ctx", { value: { container } });
+	Object.defineProperty(durableObject, "env", { value: {} });
 	return { durableObject, container };
 }
 
@@ -257,6 +258,28 @@ describe("gRPC Container lifecycle", () => {
 		expect(container.start).toHaveBeenCalledWith({
 			enableInternet: false,
 			env: { GRPC_PORT: "50051" },
+		});
+	});
+
+	it("passes TLS secrets into the Container without terminating TLS in the bridge", async () => {
+		vi.spyOn(scheduler, "wait").mockResolvedValue(undefined);
+		const upstream = createSocket();
+		const { durableObject, container } = createContainer(
+			upstream.socket,
+			false,
+		);
+		Object.assign((durableObject as unknown as { env: object }).env, {
+			GRPC_TLS_CERT: "test-cert",
+			GRPC_TLS_KEY: "test-key",
+		});
+		await durableObject.connect(createSocket().socket);
+		expect(container.start).toHaveBeenCalledWith({
+			enableInternet: false,
+			env: {
+				GRPC_PORT: "50051",
+				GRPC_TLS_CERT: "test-cert",
+				GRPC_TLS_KEY: "test-key",
+			},
 		});
 	});
 

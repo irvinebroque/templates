@@ -37,7 +37,8 @@
 		"grpc:server": "npm --prefix container start",
 		"start": "wrangler dev",
 		"test": "vitest run",
-		"test:e2e": "node scripts/smoke-test.mjs"
+		"test:e2e": "node scripts/smoke-test.mjs",
+		"test:tls": "node scripts/tls-test.mjs"
 	},
 	"type": "module"
 }
