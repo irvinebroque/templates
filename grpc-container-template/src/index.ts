@@ -33,9 +33,7 @@ async function bridgeSockets(left: Socket, right: Socket): Promise<void> {
 	}
 }
 
-type GrpcEnv = Env & { GRPC_TLS_CERT?: string; GRPC_TLS_KEY?: string };
-
-export class GrpcContainer extends DurableObject<GrpcEnv> {
+export class GrpcContainer extends DurableObject<Env> {
 	private starting: Promise<void> | undefined;
 
 	private async openGrpcSocket(): Promise<Socket> {
@@ -45,19 +43,26 @@ export class GrpcContainer extends DurableObject<GrpcEnv> {
 		}
 
 		if (!container.running && !this.starting) {
-			container.start({
-				enableInternet: false,
-				env: {
-					GRPC_PORT: String(GRPC_PORT),
-					...(this.env.GRPC_TLS_CERT
-						? { GRPC_TLS_CERT: this.env.GRPC_TLS_CERT }
-						: {}),
-					...(this.env.GRPC_TLS_KEY
-						? { GRPC_TLS_KEY: this.env.GRPC_TLS_KEY }
-						: {}),
-				},
-			});
-			this.starting = scheduler.wait(CONTAINER_STARTUP_GRACE_MS).finally(() => {
+			this.starting = (async () => {
+				const [cert, key] = await Promise.all([
+					this.env.GRPC_TLS_CERT.get(),
+					this.env.GRPC_TLS_KEY.get(),
+				]);
+				if (!cert || !key) {
+					throw new Error(
+						"Both TLS secrets must be configured in Secrets Store",
+					);
+				}
+				container.start({
+					enableInternet: false,
+					env: {
+						GRPC_PORT: String(GRPC_PORT),
+						GRPC_TLS_CERT: cert,
+						GRPC_TLS_KEY: key,
+					},
+				});
+				await scheduler.wait(CONTAINER_STARTUP_GRACE_MS);
+			})().finally(() => {
 				this.starting = undefined;
 			});
 		}

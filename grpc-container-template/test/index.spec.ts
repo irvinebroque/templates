@@ -57,8 +57,12 @@ function createContainer(socket: Socket, running = true) {
 	};
 	const durableObject: GrpcContainer = Object.create(GrpcContainer.prototype);
 	Object.defineProperty(durableObject, "ctx", { value: { container } });
-	Object.defineProperty(durableObject, "env", { value: {} });
-	return { durableObject, container };
+	const cert = vi.fn().mockResolvedValue("test-cert");
+	const key = vi.fn().mockResolvedValue("test-key");
+	Object.defineProperty(durableObject, "env", {
+		value: { GRPC_TLS_CERT: { get: cert }, GRPC_TLS_KEY: { get: key } },
+	});
+	return { durableObject, container, cert, key };
 }
 
 afterEach(() => {
@@ -210,7 +214,7 @@ describe("gRPC Container lifecycle", () => {
 
 		const first = durableObject.connect(createSocket().socket);
 		const second = durableObject.connect(createSocket().socket);
-		expect(container.start).toHaveBeenCalledOnce();
+		await vi.waitFor(() => expect(container.start).toHaveBeenCalledOnce());
 		expect(container.getTcpPort).not.toHaveBeenCalled();
 		finishStartup!();
 		await Promise.all([first, second]);
@@ -257,7 +261,65 @@ describe("gRPC Container lifecycle", () => {
 		expect(container.start).toHaveBeenCalledTimes(2);
 		expect(container.start).toHaveBeenCalledWith({
 			enableInternet: false,
-			env: { GRPC_PORT: "50051" },
+			env: {
+				GRPC_PORT: "50051",
+				GRPC_TLS_CERT: "test-cert",
+				GRPC_TLS_KEY: "test-key",
+			},
+		});
+	});
+
+	it("refuses startup when Secrets Store cannot return a key, then retries", async () => {
+		vi.spyOn(scheduler, "wait").mockResolvedValue(undefined);
+		const { durableObject, container, key } = createContainer(
+			createSocket().socket,
+			false,
+		);
+		key.mockRejectedValueOnce(new Error("Secret not found"));
+		const incoming = createSocket();
+		await expect(durableObject.connect(incoming.socket)).rejects.toThrow(
+			"Secret not found",
+		);
+		expect(container.start).not.toHaveBeenCalled();
+		expect(container.getTcpPort).not.toHaveBeenCalled();
+		expect(incoming.socket.close).toHaveBeenCalledOnce();
+		await durableObject.connect(createSocket().socket);
+		expect(container.start).toHaveBeenCalledOnce();
+	});
+
+	it("refuses empty TLS values instead of starting in plaintext", async () => {
+		const { durableObject, container, cert } = createContainer(
+			createSocket().socket,
+			false,
+		);
+		cert.mockResolvedValue("");
+		await expect(durableObject.connect(createSocket().socket)).rejects.toThrow(
+			"Both TLS secrets",
+		);
+		expect(container.start).not.toHaveBeenCalled();
+	});
+
+	it("reads rotated secrets when a stopped Container restarts", async () => {
+		vi.spyOn(scheduler, "wait").mockResolvedValue(undefined);
+		const { durableObject, container, cert, key } = createContainer(
+			createSocket().socket,
+			false,
+		);
+		await durableObject.connect(createSocket().socket);
+		container.running = false;
+		cert.mockResolvedValue("rotated-cert");
+		key.mockResolvedValue("rotated-key");
+		container.getTcpPort.mockReturnValue({
+			connect: vi.fn().mockReturnValue(createSocket().socket),
+		});
+		await durableObject.connect(createSocket().socket);
+		expect(container.start).toHaveBeenLastCalledWith({
+			enableInternet: false,
+			env: {
+				GRPC_PORT: "50051",
+				GRPC_TLS_CERT: "rotated-cert",
+				GRPC_TLS_KEY: "rotated-key",
+			},
 		});
 	});
 
@@ -269,8 +331,8 @@ describe("gRPC Container lifecycle", () => {
 			false,
 		);
 		Object.assign((durableObject as unknown as { env: object }).env, {
-			GRPC_TLS_CERT: "test-cert",
-			GRPC_TLS_KEY: "test-key",
+			GRPC_TLS_CERT: { get: vi.fn().mockResolvedValue("test-cert") },
+			GRPC_TLS_KEY: { get: vi.fn().mockResolvedValue("test-key") },
 		});
 		await durableObject.connect(createSocket().socket);
 		expect(container.start).toHaveBeenCalledWith({

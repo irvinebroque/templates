@@ -53,24 +53,22 @@ function chat(call) {
 	});
 }
 
-// PEM values come from Worker secrets, never from the image.
+// PEM values come from Secrets Store through the Durable Object.
 const cert = process.env.GRPC_TLS_CERT;
 const key = process.env.GRPC_TLS_KEY;
-if (Boolean(cert) !== Boolean(key)) {
+if (!cert || !key) {
 	throw new Error("Set both GRPC_TLS_CERT and GRPC_TLS_KEY");
 }
-const credentials = cert
-	? grpc.ServerCredentials.createSsl(
-			null,
-			[
-				{
-					private_key: Buffer.from(key),
-					cert_chain: Buffer.from(cert),
-				},
-			],
-			false,
-		)
-	: grpc.ServerCredentials.createInsecure();
+const credentials = grpc.ServerCredentials.createSsl(
+	null,
+	[
+		{
+			private_key: Buffer.from(key),
+			cert_chain: Buffer.from(cert),
+		},
+	],
+	false,
+);
 
 const server = new grpc.Server();
 server.addService(proto.ByteStream.service, { Chat: chat });

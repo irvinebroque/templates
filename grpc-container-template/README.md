@@ -32,7 +32,7 @@ npm create cloudflare@latest -- --template=cloudflare/templates/grpc-container-t
 ```text
 gRPC client
     │
-    │ raw TCP
+    │ TLS over TCP
     ▼
 Worker.connect()
     │
@@ -52,7 +52,9 @@ The gRPC listener uses port `8788` during local development.
 - Node.js 20.16 or newer
 - Docker running locally
 - Access to Cloudflare Containers for deployment
-- A Cloudflare zone on a Pro or Business plan for inbound TCP access
+- A Cloudflare zone on a Pro or Business plan, or with Spectrum Enterprise enabled
+- The [Cloudflare CLI (`cf`)](https://developers.cloudflare.com/cf/get-started/)
+- A [Secrets Store](https://developers.cloudflare.com/secrets-store/integrations/workers/) in the same account, with permission to create secrets and deploy bindings
 
 ## Getting Started
 
@@ -62,18 +64,43 @@ Install dependencies:
 npm install
 ```
 
+Find your store ID in the [Secrets Store dashboard](https://dash.cloudflare.com/?to=/:account/secrets-store/), or sign in with `cf auth login` and run `cf secrets-store stores list`. Replace both `<SECRETS_STORE_ID>` placeholders in `wrangler.jsonc` with that ID.
+
+### Prepare TLS credentials
+
+Keep the private key out of the image and repository. Add `certs/` to `.gitignore`; the included `.dockerignore` already excludes it.
+
+For a reproducible local test, create a short-lived self-signed certificate. Replace `grpc.example.com` with your public hostname. The `localhost` subject alternative name also lets you test locally:
+
+```sh
+mkdir -p certs
+openssl req -x509 -newkey rsa:2048 -nodes -days 2 \
+  -keyout certs/key.pem -out certs/cert.pem \
+  -subj "/CN=grpc.example.com" \
+  -addext "subjectAltName=DNS:grpc.example.com,DNS:localhost"
+```
+
+For production, obtain a PEM certificate chain and private key from a CA trusted by your clients.
+
+Seed local Secrets Store values using the same store ID as `wrangler.jsonc`:
+
+```sh
+npx wrangler secrets-store secret create <SECRETS_STORE_ID> --name GRPC_TLS_CERT --scopes workers < certs/cert.pem
+npx wrangler secrets-store secret create <SECRETS_STORE_ID> --name GRPC_TLS_KEY --scopes workers < certs/key.pem
+```
+
+These commands seed the local `.wrangler/state` used by this template. Production secrets are not available locally. `cf` does not yet support creating local Secrets Store values.
+
 Start the Worker, Durable Object, and Container:
 
 ```sh
 npm run dev
 ```
 
-Wrangler listens for local gRPC traffic at `127.0.0.1:8788`.
-
-In another terminal, run the included streaming client:
+Wrangler listens for local gRPC traffic at `localhost:8788`. In another terminal, run the included streaming client with TLS:
 
 ```sh
-npm run grpc:client
+GRPC_TLS=1 GRPC_CA_FILE=certs/cert.pem node container/client.js localhost:8788
 ```
 
 The client receives a greeting, sends a sequence of byte payloads, receives an
@@ -97,9 +124,23 @@ npm run test:tls
 
 The end-to-end test starts Wrangler, connects the included gRPC client to port
 `8788`, and verifies traffic traverses the Worker, Durable Object, and Container.
-Docker must be running.
+Docker must be running. The smoke test generates temporary TLS credentials, seeds an isolated local Secrets Store, and verifies the TLS path. It does not use your production secrets.
 
 ## Deploying
+
+Use Spectrum TCP passthrough. The Container terminates TLS, including HTTP/2 ALPN (`h2`). Workers Paid and the zone plan are separate.
+
+Upload the certificate and private key to Secrets Store before deploying. Use a CA-issued certificate and key for production. Create request files without printing the PEM values:
+
+```sh
+node --input-type=module -e 'import fs from "node:fs"; for (const [name, file] of [["GRPC_TLS_CERT", "cert"], ["GRPC_TLS_KEY", "key"]]) { fs.writeFileSync(`certs/${file}-secret.json`, JSON.stringify({name, value: fs.readFileSync(`certs/${file}.pem`, "utf8"), scopes: ["workers"]}), {mode: 0o600}); }'
+cf auth login
+cf secrets-store secrets create <SECRETS_STORE_ID> --body @certs/cert-secret.json
+cf secrets-store secrets create <SECRETS_STORE_ID> --body @certs/key-secret.json
+rm certs/cert-secret.json certs/key-secret.json
+```
+
+Use the same store ID and secret names as `wrangler.jsonc`. The secrets need the `workers` scope.
 
 Deploy the Worker and Container:
 
@@ -107,35 +148,7 @@ Deploy the Worker and Container:
 npm run deploy
 ```
 
-Use a Pro or Business zone and configure Spectrum for TCP passthrough. TLS
-terminates in the Container, including HTTP/2 ALPN (`h2`); Spectrum Enterprise
-TLS termination is not required. Workers Paid and the zone plan are separate.
-
-### Configure TLS before exposing a public endpoint
-
-Obtain a certificate and private key for your gRPC hostname from a CA trusted
-by your clients. Use the full certificate chain in PEM format. Keep the key out
-of the repository and Docker image. For a reproducible test, create a short-lived
-self-signed certificate and explicitly trust it in the test client:
-
-```sh
-mkdir -p certs
-openssl req -x509 -newkey rsa:2048 -nodes -days 2 \
-  -keyout certs/key.pem -out certs/cert.pem \
-  -subj "/CN=grpc.example.com" -addext "subjectAltName=DNS:grpc.example.com"
-```
-
-Replace `grpc.example.com` with your hostname. Create the secret upload file
-without printing the key:
-
-```sh
-node --input-type=module -e 'import fs from "node:fs"; fs.writeFileSync("secrets.json", JSON.stringify({GRPC_TLS_CERT: {type: "secret_text", text: fs.readFileSync("certs/cert.pem", "utf8")}, GRPC_TLS_KEY: {type: "secret_text", text: fs.readFileSync("certs/key.pem", "utf8")}}), {mode: 0o600})'
-cf workers secrets bulk --worker grpc-container-template --file secrets.json
-```
-
-Upload both secrets before creating the Spectrum application. Restart an existing
-Container after rotating secrets so it receives the new certificate. Without
-these secrets the server uses plaintext for local development only.
+The Durable Object reads both Secrets Store bindings with `.get()` and passes the PEM values into `container.start({ env: ... })`. If either secret is unavailable, startup fails. Restart existing Containers after certificate rotation so they receive the new values; running Containers retain their startup environment.
 
 Create a Spectrum application in the same account as the Worker. Use the
 Worker's immutable tag as `origin_worker_id`:
@@ -153,8 +166,7 @@ GRPC_TLS=1 GRPC_CA_FILE=certs/cert.pem node container/client.js grpc.example.com
 ```
 
 For a publicly trusted certificate, omit `GRPC_CA_FILE` to use system trust.
-Do not disable certificate or hostname verification. The plaintext client remains
-available for local development. The Worker's HTTP URL is only a status response,
+Do not disable certificate or hostname verification. The Worker's HTTP URL is only a status response,
 not the gRPC endpoint.
 
 ## Project Structure
@@ -168,6 +180,8 @@ not the gRPC endpoint.
 
 ## Learn More
 
+- [gRPC walkthrough with `cf init`](https://developers.cloudflare.com/containers/examples/bidirectional-grpc/)
+- [Secrets Store bindings](https://developers.cloudflare.com/secrets-store/integrations/workers/)
 - [Cloudflare Containers](https://developers.cloudflare.com/containers/)
 - [Durable Object Container API](https://developers.cloudflare.com/durable-objects/api/container/)
 - [Workers TCP sockets](https://developers.cloudflare.com/workers/runtime-apis/tcp-sockets/)

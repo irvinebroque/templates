@@ -23,6 +23,18 @@
 			"max_instances": 1
 		}
 	],
+	"secrets_store_secrets": [
+		{
+			"binding": "GRPC_TLS_CERT",
+			"store_id": "<SECRETS_STORE_ID>",
+			"secret_name": "GRPC_TLS_CERT"
+		},
+		{
+			"binding": "GRPC_TLS_KEY",
+			"store_id": "<SECRETS_STORE_ID>",
+			"secret_name": "GRPC_TLS_KEY"
+		}
+	],
 	"durable_objects": {
 		"bindings": [
 			{

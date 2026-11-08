@@ -1,6 +1,9 @@
-import { spawn } from "node:child_process";
+import { spawn, execFileSync } from "node:child_process";
 import { createConnection } from "node:net";
 import process from "node:process";
+import { mkdtempSync, readFileSync, writeFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const GRPC_HOST = "127.0.0.1";
 const GRPC_PORT = Number(process.env.GRPC_TEST_PORT || 8788);
@@ -59,12 +62,13 @@ function runClient() {
 				"run",
 				"client",
 				"--",
-				`${process.env.GRPC_TLS === "1" ? "localhost" : GRPC_HOST}:${GRPC_PORT}`,
+				`localhost:${GRPC_PORT}`,
 				"2",
 				"25",
 			],
 			{
 				cwd: process.cwd(),
+				env: { ...process.env, GRPC_TLS: "1", GRPC_CA_FILE: cert },
 				stdio: ["ignore", "pipe", "pipe"],
 			},
 		);
@@ -135,16 +139,80 @@ if (await canConnect(GRPC_HOST, GRPC_PORT)) {
 	throw new Error(`Port ${GRPC_HOST}:${GRPC_PORT} is already in use`);
 }
 
+// Isolate test state and credentials from developer and production secrets.
+const fixture = mkdtempSync(join(tmpdir(), "grpc-tunnel-"));
+const cert = join(fixture, "cert.pem");
+const key = join(fixture, "key.pem");
+const state = join(fixture, "state");
+const config = join(process.cwd(), `.grpc-smoke-${process.pid}.jsonc`);
+const storeId = "00000000000000000000000000000001";
+try {
+	execFileSync(
+		"openssl",
+		[
+			"req",
+			"-x509",
+			"-newkey",
+			"rsa:2048",
+			"-nodes",
+			"-days",
+			"1",
+			"-keyout",
+			key,
+			"-out",
+			cert,
+			"-subj",
+			"/CN=localhost",
+			"-addext",
+			"subjectAltName=DNS:localhost",
+		],
+		{ stdio: "ignore" },
+	);
+	const source = readFileSync(
+		process.env.GRPC_TEST_CONFIG || "wrangler.jsonc",
+		"utf8",
+	);
+	writeFileSync(
+		config,
+		source
+			.replace(/"store_id":\s*"[^"]*"/g, `"store_id": "${storeId}"`)
+			.replace(/"port":\s*8788/, `"port": ${GRPC_PORT}`),
+	);
+	for (const [name, file] of [
+		["GRPC_TLS_CERT", cert],
+		["GRPC_TLS_KEY", key],
+	]) {
+		execFileSync(
+			"npm",
+			[
+				"exec",
+				"--",
+				"wrangler",
+				"secrets-store",
+				"secret",
+				"create",
+				storeId,
+				"--name",
+				name,
+				"--scopes",
+				"workers",
+				"--persist-to",
+				state,
+				"--config",
+				config,
+			],
+			{ input: readFileSync(file), stdio: ["pipe", "pipe", "pipe"] },
+		);
+	}
+} catch (error) {
+	rmSync(config, { force: true });
+	rmSync(fixture, { recursive: true, force: true });
+	throw error;
+}
+
 const wrangler = spawn(
 	"npm",
-	[
-		"run",
-		"dev",
-		"--",
-		...(process.env.GRPC_TEST_CONFIG
-			? ["--config", process.env.GRPC_TEST_CONFIG]
-			: []),
-	],
+	["run", "dev", "--", "--config", config, "--persist-to", state],
 	{
 		cwd: process.cwd(),
 		detached: process.platform !== "win32",
@@ -175,4 +243,6 @@ try {
 	console.log("Full gRPC tunnel smoke test passed.");
 } finally {
 	await stopProcessTree(wrangler);
+	rmSync(config, { force: true });
+	rmSync(fixture, { recursive: true, force: true });
 }
